@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "prisma generate && next build",
-    "start": "next start --port 3000",
+    "start": "prisma db push && tsx prisma/seed.ts && next start --hostname 0.0.0.0",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
@@ -19,9 +19,11 @@
     "leaflet": "^1.9.4",
     "next": "^15.5.4",
     "papaparse": "^5.5.2",
+    "prisma": "^6.16.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "tsx": "^4.20.6"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -30,8 +32,6 @@
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "prisma": "^6.16.2",
-    "tsx": "^4.20.6",
     "typescript": "^5.9.2"
   },
   "prisma": {

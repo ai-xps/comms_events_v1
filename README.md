@@ -9,7 +9,7 @@ This deployment is Birmingham only. Another region would be a separate copy with
 - Node.js 20 or later
 - npm
 
-SQLite is the default. You do not need Postgres, Cloudflare, or Supabase to run locally.
+Postgres is required (local Docker/Postgres or Railway). SQLite is no longer used.
 
 ## Environment
 
@@ -17,10 +17,10 @@ Copy `.env.example` to `.env`.
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Default `file:./dev.db` (relative to the `prisma` folder). |
+| `DATABASE_URL` | Postgres URL, e.g. `postgresql://USER:PASSWORD@HOST:5432/gather?schema=public`. |
 | `SESSION_SECRET` | Signs the httpOnly session cookie. Use a long random string. |
 | `CRON_SECRET` | Guards `POST /api/cron/scrape`. |
-| `APP_ORIGIN` | Exact origin for mutation checks, e.g. `http://localhost:3000`. |
+| `APP_ORIGIN` | Exact origin for mutation checks, e.g. `http://localhost:3000` or your Railway HTTPS URL (no trailing slash). |
 
 ## Setup
 
@@ -31,7 +31,7 @@ npm run db:seed
 npm run dev
 ```
 
-Open http://localhost:3000. The seed command prints cell numbers and initial passwords once to stdout. They are not shown in the app.
+Open http://localhost:3000. The seed command prints cell numbers and initial passwords once to stdout. They are not shown in the app. Re-running seed is a no-op if the admin user already exists.
 
 To start again:
 
@@ -45,16 +45,11 @@ npm run db:reset
 npx prisma db push
 ```
 
-That keeps the SQLite file in line with `prisma/schema.prisma`.
+That keeps Postgres in line with `prisma/schema.prisma`.
 
-### Postgres later
+## Railway
 
-Use the same Prisma models. Change only:
-
-1. `provider = "postgresql"` in `prisma/schema.prisma`
-2. `DATABASE_URL` to a Postgres URL
-
-Do not add a second schema.
+Deploy the `experiment` branch. Attach Postgres and set `DATABASE_URL` (variable reference), `APP_ORIGIN`, `SESSION_SECRET`, `CRON_SECRET`, and `NODE_ENV=production`. `npm start` runs `prisma db push`, seed (if empty), then Next.js.
 
 ## Daily scraper (05:00 Europe/London)
 
