@@ -1,0 +1,133 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { CATEGORIES, type Category } from "@/lib/constants";
+import { StatusBanner } from "./StatusBanner";
+
+type Settings = {
+  locationLabel: string;
+  memberAttendeeView: "COUNT" | "COUNT_AND_INITIALS";
+  enabled: Record<Category, boolean>;
+  colours: Record<string, string>;
+  priorityUrls: string[];
+};
+
+export function ScraperForm({
+  settings,
+  organisations
+}: {
+  settings: Settings;
+  organisations: { id: string; name: string; status: string }[];
+}) {
+  const router = useRouter();
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function save(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = new FormData(e.currentTarget);
+    const response = await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        locationLabel: form.get("locationLabel"),
+        memberAttendeeView: form.get("memberAttendeeView"),
+        enabled: Object.fromEntries(CATEGORIES.map((c) => [c, form.get(`enabled-${c}`) === "on"])),
+        colours: Object.fromEntries(CATEGORIES.map((c) => [c, form.get(`colour-${c}`)])),
+        priorityUrls: String(form.get("priorityUrls") ?? "")
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      })
+    });
+    const data = await response.json();
+    setMessage(data.error ?? "Settings saved.");
+    router.refresh();
+  }
+
+  async function runNow() {
+    const response = await fetch("/api/scraper/run", { method: "POST" });
+    const data = await response.json();
+    setMessage(data.error ?? `Run finished: created ${data.createdCount}, updated ${data.updatedCount}.`);
+    router.refresh();
+  }
+
+  async function setOrg(id: string, status: string) {
+    await fetch("/api/organisations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, status })
+    });
+    router.refresh();
+  }
+
+  return (
+    <div className="stack">
+      <StatusBanner message={message} />
+      <form className="card stack" onSubmit={save}>
+        <label>
+          Location label
+          <input name="locationLabel" defaultValue={settings.locationLabel} />
+        </label>
+        <label>
+          What members see for attendees
+          <select name="memberAttendeeView" defaultValue={settings.memberAttendeeView}>
+            <option value="COUNT">Count only</option>
+            <option value="COUNT_AND_INITIALS">Count and initials</option>
+          </select>
+        </label>
+        <fieldset className="stack">
+          <legend>Event types</legend>
+          {CATEGORIES.map((c) => (
+            <label key={c} className="row">
+              <input type="checkbox" name={`enabled-${c}`} defaultChecked={settings.enabled[c]} />
+              {c}
+              <input type="color" name={`colour-${c}`} defaultValue={settings.colours[c]} aria-label={`${c} colour`} />
+            </label>
+          ))}
+        </fieldset>
+        <label>
+          Priority URLs (stored on the run record; the fixture scraper does not fetch them)
+          <textarea name="priorityUrls" defaultValue={settings.priorityUrls.join("\n")} />
+        </label>
+        <div className="row">
+          <button type="submit">Save settings</button>
+          <button className="secondary" type="button" onClick={runNow}>
+            Run now
+          </button>
+        </div>
+      </form>
+      <section className="card">
+        <h2>Organisations</h2>
+        <div className="table-wrap" style={{ border: 0, boxShadow: "none", borderRadius: 0 }}>
+          <table className="data stack-sm">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Rule</th>
+              </tr>
+            </thead>
+            <tbody>
+              {organisations.map((org) => (
+                <tr key={org.id}>
+                  <td data-label="Name">{org.name}</td>
+                  <td data-label="Rule">
+                    <select
+                      aria-label={`Organisation rule for ${org.name}`}
+                      defaultValue={org.status}
+                      onChange={(e) => setOrg(org.id, e.target.value)}
+                    >
+                      <option value="WHITELIST">Whitelist (auto-publish)</option>
+                      <option value="STANDARD">Standard (pending)</option>
+                      <option value="BLACKLIST">Blacklist (discard)</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
