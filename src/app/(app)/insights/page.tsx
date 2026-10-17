@@ -178,7 +178,7 @@ export default async function InsightsPage({
 
       <ChartCard
         title="Review pipeline"
-        summary="Scraped events created in this period, and where they ended up."
+        summary="Scraped events created in this period, and where they ended up. Failed feeds on a run are listed below."
         table={
           <CountTable
             rows={[
@@ -191,6 +191,16 @@ export default async function InsightsPage({
         }
       >
         <FunnelList {...data.funnel} />
+        {data.scraperRuns.length ? (
+          <ul className="muted">
+            {data.scraperRuns.slice(0, 5).map((run) => (
+              <li key={run.startedAt}>
+                {run.trigger.toLowerCase()} · created {run.createdCount} · {run.status}
+                {run.failedFeeds ? ` · ${run.failedFeeds} feed${run.failedFeeds === 1 ? "" : "s"} failed` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </ChartCard>
 
       <section className="card">

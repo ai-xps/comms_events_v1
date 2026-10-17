@@ -70,6 +70,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
             </a>
           </p>
         ) : null}
+        {event.sourceKey ? <p className="muted">Brought in by the scraper.</p> : null}
         {event.notes ? <p>{event.notes}</p> : null}
         <p>
           <strong>Planning to go.</strong> {count}

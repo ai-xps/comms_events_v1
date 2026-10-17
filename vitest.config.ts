@@ -19,7 +19,12 @@ export default defineConfig({
         "src/lib/insights/aggregate.ts",
         "src/lib/insights/format.ts",
         "src/lib/insights/share.ts",
-        "src/lib/export-format.ts"
+        "src/lib/export-format.ts",
+        "src/lib/scraper/apply.ts",
+        "src/lib/scraper/allowlist.ts",
+        "src/lib/scraper/categorise.ts",
+        "src/lib/scraper/ics.ts",
+        "src/lib/scraper/jsonld.ts"
       ],
       thresholds: { lines: 90, functions: 90, branches: 80, statements: 90 }
     }

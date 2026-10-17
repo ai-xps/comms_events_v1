@@ -51,10 +51,21 @@ export function ScraperForm({
   }
 
   async function runNow() {
-    const result = await requestJson<{ createdCount?: number; updatedCount?: number }>("/api/scraper/run", {
+    const result = await requestJson<{
+      createdCount?: number;
+      updatedCount?: number;
+      publishedCount?: number;
+      discardedByRule?: number;
+      leftPending?: number;
+    }>("/api/scraper/run", {
       method: "POST"
     });
-    show(result, result.ok ? `Run finished: created ${result.data.createdCount}, updated ${result.data.updatedCount}.` : "");
+    show(
+      result,
+      result.ok
+        ? `Run finished: created ${result.data.createdCount ?? 0}, updated ${result.data.updatedCount ?? 0}, published ${result.data.publishedCount ?? 0}, discarded ${result.data.discardedByRule ?? 0}, pending ${result.data.leftPending ?? 0}.`
+        : ""
+    );
   }
 
   async function setOrg(id: string, status: string) {
@@ -90,7 +101,7 @@ export function ScraperForm({
           ))}
         </fieldset>
         <label>
-          Priority URLs (stored on the run record; the fixture scraper does not fetch them)
+          Priority URLs (https calendar feeds on the allowlist; one per line. Leave empty to use the demo harvest only.)
           <textarea name="priorityUrls" defaultValue={settings.priorityUrls.join("\n")} />
         </label>
         <div className="row">
@@ -99,6 +110,9 @@ export function ScraperForm({
             Run now
           </button>
         </div>
+        <p className="muted">
+          After a run, review <a href="/pending">pending events</a>. A failed feed does not stop the others.
+        </p>
       </form>
       <section className="card">
         <h2>Organisations</h2>

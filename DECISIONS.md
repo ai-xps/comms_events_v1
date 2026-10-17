@@ -19,7 +19,8 @@ Where `context.md` and the discovery-document comments disagree, this build foll
 | Exports | Ignore the member display setting. Admin: every booking. Cell leader: own cell only. Members: 403. | A cell leader needs names for reporting (F07). |
 | Attend vs confirm vs star | Attend records intent. Later confirmation records that they went. Stars are a separate bookmark, dropped when the event has ended. | Reply [q], plus the existing alpha. |
 | Region | This deployment is Birmingham only. `locationLabel` is kept for a later copy. | Reply [k]. |
-| Scraper schedule | Daily at 05:00 Europe/London, plus a manual run. Fixture provider only. | Reply [m]. Live HTTP scraping is out of this build. |
+| Scraper schedule | Daily at 05:00 Europe/London, plus a manual run. | Reply [m]. |
+| Scraper sources | Demo harvest (`fixture-` keys) always runs. Admin Priority URLs are fetched only when they are https and on the host allowlist, as ICS or JSON-LD. HTML is only read for `application/ld+json` blocks. One feed failing does not fail the run. Empty URL list or `SCRAPE_LIVE=0` skips the network. Discarded events are never undeleted. | 17 Oct scraper 8: admin-chosen URLs, no open-web crawl, no member data from third-party sites. |
 | Filters | Christian, Networking, Professional, Student, Meetup. Online or in person is a stored field, not a new category. | Reply [o]. |
 | Scope | `context.md` section 3 only. No second problem. | Prompt. |
 | Calendar navigation | Day and week follow `d=YYYY-MM-DD` (default today). Previous/Next step by the current view. The map stays visible with zero pins. | Tester feedback, 17 October (`context.md` section 18). |

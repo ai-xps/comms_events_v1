@@ -125,6 +125,7 @@ model ScraperRun {
   publishedCount      Int       @default(0)
   errorText           String?
   priorityUrlsSnapshot String   @default("[]")
+  sourceResults       String    @default("[]")
 }
 
 model AuditLog {

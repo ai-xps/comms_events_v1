@@ -71,9 +71,9 @@ Do not start a scheduler inside `next dev`. Use cron on the host:
 0 5 * * * cd /path/to/app && /usr/bin/env CRON_SECRET=your-cron-secret npm run scrape
 ```
 
-`npm run scrape` and `POST /api/cron/scrape` with `Authorization: Bearer <CRON_SECRET>` both run the fixture scraper with trigger `SCHEDULED`. The admin **Run now** button uses trigger `MANUAL` and an admin session.
+`npm run scrape` and `POST /api/cron/scrape` with `Authorization: Bearer <CRON_SECRET>` both run the scraper with trigger `SCHEDULED`. The admin **Run now** button uses trigger `MANUAL` and an admin session.
 
-This build does not fetch live websites. Priority URLs are stored on the run record. The live adapter at `src/lib/scraper/live-adapter.ts` is not called.
+The demo harvest always runs. If Priority URLs are set, Gather fetches only https ICS or JSON-LD from the host allowlist (User-Agent `GatherBirmingham/1.0`, robots.txt, 8s timeout, 1 request/s). Set `SCRAPE_LIVE=0` to skip the network. A failed feed is recorded on the run and does not stop the others. Gather does not collect member data from third-party sites.
 
 ## Import columns
 

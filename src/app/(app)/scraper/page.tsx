@@ -3,6 +3,16 @@ import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { ScraperForm } from "@/components/ScraperForm";
 import { formatDateTime } from "@/lib/time";
+import type { SourceResult } from "@/lib/scraper/live-adapter";
+
+function safeSources(raw: string): SourceResult[] {
+  try {
+    const parsed = JSON.parse(raw || "[]") as SourceResult[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 export default async function ScraperPage() {
   await requireUser(["admin"]);
@@ -14,8 +24,8 @@ export default async function ScraperPage() {
       <div className="page-head">
         <h1>Scraper settings</h1>
         <p className="lede">
-          Daily run at 05:00 Europe/London via cron. Use Run now after you change these settings. This build uses fixture
-          events only.
+          Daily run at 05:00 Europe/London via cron. Use Run now after you change these settings. Demo events always run.
+          Priority URLs are fetched only if they are https calendar feeds on the allowlist.
         </p>
       </div>
       <ScraperForm settings={settings} organisations={orgs} />
@@ -31,10 +41,14 @@ export default async function ScraperPage() {
                 <th>Status</th>
                 <th>Created</th>
                 <th>Updated</th>
+                <th>Feeds</th>
               </tr>
             </thead>
             <tbody>
-              {runs.map((run) => (
+              {runs.map((run) => {
+                const sources = safeSources(run.sourceResults);
+                const failed = sources.filter((s) => !s.ok).length;
+                return (
                 <tr key={run.id}>
                   <td className="date" data-label="When">
                     {formatDateTime(run.startedAt)}
@@ -47,8 +61,16 @@ export default async function ScraperPage() {
                   <td className="num" data-label="Updated">
                     {run.updatedCount}
                   </td>
+                  <td data-label="Feeds">
+                    {sources.length === 0
+                      ? "Demo harvest only"
+                      : failed
+                        ? `${sources.length - failed} ok, ${failed} failed`
+                        : `${sources.length} ok`}
+                  </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

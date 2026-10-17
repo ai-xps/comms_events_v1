@@ -73,7 +73,20 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       {state.view === "month" ? (
         <MonthGrid state={state} days={range.days} today={today} events={events} colours={settings.colours} />
       ) : (
-        <DatedList days={range.days} today={today} events={events} colours={settings.colours} />
+        <DatedList
+          days={range.days}
+          today={today}
+          events={events.map((e) => ({
+            id: e.id,
+            title: e.title,
+            startsAt: e.startsAt,
+            category: e.category,
+            placeName: e.placeName,
+            online: e.online,
+            sourceKey: e.sourceKey
+          }))}
+          colours={settings.colours}
+        />
       )}
 
       <section className="card map-card">

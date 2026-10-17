@@ -57,7 +57,8 @@ export async function loadRawInsights(scope: InsightsScope, filters: InsightsFil
       publishedCount: r.publishedCount,
       discardedByRule: r.discardedByRule,
       leftPending: r.leftPending,
-      status: r.status
+      status: r.status,
+      sourceResults: r.sourceResults
     })),
     members
   };

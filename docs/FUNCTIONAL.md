@@ -29,8 +29,8 @@ Applied: 17 October 2026, `experiment` branch. Live smoke on https://commsevents
 
 | What it does | Who | Agreed by | Why |
 | --- | --- | --- | --- |
-| Fixture scraper, daily 05:00 Europe/London plus Run now. Whitelist / blacklist / pending. | Admin | D11; reply [m] | Human choice before members see an event. Live HTTP scrape is out of this build. |
-| Pending queue: edit, publish, discard. Publish/discard return to pending. | Admin, cell leader | D09; Guillaume 16 Oct G4 | Keep working through the queue. |
+| Scraper, daily 05:00 Europe/London plus Run now. Demo harvest always. Optional https ICS/JSON-LD from allowlisted Priority URLs. Whitelist / blacklist / pending. Discarded rows stay discarded. | Admin | D11; reply [m]; scraper 8 17 Oct | Human choice before members see an event. |
+| Pending queue: edit, publish, discard. Cards show new vs updated, org, type, time, Event Link. Publish/discard return to pending. | Admin, cell leader | D09; Guillaume 16 Oct G4; scraper 8 17 Oct | Keep working through the queue. |
 | Manual add: place as text, click the map for a pin. Event Link (http/https). | Admin, cell leader | Guillaume 16 Oct G2, G3 | Scraped coordinates stay; typing lat/lng is not the main way in. |
 | Confirm before delete, discard, deactivate. | Admin, cell leader | Review 17 Oct | Destructive actions were one click. |
 

@@ -3,7 +3,9 @@ import { prisma } from "../db";
 import { writeAudit } from "../audit";
 import { categoryEnabledKey, type Category, CATEGORIES } from "../constants";
 import { dropEndedStars } from "../stars";
+import { scrapeDecision } from "./apply";
 import { fixtureEvents } from "./fixtures";
+import { fetchLiveEvents, type SourceResult } from "./live-adapter";
 
 function nameKey(name: string) {
   return name.trim().toLowerCase();
@@ -40,9 +42,11 @@ export async function runScraper(opts: {
     publishedCount: 0
   };
 
+  let sources: SourceResult[] = [];
+
   try {
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
-    const urls = settings ? JSON.parse(settings.priorityUrls || "[]") : [];
+    const urls: string[] = settings ? JSON.parse(settings.priorityUrls || "[]") : [];
     await prisma.scraperRun.update({
       where: { id: run.id },
       data: { priorityUrlsSnapshot: JSON.stringify(urls) }
@@ -57,9 +61,17 @@ export async function runScraper(opts: {
       CATEGORIES.forEach((c) => enabled.add(c));
     }
 
+    const live = await fetchLiveEvents(urls);
+    sources = live.sources;
+    const byKey = new Map<string, (typeof live.events)[number]>();
+    for (const event of [...live.events, ...fixtureEvents()]) {
+      if (!enabled.has(event.category)) continue;
+      byKey.set(event.sourceKey, event);
+    }
+    const events = [...byKey.values()];
+
     const organisations = await prisma.organisation.findMany();
     const orgByKey = new Map(organisations.map((o) => [o.nameKey, o]));
-    const events = fixtureEvents().filter((e) => enabled.has(e.category));
 
     for (const incoming of events) {
       const key = nameKey(incoming.organisationName);
@@ -77,52 +89,35 @@ export async function runScraper(opts: {
       const existingEvent = await prisma.event.findUnique({
         where: { sourceKey: incoming.sourceKey }
       });
-      if (existingEvent) {
-        await prisma.event.update({
-          where: { id: existingEvent.id },
-          data: {
-            title: incoming.title,
-            organisationName: incoming.organisationName,
-            organisationId: org.id,
-            category: incoming.category,
-            startsAt: incoming.startsAt,
-            endsAt: incoming.endsAt,
-            online: incoming.online,
-            placeName: incoming.placeName ?? null,
-            lat: incoming.lat ?? null,
-            lng: incoming.lng ?? null,
-            externalUrl: safeExternalUrl(incoming.externalUrl),
-            notes: incoming.notes ?? null
-          }
-        });
+      const decision = scrapeDecision(existingEvent?.status, org.status);
+      const fields = {
+        title: incoming.title,
+        organisationName: incoming.organisationName,
+        organisationId: org.id,
+        category: incoming.category,
+        startsAt: incoming.startsAt,
+        endsAt: incoming.endsAt,
+        online: incoming.online,
+        placeName: incoming.placeName ?? null,
+        lat: incoming.lat ?? null,
+        lng: incoming.lng ?? null,
+        externalUrl: safeExternalUrl(incoming.externalUrl),
+        notes: incoming.notes ?? null
+      };
+      if (decision.action === "skip-discarded") continue;
+      if (decision.action === "update" && existingEvent) {
+        await prisma.event.update({ where: { id: existingEvent.id }, data: fields });
         counts.updatedCount += 1;
         continue;
       }
-      let status = "PENDING";
-      if (org.status === "WHITELIST") {
-        status = "PUBLISHED";
-        counts.publishedCount += 1;
-      } else if (org.status === "BLACKLIST") {
-        status = "DISCARDED";
-        counts.discardedByRule += 1;
-      } else {
-        counts.leftPending += 1;
-      }
+      const status = decision.status ?? "PENDING";
+      if (status === "PUBLISHED") counts.publishedCount += 1;
+      else if (status === "DISCARDED") counts.discardedByRule += 1;
+      else counts.leftPending += 1;
       await prisma.event.create({
         data: {
           sourceKey: incoming.sourceKey,
-          title: incoming.title,
-          organisationName: incoming.organisationName,
-          organisationId: org.id,
-          category: incoming.category,
-          startsAt: incoming.startsAt,
-          endsAt: incoming.endsAt,
-          online: incoming.online,
-          placeName: incoming.placeName ?? null,
-          lat: incoming.lat ?? null,
-          lng: incoming.lng ?? null,
-          externalUrl: safeExternalUrl(incoming.externalUrl),
-          notes: incoming.notes ?? null,
+          ...fields,
           status,
           recurrence: "NONE"
         }
@@ -135,6 +130,7 @@ export async function runScraper(opts: {
       where: { id: run.id },
       data: {
         ...counts,
+        sourceResults: JSON.stringify(sources),
         status: "OK",
         finishedAt: new Date()
       }
@@ -146,12 +142,17 @@ export async function runScraper(opts: {
       entityId: run.id,
       summary: `${opts.trigger} scraper created ${counts.createdCount}, updated ${counts.updatedCount}`
     });
-    return { id: run.id, ...counts, status: "OK" as const };
+    return { id: run.id, ...counts, sources, status: "OK" as const };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Scraper failed";
     await prisma.scraperRun.update({
       where: { id: run.id },
-      data: { status: "ERROR", errorText: message, finishedAt: new Date() }
+      data: {
+        status: "ERROR",
+        errorText: message,
+        sourceResults: JSON.stringify(sources),
+        finishedAt: new Date()
+      }
     });
     throw error;
   } finally {

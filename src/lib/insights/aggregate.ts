@@ -216,10 +216,21 @@ export function aggregateInsights(
         startedAt: r.startedAt.toISOString(),
         trigger: r.trigger,
         createdCount: r.createdCount,
-        status: r.status
+        status: r.status,
+        failedFeeds: failedFeedCount(r.sourceResults)
       })),
     topEvents
   };
+}
+
+function failedFeedCount(raw?: string): number {
+  if (!raw) return 0;
+  try {
+    const parsed = JSON.parse(raw) as { ok?: boolean }[];
+    return Array.isArray(parsed) ? parsed.filter((row) => row && row.ok === false).length : 0;
+  } catch {
+    return 0;
+  }
 }
 
 export function pctLabel(value: number | null): string {

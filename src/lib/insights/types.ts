@@ -45,6 +45,7 @@ export type RawRun = {
   discardedByRule: number;
   leftPending: number;
   status: string;
+  sourceResults?: string;
 };
 export type RawMember = { id: string; active: boolean; cellId: string | null };
 
@@ -97,6 +98,7 @@ export type ScraperRow = {
   trigger: string;
   createdCount: number;
   status: string;
+  failedFeeds: number;
 };
 
 export type InsightsData = {

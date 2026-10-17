@@ -2,7 +2,15 @@ import Link from "next/link";
 import { dayKeyOf, formatDayKey, formatDayLabel, sameDayKey, type DayKey } from "@/lib/calendar";
 import { formatTime } from "@/lib/time";
 
-type ListEvent = { id: string; title: string; startsAt: Date; category: string; placeName: string | null; online: boolean };
+type ListEvent = {
+  id: string;
+  title: string;
+  startsAt: Date;
+  category: string;
+  placeName: string | null;
+  online: boolean;
+  sourceKey?: string | null;
+};
 
 export function DatedList({
   days,
@@ -35,6 +43,7 @@ export function DatedList({
                     <span className="event-title">{event.title}</span>
                     <span className="muted">
                       {formatTime(event.startsAt)} · {event.online ? "Online" : event.placeName}
+                      {event.sourceKey ? " · From scrape" : ""}
                     </span>
                   </Link>
                 ))}

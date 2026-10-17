@@ -308,7 +308,7 @@ The thread is explicit about a few constraints. Record them as trade-offs, not a
 
 **Attendance data.** Name, cell, and whether someone plans to attend or attended is personal data about members. The visibility default is unresolved (section 5). With “count and name + cell” switched on, every signed-in member can read the name and cell number of everyone booked on an event. That is a deliberate admin choice, and the person switching it on should know members can see each other’s numbers. Exports are separate from the member toggle: admin exports everyone, a cell leader exports their own cell. Cell leaders are limited to their own cell in the requirements.
 
-**Scraper.** It collects public event information from third-party sites. It does not collect member data from those sites. Which sites and URLs are in scope is an admin setting (whitelist, blacklist, targeted URLs).
+**Scraper.** Demo events always run. Live fetch is admin Priority URLs only, https ICS or JSON-LD on a host allowlist. It does not collect member data from those sites. Organisation whitelist / blacklist / pending still decide what members see.
 
 **Accounts.** There is no public registration and no self-serve cell move. That is deliberate, so the cell on the account stays the cell in the import.
 

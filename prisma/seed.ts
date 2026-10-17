@@ -1,13 +1,14 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { DEFAULT_COLOURS } from "../src/lib/constants";
-import { addDays, londonDate, londonParts } from "../src/lib/time";
+import { londonDate, londonParts } from "../src/lib/time";
+import { addLondonCalendarDays } from "../src/lib/scraper/fixtures";
 
 const prisma = new PrismaClient();
 
 function at(daysFromToday: number, hour: number, minute = 0) {
   const p = londonParts(new Date());
-  return addDays(londonDate(p.year, p.month, p.day, hour, minute), daysFromToday);
+  return addLondonCalendarDays(londonDate(p.year, p.month, p.day, hour, minute), daysFromToday);
 }
 
 async function main() {
@@ -73,7 +74,7 @@ async function main() {
       locationLabel: "Birmingham",
       memberAttendeeView: "COUNT",
       categoryColours: JSON.stringify(DEFAULT_COLOURS),
-      priorityUrls: JSON.stringify(["https://www.meetup.com/find/?location=gb--birmingham"])
+      priorityUrls: JSON.stringify([])
     }
   });
 
@@ -126,7 +127,7 @@ async function main() {
       title: "Birmingham Tech Meetup — lightning talks",
       organisationName: tech.name,
       organisationId: tech.id,
-      sourceKey: "bham-tech-meetup-oct",
+      sourceKey: "seed-tech-meetup-pending",
       category: "Meetup",
       startsAt: at(5, 18, 30),
       endsAt: at(5, 21, 0),
@@ -144,7 +145,7 @@ async function main() {
       title: "Unlimited crypto riches night",
       organisationName: spam.name,
       organisationId: spam.id,
-      sourceKey: "spam-events-crypto-night",
+      sourceKey: "seed-spam-crypto",
       category: "Networking",
       startsAt: at(4, 19, 0),
       endsAt: at(4, 22, 0),

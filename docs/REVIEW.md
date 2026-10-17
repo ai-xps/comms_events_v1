@@ -38,7 +38,7 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | High | Seed demo passwords on first production boot | **Backlog** (track C) — stop seeding in production |
 | High | `prisma db push` on every start; no migrations | **Backlog** (track C) |
 | Med | No indexes on `(status, startsAt)` | **Backlog** |
-| Med | Weekly series uses +7 UTC days (clocks go back 25 Oct) | **Backlog** |
+| Med | Weekly series uses +7 UTC days (clocks go back 25 Oct) | **Fixed** for seed and scrape fixtures via London calendar days |
 | Med | Scrape lock is check-then-act | **Backlog** |
 | Low | Unused `react-leaflet` | Removed earlier this week |
 
@@ -82,8 +82,8 @@ Attendance prompt “Ask me next time” is session-snoozed (`sessionStorage`), 
 1. Prisma migrate; never seed production; health check; backups.
 2. Browser tests (Playwright) for calendar filters, Attend, Insights export.
 3. Nonce-based CSP.
-4. Weekly series wall-clock across 25 October.
-5. Indexes and a live scraper behind the existing adapter.
+4. Confirm live ICS against a real cathedral/uni feed on Railway.
+5. Indexes. Broader live harvest (Eventbrite/Meetup APIs) still out.
 6. §16 phone UI.
 
 OpenStreetMap’s public tiles are fine for the demo. A regional rollout should use a tile provider with a usage agreement.
