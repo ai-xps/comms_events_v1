@@ -81,7 +81,8 @@ export function eventsFromJsonLd(payload: unknown, sourceUrl: string): ScrapedEv
       lat: null,
       lng: null,
       externalUrl: url,
-      notes: rec.description ? clip(String(rec.description), LIMITS.textLength) : null
+      notes: rec.description ? clip(String(rec.description), LIMITS.textLength) : null,
+      needsTypeReview: false
     });
   }
   return events;

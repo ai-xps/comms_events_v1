@@ -5,7 +5,9 @@ import { categoryEnabledKey, type Category, CATEGORIES } from "../constants";
 import { dropEndedStars } from "../stars";
 import { scrapeDecision } from "./apply";
 import { fixtureEvents } from "./fixtures";
+import { selectHarvestEvents } from "./harvest";
 import { fetchLiveEvents, type SourceResult } from "./live-adapter";
+import { claimScrapeLock, releaseScrapeLock } from "./lock";
 
 function nameKey(name: string) {
   return name.trim().toLowerCase();
@@ -15,40 +17,30 @@ export async function runScraper(opts: {
   trigger: "MANUAL" | "SCHEDULED";
   actorId?: string | null;
 }) {
-  const existing = await prisma.scrapeLock.findUnique({ where: { id: "scrape" } });
-  if (existing && existing.heldUntil > new Date()) {
-    const error = new Error("A scraper run is already in progress.");
-    (error as Error & { status?: number }).status = 409;
-    throw error;
-  }
-  await prisma.scrapeLock.upsert({
-    where: { id: "scrape" },
-    update: { heldUntil: new Date(Date.now() + 5 * 60 * 1000) },
-    create: { id: "scrape", heldUntil: new Date(Date.now() + 5 * 60 * 1000) }
-  });
-
-  const run = await prisma.scraperRun.create({
-    data: {
-      trigger: opts.trigger,
-      status: "RUNNING"
-    }
-  });
-
+  await claimScrapeLock();
+  let runId: string | null = null;
   const counts = {
     createdCount: 0,
     updatedCount: 0,
     discardedByRule: 0,
     leftPending: 0,
-    publishedCount: 0
+    publishedCount: 0,
+    skippedHumanEdited: 0
   };
-
   let sources: SourceResult[] = [];
 
   try {
+    const run = await prisma.scraperRun.create({
+      data: {
+        trigger: opts.trigger,
+        status: "RUNNING"
+      }
+    });
+    runId = run.id;
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
     const urls: string[] = settings ? JSON.parse(settings.priorityUrls || "[]") : [];
     await prisma.scraperRun.update({
-      where: { id: run.id },
+      where: { id: runId },
       data: { priorityUrlsSnapshot: JSON.stringify(urls) }
     });
 
@@ -63,12 +55,7 @@ export async function runScraper(opts: {
 
     const live = await fetchLiveEvents(urls);
     sources = live.sources;
-    const byKey = new Map<string, (typeof live.events)[number]>();
-    for (const event of [...live.events, ...fixtureEvents()]) {
-      if (!enabled.has(event.category)) continue;
-      byKey.set(event.sourceKey, event);
-    }
-    const events = [...byKey.values()];
+    const events = selectHarvestEvents(live.events, fixtureEvents(), enabled);
 
     const organisations = await prisma.organisation.findMany();
     const orgByKey = new Map(organisations.map((o) => [o.nameKey, o]));
@@ -89,7 +76,10 @@ export async function runScraper(opts: {
       const existingEvent = await prisma.event.findUnique({
         where: { sourceKey: incoming.sourceKey }
       });
-      const decision = scrapeDecision(existingEvent?.status, org.status);
+      const decision = scrapeDecision(existingEvent?.status, org.status, {
+        humanEditedAt: existingEvent?.humanEditedAt,
+        needsTypeReview: incoming.needsTypeReview
+      });
       const fields = {
         title: incoming.title,
         organisationName: incoming.organisationName,
@@ -105,6 +95,10 @@ export async function runScraper(opts: {
         notes: incoming.notes ?? null
       };
       if (decision.action === "skip-discarded") continue;
+      if (decision.action === "skip-human-edited") {
+        counts.skippedHumanEdited += 1;
+        continue;
+      }
       if (decision.action === "update" && existingEvent) {
         await prisma.event.update({ where: { id: existingEvent.id }, data: fields });
         counts.updatedCount += 1;
@@ -127,7 +121,7 @@ export async function runScraper(opts: {
 
     await dropEndedStars();
     await prisma.scraperRun.update({
-      where: { id: run.id },
+      where: { id: runId },
       data: {
         ...counts,
         sourceResults: JSON.stringify(sources),
@@ -139,24 +133,26 @@ export async function runScraper(opts: {
       actorId: opts.actorId ?? null,
       action: "scraper.run",
       entityType: "ScraperRun",
-      entityId: run.id,
-      summary: `${opts.trigger} scraper created ${counts.createdCount}, updated ${counts.updatedCount}`
+      entityId: runId,
+      summary: `${opts.trigger} scraper created ${counts.createdCount}, updated ${counts.updatedCount}, skipped ${counts.skippedHumanEdited} human-edited`
     });
-    return { id: run.id, ...counts, sources, status: "OK" as const };
+    return { id: runId, ...counts, sources, status: "OK" as const };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Scraper failed";
-    await prisma.scraperRun.update({
-      where: { id: run.id },
-      data: {
-        status: "ERROR",
-        errorText: message,
-        sourceResults: JSON.stringify(sources),
-        finishedAt: new Date()
-      }
-    });
+    if (runId) {
+      await prisma.scraperRun.update({
+        where: { id: runId },
+        data: {
+          status: "ERROR",
+          errorText: message,
+          sourceResults: JSON.stringify(sources),
+          finishedAt: new Date()
+        }
+      });
+    }
     throw error;
   } finally {
-    await prisma.scrapeLock.deleteMany({ where: { id: "scrape" } });
+    await releaseScrapeLock();
   }
 }
 

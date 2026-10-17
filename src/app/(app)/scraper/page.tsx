@@ -24,8 +24,8 @@ export default async function ScraperPage() {
       <div className="page-head">
         <h1>Scraper settings</h1>
         <p className="lede">
-          Daily run at 05:00 Europe/London via cron. Use Run now after you change these settings. Demo events always run.
-          Priority URLs are fetched only if they are https calendar feeds on the allowlist.
+          Daily run at 05:00 Europe/London via cron. Use Run now after you change these settings. Demo events run
+          unless SCRAPE_FIXTURES=0. Priority URLs are fetched only if they are https ICS or JSON-LD on the allowlist.
         </p>
       </div>
       <ScraperForm settings={settings} organisations={orgs} />
@@ -41,6 +41,7 @@ export default async function ScraperPage() {
                 <th>Status</th>
                 <th>Created</th>
                 <th>Updated</th>
+                <th>Skipped</th>
                 <th>Feeds</th>
               </tr>
             </thead>
@@ -60,6 +61,9 @@ export default async function ScraperPage() {
                   </td>
                   <td className="num" data-label="Updated">
                     {run.updatedCount}
+                  </td>
+                  <td className="num" data-label="Skipped">
+                    {run.skippedHumanEdited}
                   </td>
                   <td data-label="Feeds">
                     {sources.length === 0

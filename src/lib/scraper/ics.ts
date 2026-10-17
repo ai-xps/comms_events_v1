@@ -101,7 +101,8 @@ export function parseIcsEvents(raw: string, sourceUrl: string): ScrapedEvent[] {
         lat: null,
         lng: null,
         externalUrl: url,
-        notes: props.DESCRIPTION ? clip(props.DESCRIPTION, LIMITS.textLength) : null
+        notes: props.DESCRIPTION ? clip(props.DESCRIPTION, LIMITS.textLength) : null,
+        needsTypeReview: false
       });
       continue;
     }

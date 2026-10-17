@@ -39,7 +39,8 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | High | `prisma db push` on every start; no migrations | **Backlog** (track C) |
 | Med | No indexes on `(status, startsAt)` | **Backlog** |
 | Med | Weekly series uses +7 UTC days (clocks go back 25 Oct) | **Fixed** for seed and scrape fixtures via London calendar days |
-| Med | Scrape lock is check-then-act | **Backlog** |
+| Med | Scrape lock is check-then-act | **Fixed** — atomic `INSERT … ON CONFLICT` claim |
+| Med | Any `https://…/*.ics` bypassed the host allowlist | **Fixed** — host must be on the list |
 | Low | Unused `react-leaflet` | Removed earlier this week |
 
 ## UI and UX

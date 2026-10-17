@@ -3,7 +3,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { originAllowed, rejectOrigin } from "@/lib/origin";
 import { prisma } from "@/lib/db";
 import { CATEGORIES, DEFAULT_COLOURS, parseMemberAttendeeView } from "@/lib/constants";
-import { isHexColour, isHttpUrl } from "@/lib/security";
+import { isHexColour } from "@/lib/security";
+import { parsePriorityUrls } from "@/lib/scraper/allowlist";
 import { writeAudit } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {
@@ -19,10 +20,12 @@ export async function POST(request: NextRequest) {
   const colours = Object.fromEntries(
     CATEGORIES.map((c) => [c, isHexColour(submittedColours[c]) ? submittedColours[c] : DEFAULT_COLOURS[c]])
   );
-  const priorityUrls = (Array.isArray(body.priorityUrls) ? body.priorityUrls : [])
-    .map((u: unknown) => String(u).trim())
-    .filter(isHttpUrl)
-    .slice(0, 50);
+  const parsedUrls = parsePriorityUrls(Array.isArray(body.priorityUrls) ? body.priorityUrls : []);
+  if (parsedUrls.rejected.length) {
+    const listing = parsedUrls.rejected.map((row) => `${row.url} (${row.reason})`).join("; ");
+    return NextResponse.json({ error: `These Priority URLs cannot be saved: ${listing}` }, { status: 400 });
+  }
+  const priorityUrls = parsedUrls.urls;
   const locationLabel = String(body.locationLabel ?? "Birmingham").trim().slice(0, 80) || "Birmingham";
   const previous = await prisma.settings.findUnique({ where: { id: "default" } });
   const previousView = parseMemberAttendeeView(previous?.memberAttendeeView);

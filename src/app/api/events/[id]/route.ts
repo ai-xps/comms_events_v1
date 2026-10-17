@@ -29,6 +29,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
   const nextStatus =
     body.status === "PUBLISHED" || body.status === "DISCARDED" ? String(body.status) : event.status;
+  const statusChanging = nextStatus !== event.status;
   const title = String(body.title ?? event.title).trim();
   const notes = body.notes !== undefined ? String(body.notes).trim() || null : event.notes;
   const externalUrl = body.externalUrl !== undefined ? String(body.externalUrl).trim() || null : event.externalUrl;
@@ -56,7 +57,9 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       notes,
       capacity,
       status: nextStatus,
-      reviewedById: nextStatus !== event.status ? user.id : event.reviewedById
+      reviewedById: statusChanging ? user.id : event.reviewedById,
+      // Publish/discard is not a freeze; only a later Save stamps humanEditedAt.
+      humanEditedAt: statusChanging ? event.humanEditedAt : new Date()
     }
   });
   if (nextStatus !== event.status) {

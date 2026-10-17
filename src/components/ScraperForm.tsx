@@ -57,13 +57,14 @@ export function ScraperForm({
       publishedCount?: number;
       discardedByRule?: number;
       leftPending?: number;
+      skippedHumanEdited?: number;
     }>("/api/scraper/run", {
       method: "POST"
     });
     show(
       result,
       result.ok
-        ? `Run finished: created ${result.data.createdCount ?? 0}, updated ${result.data.updatedCount ?? 0}, published ${result.data.publishedCount ?? 0}, discarded ${result.data.discardedByRule ?? 0}, pending ${result.data.leftPending ?? 0}.`
+        ? `Run finished: created ${result.data.createdCount ?? 0}, updated ${result.data.updatedCount ?? 0}, published ${result.data.publishedCount ?? 0}, discarded ${result.data.discardedByRule ?? 0}, pending ${result.data.leftPending ?? 0}, skipped human-edited ${result.data.skippedHumanEdited ?? 0}.`
         : ""
     );
   }
@@ -101,8 +102,12 @@ export function ScraperForm({
           ))}
         </fieldset>
         <label>
-          Priority URLs (https calendar feeds on the allowlist; one per line. Leave empty to use the demo harvest only.)
-          <textarea name="priorityUrls" defaultValue={settings.priorityUrls.join("\n")} />
+          Priority URLs (https ICS or JSON-LD on the allowlist; one per line. Leave empty for the demo harvest only.)
+          <textarea
+            name="priorityUrls"
+            defaultValue={settings.priorityUrls.join("\n")}
+            placeholder="https://birminghamcathedral.com/calendar.ics — not a Meetup search page"
+          />
         </label>
         <div className="row">
           <button type="submit">Save settings</button>

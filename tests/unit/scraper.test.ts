@@ -1,12 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { scrapeDecision, isUpdatedScrapedRow } from "@/lib/scraper/apply";
-import { scrapeUrlAllowed } from "@/lib/scraper/allowlist";
+import { parsePriorityUrls, scrapeUrlAllowed } from "@/lib/scraper/allowlist";
 import { inferCategory, TYPE_REVIEW_NOTE } from "@/lib/scraper/categorise";
 import { fixtureEvents } from "@/lib/scraper/fixtures";
+import { RUN_EVENT_CAP, selectHarvestEvents } from "@/lib/scraper/harvest";
 import { parseIcsDate, parseIcsEvents } from "@/lib/scraper/ics";
 import { eventsFromJsonLd, extractJsonLdScripts } from "@/lib/scraper/jsonld";
+import { scrapeLockAcquired, scrapeLockUntil } from "@/lib/scraper/lock";
 import { fetchLiveEvents, type FetchLike } from "@/lib/scraper/live-adapter";
 import { londonParts } from "@/lib/time";
+import type { ScrapedEvent } from "@/lib/scraper/types";
+import type { Category } from "@/lib/constants";
 
 describe("fixture harvest", () => {
   const events = fixtureEvents();
@@ -37,11 +41,28 @@ describe("fixture harvest", () => {
 describe("scrapeDecision", () => {
   it("never undeletes a discarded event", () => {
     expect(scrapeDecision("DISCARDED", "WHITELIST")).toEqual({ action: "skip-discarded" });
+    expect(scrapeDecision("DISCARDED", "STANDARD", { humanEditedAt: new Date() })).toEqual({
+      action: "skip-discarded"
+    });
   });
 
   it("updates published and pending in place", () => {
     expect(scrapeDecision("PUBLISHED", "STANDARD")).toEqual({ action: "update" });
     expect(scrapeDecision("PENDING", "WHITELIST")).toEqual({ action: "update" });
+  });
+
+  it("skips a human-edited published event and still updates pending without a freeze", () => {
+    expect(scrapeDecision("PUBLISHED", "STANDARD", { humanEditedAt: new Date("2026-10-17T12:00:00Z") })).toEqual({
+      action: "skip-human-edited"
+    });
+    expect(scrapeDecision("PENDING", "STANDARD")).toEqual({ action: "update" });
+  });
+
+  it("does not auto-publish unclassified events even on a whitelist org", () => {
+    expect(scrapeDecision(null, "WHITELIST", { needsTypeReview: true })).toEqual({
+      action: "create",
+      status: "PENDING"
+    });
   });
 
   it("applies org rules only on insert", () => {
@@ -58,15 +79,56 @@ describe("scrapeDecision", () => {
 });
 
 describe("allowlist", () => {
-  it("accepts cathedral https and a calendar file", () => {
+  it("accepts cathedral https and a calendar file on an allowlisted host", () => {
     expect(scrapeUrlAllowed("https://birminghamcathedral.com/worship/").ok).toBe(true);
-    expect(scrapeUrlAllowed("https://example.com/calendar.ics").ok).toBe(true);
+    expect(scrapeUrlAllowed("https://birminghamcathedral.com/calendar.ics").ok).toBe(true);
+  });
+
+  it("rejects a .ics path on an unknown host", () => {
+    const result = scrapeUrlAllowed("https://evil.example/cal.ics");
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.reason).toMatch(/allowlist/i);
+  });
+
+  it("rejects loopback in production and private IPs always", () => {
+    expect(scrapeUrlAllowed("https://127.0.0.1/foo.ics", "production").ok).toBe(false);
+    expect(scrapeUrlAllowed("http://127.0.0.1/foo.ics", "development").ok).toBe(true);
+    expect(scrapeUrlAllowed("http://dev.localhost/cal.ics", "development").ok).toBe(true);
+    expect(scrapeUrlAllowed("https://10.0.0.8/cal.ics", "development").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://192.168.1.8/cal.ics").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://172.16.0.8/cal.ics").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://169.254.169.254/latest/meta-data", "development").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://[fd12::1]/cal.ics").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://[fe80::1]/cal.ics").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://[fc00::1]/cal.ics").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://8.8.8.8/cal.ics").ok).toBe(false);
+    expect(scrapeUrlAllowed("https://0.1.2.3/cal.ics").ok).toBe(false);
   });
 
   it("rejects http off localhost and unknown html hosts", () => {
     expect(scrapeUrlAllowed("http://evil.example/x").ok).toBe(false);
     expect(scrapeUrlAllowed("https://evil.example/events").ok).toBe(false);
     expect(scrapeUrlAllowed("javascript:alert(1)").ok).toBe(false);
+  });
+
+  it("refuses to save a Meetup search URL or a 21st feed", () => {
+    const meetup = parsePriorityUrls(["https://www.meetup.com/find/?keywords=birmingham"]);
+    expect(meetup.urls).toHaveLength(0);
+    expect(meetup.rejected[0]?.reason).toMatch(/allowlist/i);
+    const rejected = parsePriorityUrls(["https://evil.example/cal.ics", "not-a-url"]);
+    expect(rejected.urls).toHaveLength(0);
+    expect(rejected.rejected.length).toBeGreaterThanOrEqual(2);
+    const many = parsePriorityUrls(
+      Array.from({ length: 21 }, (_, i) => `https://birminghamcathedral.com/cal-${i}.ics`)
+    );
+    expect(many.urls).toHaveLength(20);
+    expect(many.rejected).toHaveLength(1);
+    const dup = parsePriorityUrls([
+      "https://birminghamcathedral.com/calendar.ics",
+      "https://birminghamcathedral.com/calendar.ics"
+    ]);
+    expect(dup.urls).toHaveLength(1);
+    expect(dup.rejected).toHaveLength(0);
   });
 });
 
@@ -129,6 +191,11 @@ describe("JSON-LD", () => {
     expect(event.organisationName).toBe("Aston SU");
     expect(event.online).toBe(true);
     expect(eventsFromJsonLd({ "@type": "Event", name: "No date" }, "https://www.astonsu.com/events/")).toHaveLength(0);
+    const [fallback] = eventsFromJsonLd(
+      { "@type": "Event", name: "Loose", startDate: "2026-10-21T16:00:00Z" },
+      "not a url"
+    );
+    expect(fallback.sourceKey.startsWith("live:jsonld:")).toBe(true);
   });
 });
 
@@ -151,6 +218,18 @@ END:VCALENDAR`;
     expect(parsed).toHaveLength(1);
     expect(parsed[0].title).toBe("A long title");
     expect(parsed[0].sourceKey.startsWith("live:ics:")).toBe(true);
+  });
+
+  it("defaults an end time when DTEND is missing", () => {
+    const raw = `BEGIN:VCALENDAR
+BEGIN:VEVENT
+UID:no-end
+SUMMARY:Open
+DTSTART:20261022T180000Z
+END:VEVENT
+END:VCALENDAR`;
+    const [event] = parseIcsEvents(raw, "https://birminghamcathedral.com/calendar.ics");
+    expect(event.endsAt.getTime() - event.startsAt.getTime()).toBe(60 * 60 * 1000);
   });
 });
 
@@ -181,5 +260,103 @@ describe("live adapter", () => {
     }, pauseMs: 0 });
     expect(harvest.events).toHaveLength(0);
     expect(harvest.sources[0]?.error).toMatch(/allowlist/i);
+  });
+
+  it("records Response too large and keeps zero events", async () => {
+    const harvest = await fetchLiveEvents(["https://birminghamcathedral.com/calendar.ics"], {
+      fetchFn: async (input) => {
+        if (input.endsWith("/robots.txt")) {
+          return { ok: true, status: 200, headers: { get: () => "text/plain" }, text: async () => "User-agent: *\nAllow: /\n" };
+        }
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "text/calendar" },
+          text: async () => "X".repeat(512 * 1024 + 1)
+        };
+      },
+      pauseMs: 0
+    });
+    expect(harvest.events).toHaveLength(0);
+    expect(harvest.sources[0]?.error).toBe("Response too large.");
+  });
+
+  it("keeps 200 events from a 250-event ICS", async () => {
+    const vevents = Array.from({ length: 250 }, (_, i) => {
+      const n = String(i).padStart(3, "0");
+      return `BEGIN:VEVENT
+UID:bulk-${n}
+SUMMARY:Event ${n}
+DTSTART:20261022T180000Z
+DTEND:20261022T190000Z
+END:VEVENT`;
+    }).join("\n");
+    const ics = `BEGIN:VCALENDAR\n${vevents}\nEND:VCALENDAR`;
+    const harvest = await fetchLiveEvents(["https://birminghamcathedral.com/calendar.ics"], {
+      fetchFn: async (input) => {
+        if (input.endsWith("/robots.txt")) {
+          return { ok: true, status: 200, headers: { get: () => "text/plain" }, text: async () => "User-agent: *\nAllow: /\n" };
+        }
+        return { ok: true, status: 200, headers: { get: () => "text/calendar" }, text: async () => ics };
+      },
+      pauseMs: 0
+    });
+    expect(harvest.events).toHaveLength(200);
+    expect(harvest.sources[0]?.eventCount).toBe(200);
+  });
+});
+
+function sampleEvent(overrides: Partial<ScrapedEvent> & Pick<ScrapedEvent, "sourceKey" | "category">): ScrapedEvent {
+  return {
+    title: "Sample",
+    organisationName: "Org",
+    startsAt: new Date("2026-10-20T10:00:00Z"),
+    endsAt: new Date("2026-10-20T11:00:00Z"),
+    online: false,
+    needsTypeReview: false,
+    ...overrides
+  };
+}
+
+describe("harvest select", () => {
+  it("keeps unclassified events when Meetup is disabled and caps the run", () => {
+    const enabled = new Set<Category>(["Christian"]);
+    const unclassified = sampleEvent({
+      sourceKey: "live:calendar.google.com:anon",
+      category: "Meetup",
+      needsTypeReview: true
+    });
+    const droppedMeetup = sampleEvent({ sourceKey: "live:meetup.com:known", category: "Meetup" });
+    const kept = selectHarvestEvents([unclassified, droppedMeetup], [], enabled);
+    expect(kept.map((e) => e.sourceKey)).toEqual(["live:calendar.google.com:anon"]);
+  });
+
+  it("slices combined live and fixture events to the run cap", () => {
+    const enabled = new Set<Category>(["Meetup"]);
+    const live = Array.from({ length: RUN_EVENT_CAP + 10 }, (_, i) =>
+      sampleEvent({ sourceKey: `live:n:${i}`, category: "Meetup" })
+    );
+    expect(selectHarvestEvents(live, [], enabled)).toHaveLength(RUN_EVENT_CAP);
+  });
+});
+
+describe("fixture gate", () => {
+  it("yields no fixture- keys when SCRAPE_FIXTURES=0", () => {
+    const previous = process.env.SCRAPE_FIXTURES;
+    process.env.SCRAPE_FIXTURES = "0";
+    try {
+      expect(fixtureEvents()).toEqual([]);
+    } finally {
+      if (previous === undefined) delete process.env.SCRAPE_FIXTURES;
+      else process.env.SCRAPE_FIXTURES = previous;
+    }
+  });
+});
+
+describe("scrape lock helper", () => {
+  it("treats an empty RETURNING set as not acquired", () => {
+    expect(scrapeLockAcquired([])).toBe(false);
+    expect(scrapeLockAcquired([{ id: "scrape" }])).toBe(true);
+    expect(scrapeLockUntil(0).getTime()).toBe(5 * 60 * 1000);
   });
 });

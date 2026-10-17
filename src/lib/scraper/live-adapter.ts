@@ -1,5 +1,6 @@
 import { scrapeUrlAllowed } from "./allowlist";
 import { inferCategory, TYPE_REVIEW_NOTE } from "./categorise";
+import { FETCH_BODY_MAX, URL_EVENT_CAP } from "./harvest";
 import { parseIcsEvents } from "./ics";
 import { eventsFromJsonLd, extractJsonLdScripts } from "./jsonld";
 import type { ScrapedEvent } from "./types";
@@ -88,7 +89,12 @@ function decorate(events: ScrapedEvent[], pageUrl: string): ScrapedEvent[] {
     const notes = inferred.inferred
       ? event.notes
       : [TYPE_REVIEW_NOTE, event.notes].filter(Boolean).join("\n\n");
-    return { ...event, category: inferred.category, notes };
+    return {
+      ...event,
+      category: inferred.category,
+      notes,
+      needsTypeReview: !inferred.inferred
+    };
   });
 }
 
@@ -163,8 +169,13 @@ export async function fetchLiveEvents(
       const page = await timedFetch(fetchFn, url.toString());
       if (!page.ok) {
         sources.push({ url: raw, ok: false, eventCount: 0, error: `HTTP ${page.status}` });
+      } else if (page.body.length > FETCH_BODY_MAX) {
+        sources.push({ url: raw, ok: false, eventCount: 0, error: "Response too large." });
       } else {
-        const parsed = decorate(parseBody(url.toString(), page.contentType, page.body), url.toString());
+        const parsed = decorate(parseBody(url.toString(), page.contentType, page.body), url.toString()).slice(
+          0,
+          URL_EVENT_CAP
+        );
         events.push(...parsed);
         sources.push({
           url: raw,

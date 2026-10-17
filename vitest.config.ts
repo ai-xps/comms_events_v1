@@ -22,6 +22,7 @@ export default defineConfig({
         "src/lib/export-format.ts",
         "src/lib/scraper/apply.ts",
         "src/lib/scraper/allowlist.ts",
+        "src/lib/scraper/harvest.ts",
         "src/lib/scraper/categorise.ts",
         "src/lib/scraper/ics.ts",
         "src/lib/scraper/jsonld.ts"

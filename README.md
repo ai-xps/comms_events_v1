@@ -21,6 +21,8 @@ Copy `.env.example` to `.env`.
 | `SESSION_SECRET` | Signs the httpOnly session cookie. Use a long random string. |
 | `CRON_SECRET` | Guards `POST /api/cron/scrape`. |
 | `APP_ORIGIN` | Exact origin for mutation checks, e.g. `http://localhost:3000` or your Railway HTTPS URL (no trailing slash). |
+| `SCRAPE_LIVE` | Set to `0` to skip fetching Priority URLs. Fixtures still run unless `SCRAPE_FIXTURES=0`. |
+| `SCRAPE_FIXTURES` | Set to `0` to skip the demo harvest. Default is on. |
 
 ## Setup
 
@@ -73,7 +75,7 @@ Do not start a scheduler inside `next dev`. Use cron on the host:
 
 `npm run scrape` and `POST /api/cron/scrape` with `Authorization: Bearer <CRON_SECRET>` both run the scraper with trigger `SCHEDULED`. The admin **Run now** button uses trigger `MANUAL` and an admin session.
 
-The demo harvest always runs. If Priority URLs are set, Gather fetches only https ICS or JSON-LD from the host allowlist (User-Agent `GatherBirmingham/1.0`, robots.txt, 8s timeout, 1 request/s). Set `SCRAPE_LIVE=0` to skip the network. A failed feed is recorded on the run and does not stop the others. Gather does not collect member data from third-party sites.
+The demo harvest runs unless `SCRAPE_FIXTURES=0`. If Priority URLs are set, Gather fetches only https ICS or JSON-LD from the host allowlist (User-Agent `GatherBirmingham/1.0`, robots.txt, 8s timeout, 1 request/s, 512 KiB body cap). Set `SCRAPE_LIVE=0` to skip the network. A failed feed is recorded on the run and does not stop the others. Saving an event after publish freezes scrape updates for that row. Gather does not collect member data from third-party sites.
 
 ## Import columns
 

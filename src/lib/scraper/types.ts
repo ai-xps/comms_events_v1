@@ -13,4 +13,5 @@ export type ScrapedEvent = {
   lng?: number | null;
   externalUrl?: string | null;
   notes?: string | null;
+  needsTypeReview: boolean;
 };

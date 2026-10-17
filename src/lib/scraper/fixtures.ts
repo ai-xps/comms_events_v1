@@ -38,6 +38,7 @@ function at(daysFromToday: number, hour: number, minute = 0) {
  * Event Links are real host pages (not site roots), except one deliberate blank.
  */
 export function fixtureEvents(): ScrapedEvent[] {
+  if (process.env.SCRAPE_FIXTURES === "0") return [];
   const sunday = nextLondonWeekday(0, 11, 0);
   const fridayPrayer = nextLondonWeekday(5, 12, 30);
   const prayerWeeks = [0, 1, 2, 3].map((week) => {
@@ -255,5 +256,5 @@ export function fixtureEvents(): ScrapedEvent[] {
       lng: null,
       notes: "No Event Link and no coordinates yet — stays off the map."
     }
-  ];
+  ].map((event) => ({ ...event, needsTypeReview: false })) as ScrapedEvent[];
 }

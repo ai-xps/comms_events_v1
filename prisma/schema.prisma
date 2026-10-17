@@ -65,6 +65,7 @@ model Event {
   recurrence       String    @default("NONE")
   createdById      String?
   reviewedById     String?
+  humanEditedAt    DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   organisation     Organisation? @relation(fields: [organisationId], references: [id])
@@ -123,6 +124,7 @@ model ScraperRun {
   discardedByRule     Int       @default(0)
   leftPending         Int       @default(0)
   publishedCount      Int       @default(0)
+  skippedHumanEdited  Int       @default(0)
   errorText           String?
   priorityUrlsSnapshot String   @default("[]")
   sourceResults       String    @default("[]")
