@@ -1,6 +1,6 @@
 # Gather — Birmingham Community Events
 
-Context for the build. Distilled 15 October 2026 from the project group chat (14–15 October 2026), the two requirements documents linked in that chat, and the process and architecture sketches shared there. Updated 16 October 2026 with mobile-first UI mockups (logo through calendar): phone layouts are canonical; browser should be inspired by them (see section 16). Updated 17 October 2026 with Guillaume’s 16 October demo feedback (see section 17).
+Context for the build. Distilled 15 October 2026 from the project group chat (14–15 October 2026), the two requirements documents linked in that chat, and the process and architecture sketches shared there. Updated 16 October 2026 with mobile-first UI mockups (logo through calendar): phone layouts are canonical; browser should be inspired by them (see section 16). Updated 17 October 2026 with Guillaume’s 16 October demo feedback (see section 17) and tester calendar notes (see section 18). Insights for admins and cell leaders is described in section 19.
 
 This file is a reference for implementation. It is not a signed specification. The discovery document calls itself finalised, and the chat on 15 October still had comments outstanding. Where sources disagree, both positions are recorded and the item is marked unresolved.
 
@@ -312,6 +312,8 @@ The thread is explicit about a few constraints. Record them as trade-offs, not a
 
 **Accounts.** There is no public registration and no self-serve cell move. That is deliberate, so the cell on the account stays the cell in the import.
 
+**Build choices (17 October).** Passwords stay hashed. Logging out, resetting a password, or deactivating a person increments `sessionVersion`, so every cookie issued before that is refused. Event Link only stores `http://` or `https://`. Category colours only store `#rrggbb`. The scheduled scrape accepts `Authorization: Bearer` only, compared in constant time. Spreadsheet exports prefix cells that look like formulas. Login `next=` only accepts a path on this app.
+
 ## 12. Requirements index
 
 From the discovery document (version 1.0, 14 October 2026, status “Finalised (Discovery Phase)”). Priority is theirs.
@@ -543,3 +545,25 @@ From the project chat, 16 October 2026 22:30–22:34, after trying the Railway d
 | G5 | “I am thinking we can use this document to make comments instead of posting here.” | Section 13 | Demo feedback document added as a source. |
 
 Not raised in this feedback, and still open: everything in section 5 except the toggle’s choices, and the section 16 design questions.
+
+## 18. Tester feedback — calendar, 17 October 2026
+
+Relayed without a name. Three reports, all on the calendar.
+
+| Report | Cause | Fix |
+| --- | --- | --- |
+| Day and week views come up empty even when events are on the month | Both views were pinned to the 1st of the displayed month. Previous/Next only moved by month. | A `d=YYYY-MM-DD` anchor. Day is that London day; week is Monday–Sunday around it. Previous/Next step by the current view. A Today button and a range heading say which dates you are looking at. |
+| After choosing a type (for example Christian), All types does not clear the filter | The All types link reused the current category. | One `calendarHref` helper. Empty overrides drop the param. |
+| Playing with the filters makes the map at the bottom disappear | With no located events, the map was replaced by a one-line note, and Leaflet was rebuilt on every render. | The map always stays. Empty views sit on Birmingham with a note. Markers swap in a layer group. |
+
+## 19. Insights and sharing
+
+Admins and cell leaders have **Insights**. Members do not. An admin sees the region and can pick a cell. A cell leader is pinned to their own cell.
+
+Headline figures and charts (Attend clicks over time, attendance outcomes, type, format, cell, day-and-time, review funnel, busiest events) all come from one calculation, so the page, the file you download, and the share text agree.
+
+Export drop-down: Summary, Weekly trend, By event type, By cell, Per-event attendance, Attendee list (names, same scope as F07), or Everything. Formats: CSV, TXT, JSON, XLSX. Every export is written to the audit log.
+
+Share drop-down: WhatsApp, Email, Microsoft Teams, Telegram, Copy, or the device’s own share menu. The message is totals plus a link back to Insights. It never includes names or cell numbers. The person’s own app sends it. Gather does not hold messaging accounts, so D02 (no SMS or notification channel in this phase) still holds.
+
+Cells with fewer than three people are shown as “fewer than 3” on charts so no one can be singled out.

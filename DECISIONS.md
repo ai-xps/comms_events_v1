@@ -22,3 +22,9 @@ Where `context.md` and the discovery-document comments disagree, this build foll
 | Scraper schedule | Daily at 05:00 Europe/London, plus a manual run. Fixture provider only. | Reply [m]. Live HTTP scraping is out of this build. |
 | Filters | Christian, Networking, Professional, Student, Meetup. Online or in person is a stored field, not a new category. | Reply [o]. |
 | Scope | `context.md` section 3 only. No second problem. | Prompt. |
+| Calendar navigation | Day and week follow `d=YYYY-MM-DD` (default today). Previous/Next step by the current view. The map stays visible with zero pins. | Tester feedback, 17 October (`context.md` section 18). |
+| Security headers | CSP as in `next.config.ts`, HSTS, nosniff, frame deny, strict-origin-when-cross-origin, Permissions-Policy off for camera/mic/geo. `script-src` keeps `'unsafe-inline'` because of Next hydration. Event Link is http(s) only. | Review 17 October. Nonce-based CSP is production-hardening work. |
+| Sessions | Signed cookie carries `sessionVersion`. Logout, password reset and deactivation bump it, which signs the person out everywhere. | Review 17 October. Trade-off: one logout ends every device. |
+| Insights access | Admin: region, optional cell. Cell leader: own cell. Members: no page. | Product call 17 October. |
+| Insights sharing | Share drop-down opens the person’s own app (WhatsApp, Email, Teams, Telegram, Copy, device share). Totals only, no names. D02 unchanged. | Product call 17 October. |
+| Export formats | Insights and attendee files: CSV, TXT, JSON, XLSX. Formula-looking cells are prefixed. | F07 plus 17 October Insights work. |

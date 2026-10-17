@@ -33,6 +33,18 @@ npm run dev
 
 Open http://localhost:3000. The seed command prints cell numbers and initial passwords once to stdout. They are not shown in the app. Re-running seed is a no-op if the admin user already exists.
 
+## Tests
+
+```bash
+npm test              # unit tests (integration tests run when TEST_DATABASE_URL is set)
+npm run test:coverage
+npm run typecheck
+```
+
+CI (`.github/workflows/ci.yml`) on push to `experiment` or `main`: typecheck, tests against Postgres 16, then `next build`.
+
+What the app does, with who agreed it: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Weak points and the live smoke list: [`docs/REVIEW.md`](docs/REVIEW.md).
+
 To start again:
 
 ```bash
@@ -59,7 +71,7 @@ Do not start a scheduler inside `next dev`. Use cron on the host:
 0 5 * * * cd /path/to/app && /usr/bin/env CRON_SECRET=your-cron-secret npm run scrape
 ```
 
-`npm run scrape` and `POST /api/cron/scrape` (Bearer or `?secret=`) both run the fixture scraper with trigger `SCHEDULED`. The admin **Run now** button uses trigger `MANUAL` and an admin session.
+`npm run scrape` and `POST /api/cron/scrape` with `Authorization: Bearer <CRON_SECRET>` both run the fixture scraper with trigger `SCHEDULED`. The admin **Run now** button uses trigger `MANUAL` and an admin session.
 
 This build does not fetch live websites. Priority URLs are stored on the run record. The live adapter at `src/lib/scraper/live-adapter.ts` is not called.
 
