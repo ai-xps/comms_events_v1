@@ -2,12 +2,12 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CATEGORIES, type Category } from "@/lib/constants";
+import { CATEGORIES, type Category, type MemberAttendeeView } from "@/lib/constants";
 import { StatusBanner } from "./StatusBanner";
 
 type Settings = {
   locationLabel: string;
-  memberAttendeeView: "COUNT" | "COUNT_AND_INITIALS";
+  memberAttendeeView: MemberAttendeeView;
   enabled: Record<Category, boolean>;
   colours: Record<string, string>;
   priorityUrls: string[];
@@ -74,7 +74,9 @@ export function ScraperForm({
           <select name="memberAttendeeView" defaultValue={settings.memberAttendeeView}>
             <option value="COUNT">Count only</option>
             <option value="COUNT_AND_INITIALS">Count and initials</option>
+            <option value="COUNT_AND_NAME_CELL">Count and name + cell</option>
           </select>
+          <span className="muted">Name + cell shows every member the name and cell number of everyone booked.</span>
         </label>
         <fieldset className="stack">
           <legend>Event types</legend>

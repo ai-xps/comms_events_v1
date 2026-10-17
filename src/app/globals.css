@@ -483,6 +483,23 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
   padding: var(--space-4) var(--space-5) var(--space-5);
   margin: 0;
 }
+.location-field { display: grid; gap: var(--space-2); }
+.location-field p { margin: 0; }
+.location-field summary { cursor: pointer; color: var(--ink-soft); }
+.location-field details .row { margin-top: var(--space-2); }
+.field-label { font-weight: 600; font-size: 0.95rem; }
+.map.map-picker {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: crosshair;
+}
+
+.attendee-list {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-1);
+}
 
 .dated-list { display: grid; gap: var(--space-4); }
 .dated-group h3 {

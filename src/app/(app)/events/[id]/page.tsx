@@ -64,7 +64,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
         ) : null}
         {event.externalUrl ? (
           <p>
-            <strong>Host site.</strong>{" "}
+            <strong>Event Link.</strong>{" "}
             <a href={event.externalUrl} target="_blank" rel="noreferrer">
               Register there if they ask, and still click Attend here
             </a>
@@ -80,6 +80,19 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
           <p className="muted">
             Initials: {event.bookings.map((b) => initialsFromName(b.user.name)).join(", ") || "nobody yet"}
           </p>
+        ) : null}
+        {user.role === "member" && settings.memberAttendeeView === "COUNT_AND_NAME_CELL" ? (
+          event.bookings.length ? (
+            <ul className="attendee-list">
+              {event.bookings.map((b) => (
+                <li key={b.id}>
+                  {b.user.name} <span className="muted">· {b.user.cellNumber}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">Nobody has booked yet.</p>
+          )
         ) : null}
         <EventActions
           eventId={event.id}

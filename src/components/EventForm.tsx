@@ -1,9 +1,10 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES } from "@/lib/constants";
 import { StatusBanner } from "./StatusBanner";
+import { LocationPicker } from "./LocationPicker";
 
 type Org = { id: string; name: string };
 type EventValue = {
@@ -39,6 +40,14 @@ export function EventForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [kind, setKind] = useState<"info" | "error">("info");
+  const [online, setOnline] = useState(event?.online ?? false);
+  const [lat, setLat] = useState(event?.lat != null ? String(event.lat) : "");
+  const [lng, setLng] = useState(event?.lng != null ? String(event.lng) : "");
+  const point = useMemo(() => {
+    const la = Number(lat);
+    const ln = Number(lng);
+    return lat !== "" && lng !== "" && Number.isFinite(la) && Number.isFinite(ln) ? { lat: la, lng: ln } : null;
+  }, [lat, lng]);
 
   async function submit(extra: Record<string, string> = {}) {
     if (!formRef.current) return;
@@ -46,7 +55,7 @@ export function EventForm({
     const response = await fetch(event ? `/api/events/${event.id}` : "/api/events", {
       method: event ? "PATCH" : "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, ...extra })
+      body: JSON.stringify({ ...payload, online: online ? "on" : "off", ...extra })
     });
     const data = await response.json();
     if (!response.ok) {
@@ -54,7 +63,7 @@ export function EventForm({
       setMessage(data.error);
       return;
     }
-    if (extra.status === "DISCARDED") {
+    if (event?.status === "PENDING" && (extra.status === "PUBLISHED" || extra.status === "DISCARDED")) {
       router.push("/pending");
     } else {
       router.push(data.id ? `/events/${data.id}` : "/calendar");
@@ -106,25 +115,43 @@ export function EventForm({
         </label>
       </div>
       <label>
-        <input type="checkbox" name="online" defaultChecked={event?.online} /> Online
+        <input type="checkbox" name="online" checked={online} onChange={(e) => setOnline(e.target.checked)} /> Online
       </label>
       <label>
         Place
         <input name="placeName" defaultValue={event?.placeName} />
       </label>
-      <div className="row">
-        <label>
-          Latitude
-          <input name="lat" defaultValue={event?.lat ?? ""} />
-        </label>
-        <label>
-          Longitude
-          <input name="lng" defaultValue={event?.lng ?? ""} />
-        </label>
-      </div>
+      {!online ? (
+        <div className="location-field">
+          <span className="field-label">Map pin</span>
+          <p className="muted">
+            {point ? `Pin set at ${point.lat}, ${point.lng}. Click the map to move it.` : "Click the map to set where the event is."}
+          </p>
+          <LocationPicker
+            value={point}
+            onChange={(p) => {
+              setLat(String(p.lat));
+              setLng(String(p.lng));
+            }}
+          />
+          <details>
+            <summary>Enter coordinates instead</summary>
+            <div className="row">
+              <label>
+                Latitude
+                <input name="lat" inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} />
+              </label>
+              <label>
+                Longitude
+                <input name="lng" inputMode="decimal" value={lng} onChange={(e) => setLng(e.target.value)} />
+              </label>
+            </div>
+          </details>
+        </div>
+      ) : null}
       <label>
-        Host URL
-        <input name="externalUrl" defaultValue={event?.externalUrl} />
+        Event Link
+        <input name="externalUrl" placeholder="https://" defaultValue={event?.externalUrl} />
       </label>
       <label>
         Notes

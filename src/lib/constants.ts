@@ -18,6 +18,15 @@ export const DEFAULT_COLOURS: Record<Category, string> = {
   Meetup: "#8a5a2b"
 };
 
+// COUNT_AND_NAME_CELL lets every member read the name and cell number of everyone booked
+// on an event. Default stays COUNT; see DECISIONS.md "Member attendee view".
+export const MEMBER_ATTENDEE_VIEWS = ["COUNT", "COUNT_AND_INITIALS", "COUNT_AND_NAME_CELL"] as const;
+export type MemberAttendeeView = (typeof MEMBER_ATTENDEE_VIEWS)[number];
+
+export function parseMemberAttendeeView(value: unknown): MemberAttendeeView {
+  return MEMBER_ATTENDEE_VIEWS.includes(value as MemberAttendeeView) ? (value as MemberAttendeeView) : "COUNT";
+}
+
 export const SESSION_COOKIE = "gather_session";
 export const SESSION_HOURS = 12;
 export const GENERIC_LOGIN_ERROR = "Cell number or password is not recognised.";

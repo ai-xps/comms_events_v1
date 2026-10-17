@@ -1,5 +1,5 @@
 import { prisma } from "./db";
-import { CATEGORIES, DEFAULT_COLOURS, type Category } from "./constants";
+import { CATEGORIES, DEFAULT_COLOURS, parseMemberAttendeeView, type Category } from "./constants";
 
 export async function getSettings() {
   const row = await prisma.settings.findUnique({ where: { id: "default" } });
@@ -13,7 +13,7 @@ export async function getSettings() {
   };
   return {
     locationLabel: row?.locationLabel ?? "Birmingham",
-    memberAttendeeView: (row?.memberAttendeeView ?? "COUNT") as "COUNT" | "COUNT_AND_INITIALS",
+    memberAttendeeView: parseMemberAttendeeView(row?.memberAttendeeView),
     colours: { ...DEFAULT_COLOURS, ...colours },
     enabled,
     priorityUrls: row ? (JSON.parse(row.priorityUrls || "[]") as string[]) : []
