@@ -5,6 +5,10 @@ import { formatDateTime, formatDate } from "@/lib/time";
 import { isUpdatedScrapedRow } from "@/lib/scraper/apply";
 import { dayKeyOf, formatDayKey } from "@/lib/calendar";
 
+function displayEventLink(url: string) {
+  return url.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
+}
+
 export default async function PendingPage() {
   await requireUser(["admin", "cell leader"]);
   const events = await prisma.event.findMany({
@@ -38,12 +42,22 @@ export default async function PendingPage() {
               const updated = isUpdatedScrapedRow(event.createdAt, event.updatedAt);
               return (
                 <Link key={event.id} className="card pending-tile" href={`/events/${event.id}/edit`}>
-                  <p className="muted">{updated ? "Updated" : "New"}</p>
+                  <p className="pending-kicker muted">{updated ? "Updated" : "New"}</p>
                   <h3>{event.title}</h3>
-                  <p className="muted">
-                    {event.organisationName} · {event.category} · {formatDateTime(event.startsAt)}
+                  <p className="pending-meta muted">
+                    <span>
+                      {event.organisationName} · {event.category}
+                    </span>
+                    <time dateTime={event.startsAt.toISOString()}>{formatDateTime(event.startsAt)}</time>
                   </p>
-                  {event.externalUrl ? <p className="muted">Event Link. {event.externalUrl}</p> : null}
+                  {event.externalUrl ? (
+                    <p className="pending-ext" title={event.externalUrl}>
+                      <span className="pending-ext-label">Event Link</span>
+                      <span className="pending-ext-url">{displayEventLink(event.externalUrl)}</span>
+                    </p>
+                  ) : (
+                    <p className="pending-ext pending-ext-empty" aria-hidden="true" />
+                  )}
                 </Link>
               );
             })}
