@@ -1,7 +1,9 @@
 /**
  * Builds the 6-slide tester guide.
- * Run: node docs/presentation/build-deck.mjs
- * Needs pptxgenjs (devDependency).
+ * Run: npm run deck
+ *
+ * Do not put cell numbers, passwords, account names, or other secrets in this file
+ * or in the screenshots it embeds.
  */
 import PptxGenJS from "pptxgenjs";
 import { dirname, join } from "node:path";
@@ -11,7 +13,6 @@ const root = dirname(fileURLToPath(import.meta.url));
 const shot = (name) => join(root, "shots", name);
 
 const PAPER = "F4EEE4";
-const PAPER2 = "EFE6D6";
 const WHITE = "FFFDF8";
 const INK = "1C1612";
 const SOFT = "4A4038";
@@ -22,8 +23,8 @@ const pres = new PptxGenJS();
 pres.defineLayout({ name: "WIDE", width: 13.333, height: 7.5 });
 pres.layout = "WIDE";
 pres.author = "Gather";
-pres.title = "Gather — tester guide";
-pres.subject = "Birmingham community events, 17 October 2026";
+pres.title = "Gather — a quick look";
+pres.subject = "Birmingham community events";
 
 function slide() {
   const s = pres.addSlide();
@@ -32,7 +33,7 @@ function slide() {
 }
 
 function footer(s, n) {
-  s.addText("Gather  ·  Birmingham  ·  17 October 2026", {
+  s.addText("Gather  ·  Birmingham", {
     x: 0.5,
     y: 7.12,
     w: 10.5,
@@ -66,7 +67,18 @@ function heading(s, text) {
   });
 }
 
-// 1 — Title
+function card(s, x, y, w, h) {
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x,
+    y,
+    w,
+    h,
+    fill: { color: WHITE },
+    line: { color: LINE },
+    rectRadius: 0.12
+  });
+}
+
 {
   const s = slide();
   s.addShape(pres.shapes.RECTANGLE, {
@@ -79,7 +91,7 @@ function heading(s, text) {
   });
   s.addText("Gather", {
     x: 0.7,
-    y: 1.7,
+    y: 1.85,
     w: 12,
     h: 0.9,
     fontFace: "Georgia",
@@ -87,27 +99,27 @@ function heading(s, text) {
     color: INK,
     bold: true
   });
-  s.addText("Tester guide", {
+  s.addText("A quick look around", {
     x: 0.7,
-    y: 2.55,
+    y: 2.75,
     w: 12,
     h: 0.5,
     fontFace: "Georgia",
     fontSize: 28,
     color: TERRACOTTA
   });
-  s.addText("Closed calendar for one Birmingham community. Accounts are created by an admin. Members sign in with a cell number and password.", {
+  s.addText("A closed calendar for one community in Birmingham. Have a click. Nothing here is a test you can fail.", {
     x: 0.7,
-    y: 3.3,
+    y: 3.5,
     w: 10.5,
     h: 0.8,
     fontFace: "Calibri",
-    fontSize: 18,
+    fontSize: 20,
     color: SOFT
   });
-  s.addText("Live demo", {
+  s.addText("Open this", {
     x: 0.7,
-    y: 4.35,
+    y: 4.6,
     w: 3,
     h: 0.28,
     fontFace: "Calibri",
@@ -117,198 +129,113 @@ function heading(s, text) {
   });
   s.addText("https://commseventsv1-production.up.railway.app", {
     x: 0.7,
-    y: 4.62,
+    y: 4.9,
     w: 11,
     h: 0.4,
     fontFace: "Calibri",
     fontSize: 20,
     color: TERRACOTTA
   });
-  s.addText("What it does: docs/FUNCTIONAL.md   ·   Weak points: docs/REVIEW.md   ·   17 October 2026", {
-    x: 0.7,
-    y: 6.7,
-    w: 11.5,
-    h: 0.3,
-    fontFace: "Calibri",
-    fontSize: 14,
-    color: SOFT
-  });
 }
 
-// 2 — Sign in
 {
   const s = slide();
   heading(s, "Sign in");
-  s.addText("Use the cell number and password your cell leader gave you. There is no public sign-up.", {
+  s.addText("Your cell leader gives you a cell number and a password. That is the whole door. There is no public sign-up.", {
     x: 0.5,
-    y: 0.88,
+    y: 0.9,
     w: 6.4,
-    h: 0.55,
+    h: 0.7,
     fontFace: "Calibri",
-    fontSize: 16,
+    fontSize: 17,
     color: SOFT
   });
   s.addImage({ path: shot("login.png"), x: 7.15, y: 0.95, w: 5.65, h: 5.95 });
-  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 0.5,
-    y: 1.55,
-    w: 6.4,
-    h: 4.85,
-    fill: { color: WHITE },
-    line: { color: LINE },
-    rectRadius: 0.12
-  });
-  s.addText("Demo accounts (this deployment only)", {
-    x: 0.7,
-    y: 1.7,
-    w: 6,
-    h: 0.35,
-    fontFace: "Calibri",
-    fontSize: 15,
-    color: INK,
-    bold: true
-  });
-  s.addTable(
-    [
-      [
-        { text: "Role", options: { bold: true, color: INK } },
-        { text: "Cell number", options: { bold: true, color: INK } },
-        { text: "Password", options: { bold: true, color: INK } }
-      ],
-      ["Admin", "07000000001", "AdminPass1"],
-      ["Cell leader", "07000000002", "LeaderPass1"],
-      ["Member", "07000000004", "MemberPass1"]
-    ],
-    {
-      x: 0.7,
-      y: 2.15,
-      w: 6.0,
-      h: 2.1,
-      colW: [1.7, 2.2, 2.1],
-      border: [{ pt: 0 }, { pt: 0 }, { pt: 0.5, color: LINE }, { pt: 0 }],
-      fontFace: "Calibri",
-      fontSize: 14,
-      color: INK,
-      valign: "middle"
-    }
-  );
-  s.addText("Admin sees every page. Cell leaders see Insights for their own cell, pending review, and their members. Members see the calendar, bookings, and Attend.", {
-    x: 0.7,
-    y: 4.4,
-    w: 6.0,
-    h: 1.6,
-    fontFace: "Calibri",
-    fontSize: 15,
-    color: SOFT
+  card(s, 0.5, 1.75, 6.4, 4.85);
+  const roles = [
+    ["Members", "Browse the calendar, click Attend, confirm later if you went."],
+    ["Cell leaders", "Look after their own cell, review pending events, see Insights for that cell."],
+    ["Admin", "Sets people up, runs the scraper, sees the whole region."]
+  ];
+  roles.forEach(([title, body], i) => {
+    const y = 2.0 + i * 1.4;
+    s.addText(title, { x: 0.75, y, w: 5.9, h: 0.35, fontFace: "Georgia", fontSize: 20, color: TERRACOTTA, bold: true });
+    s.addText(body, { x: 0.75, y: y + 0.38, w: 5.9, h: 0.7, fontFace: "Calibri", fontSize: 16, color: SOFT });
   });
   footer(s, 2);
 }
 
-// 3 — Calendar
 {
   const s = slide();
-  heading(s, "Find an event");
-  s.addText("Month, week and day follow the date you pick. All types and Any format clear the filter. The map stays on the page.", {
+  heading(s, "Find something");
+  s.addText("Month, week or day. Filter by type if you like. The map stays at the bottom even when a day is quiet.", {
     x: 0.5,
     y: 0.85,
     w: 12.3,
     h: 0.4,
     fontFace: "Calibri",
-    fontSize: 16,
+    fontSize: 17,
     color: SOFT
   });
   s.addImage({ path: shot("calendar-today.png"), x: 0.5, y: 1.35, w: 7.4, h: 5.5 });
   s.addImage({ path: shot("calendar-map.png"), x: 8.05, y: 1.35, w: 4.8, h: 3.55 });
-  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 8.05,
-    y: 5.05,
-    w: 4.8,
-    h: 1.8,
-    fill: { color: WHITE },
-    line: { color: LINE },
-    rectRadius: 0.1
-  });
-  s.addText(
-    [
-      { text: "Try: ", options: { bold: true, color: INK } },
-      { text: "Week and Day for today. Christian, then All types. Online, then Any format — the map should still be there.", options: { color: SOFT } }
-    ],
-    { x: 8.2, y: 5.2, w: 4.5, h: 1.5, fontFace: "Calibri", fontSize: 14 }
-  );
-  footer(s, 3);
-}
-
-// 4 — Event
-{
-  const s = slide();
-  heading(s, "Attend, then confirm");
-  s.addImage({ path: shot("event.png"), x: 0.5, y: 1.05, w: 7.6, h: 5.75 });
-  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 8.3,
-    y: 1.15,
-    w: 4.55,
-    h: 5.55,
-    fill: { color: WHITE },
-    line: { color: LINE },
-    rectRadius: 0.12
-  });
-  const points = [
-    ["Attend", "Records that you plan to go. Capacity is checked."],
-    ["Did you go?", "After the event, say whether you went. That is attendance, not the click."],
-    ["Star", "A bookmark. It drops after the event ends."],
-    ["Who sees names", "Admin chooses count only, initials, or name + cell."]
-  ];
-  points.forEach(([title, body], i) => {
-    const y = 1.4 + i * 1.25;
-    s.addText(title, { x: 8.5, y, w: 4.15, h: 0.32, fontFace: "Georgia", fontSize: 18, color: TERRACOTTA, bold: true });
-    s.addText(body, { x: 8.5, y: y + 0.32, w: 4.15, h: 0.7, fontFace: "Calibri", fontSize: 15, color: SOFT });
-  });
-  footer(s, 4);
-}
-
-// 5 — Insights
-{
-  const s = slide();
-  heading(s, "Insights (admin and cell leaders)");
-  s.addText("Same numbers on the page, in the file, and in a short share. Cells with fewer than three people show as <3.", {
-    x: 0.5,
-    y: 0.85,
-    w: 12.3,
-    h: 0.4,
+  card(s, 8.05, 5.05, 4.8, 1.8);
+  s.addText("Try week and day for today. Tap a type, then All types — everything should come back.", {
+    x: 8.25,
+    y: 5.22,
+    w: 4.4,
+    h: 1.45,
     fontFace: "Calibri",
     fontSize: 16,
     color: SOFT
   });
-  s.addImage({ path: shot("insights-kpis.png"), x: 0.5, y: 1.35, w: 6.7, h: 5.5 });
-  s.addImage({ path: shot("insights-share.png"), x: 7.4, y: 1.35, w: 5.45, h: 5.5 });
+  footer(s, 3);
+}
+
+{
+  const s = slide();
+  heading(s, "Attend, then say if you went");
+  s.addImage({ path: shot("event.png"), x: 0.5, y: 1.05, w: 7.6, h: 5.75 });
+  card(s, 8.3, 1.15, 4.55, 5.55);
+  const points = [
+    ["Attend", "Means you plan to go. That is it."],
+    ["Did you go?", "After the event, a quiet prompt. Yes, no, or later."],
+    ["Star", "A bookmark. It drops once the event is over."],
+    ["Names", "Members usually see a count. An admin can choose initials, or name and cell."]
+  ];
+  points.forEach(([title, body], i) => {
+    const y = 1.4 + i * 1.25;
+    s.addText(title, { x: 8.5, y, w: 4.15, h: 0.32, fontFace: "Georgia", fontSize: 18, color: TERRACOTTA, bold: true });
+    s.addText(body, { x: 8.5, y: y + 0.34, w: 4.15, h: 0.7, fontFace: "Calibri", fontSize: 16, color: SOFT });
+  });
+  footer(s, 4);
+}
+
+{
+  const s = slide();
+  heading(s, "Insights, if you lead");
+  s.addText("Admin sees the region. Cell leaders see their own cell. Members do not see this page. A file or a short share uses the same numbers as the screen.", {
+    x: 0.5,
+    y: 0.85,
+    w: 12.3,
+    h: 0.5,
+    fontFace: "Calibri",
+    fontSize: 16,
+    color: SOFT
+  });
+  s.addImage({ path: shot("insights-kpis.png"), x: 0.5, y: 1.45, w: 6.7, h: 5.4 });
+  s.addImage({ path: shot("insights-share.png"), x: 7.4, y: 1.45, w: 5.45, h: 5.4 });
   footer(s, 5);
 }
 
-// 6 — What to try
 {
   const s = slide();
-  heading(s, "What to try  ·  what this is not");
-  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 0.5,
-    y: 1.05,
-    w: 6.2,
-    h: 5.7,
-    fill: { color: WHITE },
-    line: { color: LINE },
-    rectRadius: 0.12
-  });
-  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
-    x: 6.95,
-    y: 1.05,
-    w: 5.85,
-    h: 5.7,
-    fill: { color: WHITE },
-    line: { color: LINE },
-    rectRadius: 0.12
-  });
-  s.addText("Please try", {
+  heading(s, "Have a play");
+  card(s, 0.5, 1.05, 6.2, 5.7);
+  card(s, 6.95, 1.05, 5.85, 5.7);
+  s.addText("Nice ones to tap", {
     x: 0.75,
-    y: 1.25,
+    y: 1.28,
     w: 5.7,
     h: 0.4,
     fontFace: "Georgia",
@@ -318,18 +245,17 @@ function heading(s, text) {
   });
   s.addText(
     [
-      { text: "Week and Day show this week’s / today’s events.", options: { breakLine: true } },
-      { text: "Christian, then All types, restores every type.", options: { breakLine: true } },
-      { text: "The map is still there after Online, then Any format.", options: { breakLine: true } },
-      { text: "Attend as a member. Confirm later if asked.", options: { breakLine: true } },
-      { text: "Add an event: place on the map, Event Link, publish — you should land back on pending.", options: { breakLine: true } },
-      { text: "Insights: download CSV, copy the summary. Members should not see Insights." }
+      { text: "Week and day for today.", options: { breakLine: true } },
+      { text: "A type chip, then All types.", options: { breakLine: true } },
+      { text: "Scroll to the map.", options: { breakLine: true } },
+      { text: "Open an event and click Attend.", options: { breakLine: true } },
+      { text: "If you can add events: drop a pin, add a link, publish — you should land back on pending." }
     ],
-    { x: 0.75, y: 1.8, w: 5.7, h: 4.6, fontFace: "Calibri", fontSize: 16, color: INK, paraSpaceAfter: 10 }
+    { x: 0.75, y: 1.85, w: 5.7, h: 4.5, fontFace: "Calibri", fontSize: 17, color: INK, paraSpaceAfter: 12 }
   );
-  s.addText("Not in this phase", {
+  s.addText("Not this round", {
     x: 7.2,
-    y: 1.25,
+    y: 1.28,
     w: 5.4,
     h: 0.4,
     fontFace: "Georgia",
@@ -339,13 +265,12 @@ function heading(s, text) {
   });
   s.addText(
     [
-      { text: "Public sign-up, email or SMS from Gather, member password reset.", options: { breakLine: true } },
-      { text: "Live website scrape (fixtures only).", options: { breakLine: true } },
-      { text: "Phone-first redesign (section 16) — this demo is the cream paper look.", options: { breakLine: true } },
+      { text: "No public sign-up, email or texts from Gather.", options: { breakLine: true } },
       { text: "Share opens your own app. Gather does not send the message.", options: { breakLine: true } },
-      { text: "Sign-off on docs/FUNCTIONAL.md is still for Guillaume." }
+      { text: "The phone-first look is still to come. This demo is the cream paper one.", options: { breakLine: true } },
+      { text: "If something feels off, say so. That is the point of looking." }
     ],
-    { x: 7.2, y: 1.8, w: 5.4, h: 4.6, fontFace: "Calibri", fontSize: 16, color: INK, paraSpaceAfter: 10 }
+    { x: 7.2, y: 1.85, w: 5.4, h: 4.5, fontFace: "Calibri", fontSize: 17, color: INK, paraSpaceAfter: 12 }
   );
   footer(s, 6);
 }
