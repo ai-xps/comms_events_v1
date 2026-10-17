@@ -43,7 +43,7 @@ npm run typecheck
 
 CI (`.github/workflows/ci.yml`) on push to `experiment` or `main`: typecheck, tests against Postgres 16, then `next build`.
 
-What the app does, with who agreed it: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Weak points and the live smoke list: [`docs/REVIEW.md`](docs/REVIEW.md).
+What the app does, with who agreed it: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Weak points and the live smoke list: [`docs/REVIEW.md`](docs/REVIEW.md). Six-slide tester guide: [`docs/presentation/Gather-tester-guide.pptx`](docs/presentation/Gather-tester-guide.pptx) (`npm run deck` to rebuild).
 
 To start again:
 

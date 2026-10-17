@@ -6,6 +6,8 @@ import { StatusBanner } from "./StatusBanner";
 
 type Item = { id: string; title: string; when: string };
 
+const SNOOZE_KEY = "gather-attendance-snooze";
+
 export function AttendancePrompt() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [open, setOpen] = useState(false);
@@ -15,11 +17,21 @@ export function AttendancePrompt() {
   const panelRef = useRef<HTMLDivElement>(null);
 
   function close() {
+    try {
+      sessionStorage.setItem(SNOOZE_KEY, "1");
+    } catch {
+      // Private mode can refuse sessionStorage; the overlay will still close for this page.
+    }
     setOpen(false);
     lastFocus.current?.focus();
   }
 
   useEffect(() => {
+    try {
+      if (sessionStorage.getItem(SNOOZE_KEY)) return;
+    } catch {
+      // Continue and fetch; better to ask once than to hide attendance.
+    }
     fetch("/api/attendance/pending")
       .then((r) => r.json())
       .then((data) => {

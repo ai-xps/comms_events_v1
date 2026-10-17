@@ -67,11 +67,15 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 
 ## Live smoke (run after each deploy)
 
-1. Sign in as member. Calendar: Day and Week list today’s / this week’s events. Christian then All types restores every type. Online then All types: map stays.
-2. `/login?next=https://example.com` lands on `/calendar` after sign-in.
-3. Response headers include `Content-Security-Policy` and `Strict-Transport-Security`. Console on calendar, event, new event, Insights, login: no CSP errors. Map tiles and fonts load.
-4. As admin: Insights loads; download CSV; share Copy. As cell leader: Insights is own cell. As member: no Insights in the menu.
-5. Attend still works for a member. Publish from pending returns to pending.
+Run 17 October 2026 on https://commseventsv1-production.up.railway.app (admin session unless noted).
+
+1. **Pass.** Day view 17 Oct lists Sunday gathering and Test Guillaume. Week view 12–18 Oct lists Friday prayer through Sunday breakfast. Christian then All types restores Student, Networking, Meetup, Professional. Map stays (Birmingham pins).
+2. **Pass.** `/login?next=https://example.com` signed in to `/calendar`, not example.com.
+3. **Pass.** Login HEAD: `Content-Security-Policy`, `Strict-Transport-Security` (max-age=31536000; includeSubDomains), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`. Map tiles loaded.
+4. **Pass (admin).** Insights loads (4 published, 3 Attend clicks, k-anon cells). Export CSV / TXT / JSON / XLSX and share buttons present. Member menu not checked this run.
+5. **Partial.** Attend already recorded on Test Guillaume; “Didn’t attend” confirmation stuck. Publish→pending not re-clicked this run.
+
+Attendance prompt “Ask me next time” is session-snoozed (`sessionStorage`), so it no longer returns on every navigation. Confirming Attended / Didn’t attend still clears it for good.
 
 ## Opportunities
 

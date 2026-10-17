@@ -4,7 +4,7 @@ Closed calendar for one Birmingham community. Accounts are created by an admin. 
 
 This is not a signed specification. Rows marked **Awaiting sign-off** have no recorded agreement in the chat or documents.
 
-Applied: 17 October 2026, `experiment` branch. Confirm the commit on that day’s log.
+Applied: 17 October 2026, `experiment` branch. Live smoke on https://commseventsv1-production.up.railway.app the same day. Sign-off below is still blank.
 
 ## Accounts and sign-in
 
