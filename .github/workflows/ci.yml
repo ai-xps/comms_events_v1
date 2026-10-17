@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [experiment, main]
+  pull_request:
+    branches: [experiment, main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: gather
+          POSTGRES_PASSWORD: gather
+          POSTGRES_DB: gather_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U gather"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://gather:gather@localhost:5432/gather_test?schema=public
+      TEST_DATABASE_URL: postgresql://gather:gather@localhost:5432/gather_test?schema=public
+      SESSION_SECRET: ci-only-session-secret-not-used-anywhere-else-0123456789
+      CRON_SECRET: ci-only-cron-secret
+      APP_ORIGIN: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma db push --skip-generate
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npx next build

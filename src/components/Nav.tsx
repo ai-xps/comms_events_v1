@@ -10,6 +10,7 @@ const ITEMS: { href: string; label: string; roles: Role[] }[] = [
   { href: "/bookings", label: "My bookings", roles: ["admin", "cell leader", "member"] },
   { href: "/pending", label: "Pending review", roles: ["admin", "cell leader"] },
   { href: "/members", label: "Members", roles: ["admin", "cell leader"] },
+  { href: "/insights", label: "Insights", roles: ["admin", "cell leader"] },
   { href: "/reports", label: "Reports", roles: ["admin", "cell leader"] },
   { href: "/import", label: "Import", roles: ["admin"] },
   { href: "/scraper", label: "Scraper settings", roles: ["admin"] },

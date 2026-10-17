@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, type Category, type MemberAttendeeView } from "@/lib/constants";
+import { requestJson, type JsonResult } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
 
 type Settings = {
@@ -22,14 +23,20 @@ export function ScraperForm({
 }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const [kind, setKind] = useState<"info" | "error">("info");
+
+  function show(result: JsonResult, success: string) {
+    setKind(result.ok ? "info" : "error");
+    setMessage(result.ok ? success : result.error);
+    if (result.ok) router.refresh();
+  }
 
   async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    const response = await fetch("/api/settings", {
+    const result = await requestJson("/api/settings", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+      body: {
         locationLabel: form.get("locationLabel"),
         memberAttendeeView: form.get("memberAttendeeView"),
         enabled: Object.fromEntries(CATEGORIES.map((c) => [c, form.get(`enabled-${c}`) === "on"])),
@@ -38,32 +45,26 @@ export function ScraperForm({
           .split("\n")
           .map((s) => s.trim())
           .filter(Boolean)
-      })
+      }
     });
-    const data = await response.json();
-    setMessage(data.error ?? "Settings saved.");
-    router.refresh();
+    show(result, "Settings saved.");
   }
 
   async function runNow() {
-    const response = await fetch("/api/scraper/run", { method: "POST" });
-    const data = await response.json();
-    setMessage(data.error ?? `Run finished: created ${data.createdCount}, updated ${data.updatedCount}.`);
-    router.refresh();
+    const result = await requestJson<{ createdCount?: number; updatedCount?: number }>("/api/scraper/run", {
+      method: "POST"
+    });
+    show(result, result.ok ? `Run finished: created ${result.data.createdCount}, updated ${result.data.updatedCount}.` : "");
   }
 
   async function setOrg(id: string, status: string) {
-    await fetch("/api/organisations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, status })
-    });
-    router.refresh();
+    const result = await requestJson("/api/organisations", { method: "POST", body: { id, status } });
+    show(result, "Organisation rule saved.");
   }
 
   return (
     <div className="stack">
-      <StatusBanner message={message} />
+      <StatusBanner message={message} kind={kind} />
       <form className="card stack" onSubmit={save}>
         <label>
           Location label

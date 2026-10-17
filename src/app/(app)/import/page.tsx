@@ -12,8 +12,22 @@ export default function ImportPage() {
     e.preventDefault();
     const form = e.currentTarget;
     const data = new FormData(form);
-    const response = await fetch("/api/import", { method: "POST", body: data });
-    const json = await response.json();
+    const file = data.get("file");
+    if (file instanceof File && file.size > 2 * 1024 * 1024) {
+      setKind("error");
+      setMessage("That file is too large. The limit is 2 MB.");
+      setErrors([]);
+      return;
+    }
+    let json: { ok?: boolean; created?: number; error?: string; errors?: { row: number; reason: string }[] };
+    try {
+      const response = await fetch("/api/import", { method: "POST", body: data });
+      json = await response.json().catch(() => ({ ok: false, error: "Import failed." }));
+    } catch {
+      setKind("error");
+      setMessage("Could not reach Gather. Check your connection and try again.");
+      return;
+    }
     if (!json.ok) {
       setKind("error");
       setMessage("Nothing was imported. Fix the rows below and try again.");

@@ -2,7 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { requestJson } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
+import { useConfirm } from "./ConfirmDialog";
 
 type Cell = { id: string; name: string };
 
@@ -22,18 +24,34 @@ export function MemberForm({
 }) {
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [dialog, confirm] = useConfirm();
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const payload = Object.fromEntries(new FormData(e.currentTarget).entries());
-    const response = await fetch(member ? `/api/users/${member.id}` : "/api/users", {
+    const form = new FormData(e.currentTarget);
+    const payload: Record<string, unknown> = Object.fromEntries(form.entries());
+    if (member) {
+      const active = form.get("active") === "on";
+      payload.active = active ? "on" : "off";
+      if (member.active && !active) {
+        const ok = await confirm({
+          title: `Deactivate ${member.name}?`,
+          body: "They will be signed out straight away and cannot sign in until reactivated. Their bookings stay in the records.",
+          confirmLabel: "Deactivate",
+          destructive: true
+        });
+        if (!ok) return;
+      }
+    }
+    setBusy(true);
+    const result = await requestJson(member ? `/api/users/${member.id}` : "/api/users", {
       method: member ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: payload
     });
-    const data = await response.json();
-    if (!response.ok) {
-      setMessage(data.error);
+    setBusy(false);
+    if (!result.ok) {
+      setMessage(result.error);
       return;
     }
     router.push("/members");
@@ -45,11 +63,11 @@ export function MemberForm({
       <StatusBanner message={message} kind="error" />
       <label>
         Name
-        <input name="name" required defaultValue={member?.name} />
+        <input name="name" required maxLength={120} defaultValue={member?.name} />
       </label>
       <label>
         Cell number
-        <input name="cellNumber" required defaultValue={member?.cellNumber} />
+        <input name="cellNumber" required inputMode="tel" defaultValue={member?.cellNumber} />
       </label>
       <label>
         Cell
@@ -72,14 +90,24 @@ export function MemberForm({
       </label>
       <label>
         Password {member ? "(leave blank to keep the current one)" : ""}
-        <input name="password" type="password" minLength={member ? 0 : 8} required={!member} />
+        <input
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          minLength={member ? 0 : 8}
+          maxLength={128}
+          required={!member}
+        />
       </label>
       {member ? (
         <label>
           <input type="checkbox" name="active" defaultChecked={member.active} /> Active
         </label>
       ) : null}
-      <button type="submit">Save</button>
+      <button type="submit" disabled={busy}>
+        Save
+      </button>
+      {dialog}
     </form>
   );
 }

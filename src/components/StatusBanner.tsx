@@ -7,7 +7,7 @@ export function StatusBanner({
 }) {
   if (!message) return null;
   return (
-    <p className="status" role="status" data-kind={kind}>
+    <p className="status" role={kind === "error" ? "alert" : "status"} data-kind={kind}>
       {message}
     </p>
   );

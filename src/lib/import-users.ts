@@ -5,6 +5,7 @@ import { hashPassword } from "./password";
 import { normaliseCellNumber, isValidCellNumber } from "./cell-number";
 import { parseRole, type Role } from "./constants";
 import { writeAudit } from "./audit";
+import { LIMITS } from "./security";
 import type { SessionUser } from "./session";
 
 type Row = {
@@ -127,6 +128,13 @@ export async function importUsers(opts: {
 }) {
   const { rows, cells } = await parseImportFile(opts.filename, opts.buffer);
   const errors: { row: number; reason: string }[] = [];
+  if (rows.length > LIMITS.importRows) {
+    return {
+      ok: false as const,
+      created: 0,
+      errors: [{ row: 0, reason: `The file has ${rows.length} rows. The limit is ${LIMITS.importRows} per import.` }]
+    };
+  }
   const seen = new Set<string>();
   const prepared: Array<Row & { role: Role; cellNumber: string }> = [];
 
@@ -138,8 +146,8 @@ export async function importUsers(opts: {
       errors.push({ row: rowNumber, reason: "Cell number must be 6–15 digits." });
     }
     if (!row.cell) errors.push({ row: rowNumber, reason: "Cell is missing." });
-    if (!row.password || row.password.length < 8) {
-      errors.push({ row: rowNumber, reason: "Password must be at least 8 characters." });
+    if (!row.password || row.password.length < 8 || row.password.length > LIMITS.passwordMax) {
+      errors.push({ row: rowNumber, reason: `Password must be 8 to ${LIMITS.passwordMax} characters.` });
     }
     const role = parseRole(row.permission);
     if (!role) errors.push({ row: rowNumber, reason: "Permission must be admin, cell leader, or member." });

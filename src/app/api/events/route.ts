@@ -6,6 +6,7 @@ import { fromDatetimeLocalValue } from "@/lib/time";
 import { CATEGORIES, type Category } from "@/lib/constants";
 import { createWeeklySeries } from "@/lib/series";
 import { writeAudit } from "@/lib/audit";
+import { eventInputProblem } from "@/lib/security";
 
 function parseEvent(body: Record<string, unknown>) {
   const category = String(body.category ?? "");
@@ -13,6 +14,15 @@ function parseEvent(body: Record<string, unknown>) {
   const startsAt = fromDatetimeLocalValue(String(body.startsAt));
   const endsAt = fromDatetimeLocalValue(String(body.endsAt));
   const capacityRaw = String(body.capacity ?? "").trim();
+  const problem = eventInputProblem({
+    title: String(body.title ?? ""),
+    notes: String(body.notes ?? ""),
+    externalUrl: String(body.externalUrl ?? "").trim(),
+    capacity: capacityRaw === "" ? null : Number(capacityRaw),
+    startsAt,
+    endsAt
+  });
+  if (problem) throw new Error(problem);
   return {
     title: String(body.title ?? "").trim(),
     organisationName: String(body.organisationName ?? "").trim(),

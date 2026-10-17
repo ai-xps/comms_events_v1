@@ -1,15 +1,17 @@
-import ExcelJS from "exceljs";
 import { prisma } from "./db";
 import { writeAudit } from "./audit";
 import { formatDateTime } from "./time";
+import { toCsv as tableToCsv, toXlsx, type Table } from "./export-format";
+import { canExportAttendees, canSeeAttendee } from "./policy";
 import type { SessionUser } from "./session";
 
-const COLUMNS = ["name", "cell number", "cell", "booked at", "attendance", "booked by"] as const;
+const COLUMNS = ["name", "cell number", "cell", "booked at", "attendance", "booked by"];
 
 export async function bookingsForExport(eventId: string, actor: SessionUser) {
-  if (actor.role === "member") {
-    const error = new Error("Members cannot export.");
-    (error as Error & { status?: number }).status = 403;
+  const decision = canExportAttendees(actor);
+  if (!decision.ok) {
+    const error = new Error(decision.reason);
+    (error as Error & { status?: number }).status = decision.status;
     throw error;
   }
   const event = await prisma.event.findUnique({ where: { id: eventId } });
@@ -20,7 +22,7 @@ export async function bookingsForExport(eventId: string, actor: SessionUser) {
     orderBy: { bookedAt: "asc" }
   });
   const rows = bookings
-    .filter((b) => actor.role === "admin" || b.user.cellId === actor.cellId)
+    .filter((b) => canSeeAttendee(actor, b.user.cellId))
     .map((b) => ({
       name: b.user.name,
       cellNumber: b.user.cellNumber,
@@ -32,24 +34,22 @@ export async function bookingsForExport(eventId: string, actor: SessionUser) {
   return { event, rows };
 }
 
-export function toCsv(rows: Awaited<ReturnType<typeof bookingsForExport>>["rows"]): string {
-  const header = COLUMNS.join(",");
-  const body = rows.map((r) =>
-    [r.name, r.cellNumber, r.cell, r.bookedAt, r.attendance, r.bookedBy]
-      .map((v) => `"${String(v).replaceAll('"', '""')}"`)
-      .join(",")
-  );
-  return [header, ...body].join("\n");
+type Rows = Awaited<ReturnType<typeof bookingsForExport>>["rows"];
+
+function asTable(rows: Rows): Table {
+  return {
+    name: "Attendees",
+    columns: COLUMNS,
+    rows: rows.map((r) => [r.name, r.cellNumber, r.cell, r.bookedAt, r.attendance, r.bookedBy])
+  };
 }
 
-export async function toExcel(rows: Awaited<ReturnType<typeof bookingsForExport>>["rows"]) {
-  const workbook = new ExcelJS.Workbook();
-  const sheet = workbook.addWorksheet("Attendees");
-  sheet.addRow([...COLUMNS]);
-  rows.forEach((r) => {
-    sheet.addRow([r.name, r.cellNumber, r.cell, r.bookedAt, r.attendance, r.bookedBy]);
-  });
-  return workbook.xlsx.writeBuffer();
+export function toCsv(rows: Rows): string {
+  return tableToCsv(asTable(rows));
+}
+
+export async function toExcel(rows: Rows) {
+  return toXlsx([asTable(rows)]);
 }
 
 export async function logExport(actor: SessionUser, eventId: string, format: string) {

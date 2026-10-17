@@ -2,16 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { CircleMarker, Map as LeafletMap } from "leaflet";
-
-const BIRMINGHAM: [number, number] = [52.4862, -1.8904];
-
-const MARKER = {
-  radius: 8,
-  color: "#8b3a24",
-  weight: 2,
-  fillColor: "#8b3a24",
-  fillOpacity: 0.85
-};
+import { BIRMINGHAM, MARKER_STYLE as MARKER, TILE_ATTRIBUTION, TILE_URL } from "@/lib/map";
 
 type Point = { lat: number; lng: number };
 
@@ -37,9 +28,7 @@ export function LocationPicker({
       const L = leaflet.default;
       const start = initial.current;
       const map = L.map(ref.current).setView(start ? [start.lat, start.lng] : BIRMINGHAM, start ? 15 : 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors"
-      }).addTo(map);
+      L.tileLayer(TILE_URL, { attribution: TILE_ATTRIBUTION }).addTo(map);
       if (start) markerRef.current = L.circleMarker([start.lat, start.lng], MARKER).addTo(map);
       map.on("click", (e) => {
         const point = {

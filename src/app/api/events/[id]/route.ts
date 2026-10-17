@@ -6,6 +6,7 @@ import { fromDatetimeLocalValue } from "@/lib/time";
 import { writeAudit } from "@/lib/audit";
 import { deleteOccurrence } from "@/lib/series";
 import { CATEGORIES, type Category } from "@/lib/constants";
+import { eventInputProblem } from "@/lib/security";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!originAllowed(request)) return rejectOrigin();
@@ -28,20 +29,31 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
   const nextStatus =
     body.status === "PUBLISHED" || body.status === "DISCARDED" ? String(body.status) : event.status;
+  const title = String(body.title ?? event.title).trim();
+  const notes = body.notes !== undefined ? String(body.notes).trim() || null : event.notes;
+  const externalUrl = body.externalUrl !== undefined ? String(body.externalUrl).trim() || null : event.externalUrl;
+  const startsAt = body.startsAt ? fromDatetimeLocalValue(String(body.startsAt)) : event.startsAt;
+  const endsAt = body.endsAt ? fromDatetimeLocalValue(String(body.endsAt)) : event.endsAt;
+  const lat = body.lat !== undefined && String(body.lat) ? Number(body.lat) : event.lat;
+  const lng = body.lng !== undefined && String(body.lng) ? Number(body.lng) : event.lng;
+  const problem =
+    (title ? null : "Title is required.") ??
+    eventInputProblem({ title, notes: notes ?? "", externalUrl: externalUrl ?? "", capacity, startsAt, endsAt });
+  if (problem) return NextResponse.json({ error: problem }, { status: 400 });
   const updated = await prisma.event.update({
     where: { id },
     data: {
-      title: String(body.title ?? event.title),
+      title,
       organisationName: String(body.organisationName ?? event.organisationName),
       category,
-      startsAt: body.startsAt ? fromDatetimeLocalValue(String(body.startsAt)) : event.startsAt,
-      endsAt: body.endsAt ? fromDatetimeLocalValue(String(body.endsAt)) : event.endsAt,
+      startsAt,
+      endsAt,
       online: body.online === true || body.online === "on" || (body.online === undefined && event.online),
       placeName: body.placeName !== undefined ? String(body.placeName) || null : event.placeName,
-      lat: body.lat !== undefined && String(body.lat) ? Number(body.lat) : event.lat,
-      lng: body.lng !== undefined && String(body.lng) ? Number(body.lng) : event.lng,
-      externalUrl: body.externalUrl !== undefined ? String(body.externalUrl) || null : event.externalUrl,
-      notes: body.notes !== undefined ? String(body.notes) || null : event.notes,
+      lat: Number.isFinite(lat) ? lat : event.lat,
+      lng: Number.isFinite(lng) ? lng : event.lng,
+      externalUrl,
+      notes,
       capacity,
       status: nextStatus,
       reviewedById: nextStatus !== event.status ? user.id : event.reviewedById

@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { requestJson } from "@/lib/fetch-json";
+import { StatusBanner } from "./StatusBanner";
 
 type Item = { id: string; title: string; when: string };
 
 export function AttendancePrompt() {
   const [items, setItems] = useState<Item[] | null>(null);
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const first = useRef<HTMLButtonElement>(null);
   const lastFocus = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -64,11 +67,12 @@ export function AttendancePrompt() {
   if (!open || !items?.length) return null;
 
   async function mark(id: string, attendance: "ATTENDED" | "ABSENT") {
-    await fetch("/api/attendance", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId: id, attendance })
-    });
+    const result = await requestJson("/api/attendance", { method: "POST", body: { bookingId: id, attendance } });
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setError(null);
     const next = (items ?? []).filter((item) => item.id !== id);
     setItems(next);
     if (next.length === 0) close();
@@ -85,6 +89,7 @@ export function AttendancePrompt() {
       >
         <h2 id="attend-title">Did you go?</h2>
         <p className="muted">These events have finished. Confirming helps your cell leader keep records.</p>
+        <StatusBanner message={error} kind="error" />
         <div className="stack">
           {items.map((item, index) => (
             <div key={item.id}>

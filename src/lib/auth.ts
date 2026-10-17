@@ -7,7 +7,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   const session = await readSession();
   if (!session) return null;
   const user = await prisma.user.findUnique({ where: { id: session.id } });
-  if (!user || !user.active) return null;
+  if (!user || !user.active || user.sessionVersion !== session.sv) return null;
   return {
     id: user.id,
     name: user.name,

@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
     name: user!.name,
     cellNumber: user!.cellNumber,
     role: user!.role as Role,
-    cellId: user!.cellId
+    cellId: user!.cellId,
+    sv: user!.sessionVersion
   });
   return NextResponse.json({ ok: true });
 }

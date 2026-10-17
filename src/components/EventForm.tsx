@@ -3,8 +3,10 @@
 import { FormEvent, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES } from "@/lib/constants";
+import { requestJson } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
 import { LocationPicker } from "./LocationPicker";
+import { useConfirm } from "./ConfirmDialog";
 
 type Org = { id: string; name: string };
 type EventValue = {
@@ -40,6 +42,7 @@ export function EventForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [kind, setKind] = useState<"info" | "error">("info");
+  const [dialog, confirm] = useConfirm();
   const [online, setOnline] = useState(event?.online ?? false);
   const [lat, setLat] = useState(event?.lat != null ? String(event.lat) : "");
   const [lng, setLng] = useState(event?.lng != null ? String(event.lng) : "");
@@ -51,23 +54,59 @@ export function EventForm({
 
   async function submit(extra: Record<string, string> = {}) {
     if (!formRef.current) return;
+    if (extra.status === "DISCARDED") {
+      const ok = await confirm({
+        title: "Discard this event?",
+        body: "It leaves the review queue and will not appear on the calendar.",
+        confirmLabel: "Discard",
+        cancelLabel: "Keep reviewing",
+        destructive: true
+      });
+      if (!ok) return;
+    }
     const payload = Object.fromEntries(new FormData(formRef.current).entries());
-    const response = await fetch(event ? `/api/events/${event.id}` : "/api/events", {
+    const result = await requestJson<{ id?: string }>(event ? `/api/events/${event.id}` : "/api/events", {
       method: event ? "PATCH" : "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...payload, online: online ? "on" : "off", ...extra })
+      body: { ...payload, online: online ? "on" : "off", ...extra }
     });
-    const data = await response.json();
-    if (!response.ok) {
+    if (!result.ok) {
       setKind("error");
-      setMessage(data.error);
+      setMessage(result.error);
       return;
     }
     if (event?.status === "PENDING" && (extra.status === "PUBLISHED" || extra.status === "DISCARDED")) {
       router.push("/pending");
     } else {
-      router.push(data.id ? `/events/${data.id}` : "/calendar");
+      router.push(result.data.id ? `/events/${result.data.id}` : "/calendar");
     }
+    router.refresh();
+  }
+
+  async function remove(mode: "this" | "future") {
+    if (!event) return;
+    const ok = await confirm(
+      mode === "this"
+        ? {
+            title: "Delete this event?",
+            body: "Anyone who clicked Attend will lose their place. This cannot be undone.",
+            confirmLabel: "Delete event",
+            destructive: true
+          }
+        : {
+            title: "Delete this and all later events in the series?",
+            body: "Earlier events stay. Places on the deleted events are removed. This cannot be undone.",
+            confirmLabel: "Delete series from here",
+            destructive: true
+          }
+    );
+    if (!ok) return;
+    const result = await requestJson(`/api/events/${event.id}`, { method: "DELETE", body: { mode } });
+    if (!result.ok) {
+      setKind("error");
+      setMessage(result.error);
+      return;
+    }
+    router.push("/calendar");
     router.refresh();
   }
 
@@ -184,31 +223,11 @@ export function EventForm({
         ) : null}
         {event ? (
           <>
-            <button
-              className="ghost"
-              type="button"
-              onClick={() =>
-                fetch(`/api/events/${event.id}`, {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ mode: "this" })
-                }).then(() => router.push("/calendar"))
-              }
-            >
+            <button className="ghost" type="button" onClick={() => remove("this")}>
               Delete this occurrence
             </button>
             {event.seriesId ? (
-              <button
-                className="ghost"
-                type="button"
-                onClick={() =>
-                  fetch(`/api/events/${event.id}`, {
-                    method: "DELETE",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ mode: "future" })
-                  }).then(() => router.push("/calendar"))
-                }
-              >
+              <button className="ghost" type="button" onClick={() => remove("future")}>
                 Delete this and future
               </button>
             ) : null}
@@ -216,6 +235,7 @@ export function EventForm({
         ) : null}
       </div>
       <p className="muted">Colours are {Object.keys(colours).join(", ")}.</p>
+      {dialog}
     </form>
   );
 }

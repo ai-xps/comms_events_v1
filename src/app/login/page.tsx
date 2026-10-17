@@ -3,10 +3,11 @@
 import { FormEvent, Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { StatusBanner } from "@/components/StatusBanner";
+import { safeNextPath } from "@/lib/security";
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<main className="login-shell" aria-busy="true" />}>
       <LoginForm />
     </Suspense>
   );
@@ -23,21 +24,27 @@ function LoginForm() {
     setPending(true);
     setError(null);
     const form = new FormData(event.currentTarget);
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        cellNumber: form.get("cellNumber"),
-        password: form.get("password")
-      })
-    });
-    const data = await response.json();
-    setPending(false);
-    if (!response.ok) {
-      setError(data.error ?? "Could not sign in.");
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cellNumber: form.get("cellNumber"),
+          password: form.get("password")
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setError(data.error ?? "Could not sign in.");
+        return;
+      }
+    } catch {
+      setError("Could not reach Gather. Check your connection and try again.");
       return;
+    } finally {
+      setPending(false);
     }
-    router.push(params.get("next") || "/calendar");
+    router.push(safeNextPath(params.get("next")));
     router.refresh();
   }
 

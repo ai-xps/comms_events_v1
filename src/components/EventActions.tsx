@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { StatusBanner } from "./StatusBanner";
+import { useConfirm } from "./ConfirmDialog";
+import { requestJson } from "@/lib/fetch-json";
 
 export function EventActions({
   eventId,
@@ -28,48 +30,44 @@ export function EventActions({
   const [message, setMessage] = useState<string | null>(null);
   const [kind, setKind] = useState<"info" | "error">("info");
   const [star, setStar] = useState(starred);
+  const [busy, setBusy] = useState(false);
+  const [dialog, confirm] = useConfirm();
+
+  function show(text: string, nextKind: "info" | "error") {
+    setKind(nextKind);
+    setMessage(text);
+  }
 
   async function attend(userId?: string) {
-    const response = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId, userId })
-    });
-    const data = await response.json();
-    if (!response.ok) {
-      setKind("error");
-      setMessage(data.error);
-      return;
-    }
-    setKind("info");
-    setMessage("You’re down as planning to go.");
+    setBusy(true);
+    const result = await requestJson("/api/bookings", { method: "POST", body: { eventId, userId } });
+    setBusy(false);
+    if (!result.ok) return show(result.error, "error");
+    show(userId ? "Booked." : "You’re down as planning to go.", "info");
     router.refresh();
   }
 
   async function cancel() {
-    const response = await fetch("/api/bookings", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId })
+    const ok = await confirm({
+      title: "Cancel your place?",
+      body: "Your place will be freed for someone else.",
+      confirmLabel: "Cancel my place",
+      cancelLabel: "Keep my place",
+      destructive: true
     });
-    const data = await response.json();
-    if (!response.ok) {
-      setKind("error");
-      setMessage(data.error);
-      return;
-    }
-    setMessage("Booking cancelled.");
+    if (!ok) return;
+    setBusy(true);
+    const result = await requestJson("/api/bookings", { method: "DELETE", body: { eventId } });
+    setBusy(false);
+    if (!result.ok) return show(result.error, "error");
+    show("Booking cancelled.", "info");
     router.refresh();
   }
 
   async function toggleStar() {
-    const response = await fetch("/api/stars", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventId })
-    });
-    const data = await response.json();
-    setStar(!!data.starred);
+    const result = await requestJson<{ starred?: boolean }>("/api/stars", { method: "POST", body: { eventId } });
+    if (!result.ok) return show(result.error, "error");
+    setStar(!!result.data.starred);
   }
 
   return (
@@ -77,18 +75,18 @@ export function EventActions({
       <StatusBanner message={message} kind={kind} />
       <div className="row">
         {booked ? (
-          <span className="chip" aria-pressed="true">
+          <span className="chip" aria-current="true">
             You clicked Attend
           </span>
         ) : full ? (
           <span className="chip">This event is full</span>
         ) : (
-          <button type="button" onClick={() => attend()}>
+          <button type="button" onClick={() => attend()} disabled={busy}>
             Attend
           </button>
         )}
         {canCancel ? (
-          <button className="secondary" type="button" onClick={cancel}>
+          <button className="secondary" type="button" onClick={cancel} disabled={busy}>
             Cancel booking
           </button>
         ) : null}
@@ -120,11 +118,12 @@ export function EventActions({
               ))}
             </select>
           </label>
-          <button className="secondary" type="submit">
+          <button className="secondary" type="submit" disabled={busy}>
             Book member
           </button>
         </form>
       ) : null}
+      {dialog}
     </div>
   );
 }

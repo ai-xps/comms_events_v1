@@ -15,6 +15,7 @@ model User {
   role         String
   cellId       String?
   active       Boolean   @default(true)
+  sessionVersion Int     @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   cell         Cell?     @relation(fields: [cellId], references: [id])

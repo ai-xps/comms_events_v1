@@ -1,3 +1,4 @@
+import { isHttpUrl } from "../security";
 import { prisma } from "../db";
 import { writeAudit } from "../audit";
 import { categoryEnabledKey, type Category, CATEGORIES } from "../constants";
@@ -90,7 +91,7 @@ export async function runScraper(opts: {
             placeName: incoming.placeName ?? null,
             lat: incoming.lat ?? null,
             lng: incoming.lng ?? null,
-            externalUrl: incoming.externalUrl ?? null,
+            externalUrl: safeExternalUrl(incoming.externalUrl),
             notes: incoming.notes ?? null
           }
         });
@@ -120,7 +121,7 @@ export async function runScraper(opts: {
           placeName: incoming.placeName ?? null,
           lat: incoming.lat ?? null,
           lng: incoming.lng ?? null,
-          externalUrl: incoming.externalUrl ?? null,
+          externalUrl: safeExternalUrl(incoming.externalUrl),
           notes: incoming.notes ?? null,
           status,
           recurrence: "NONE"
@@ -156,4 +157,8 @@ export async function runScraper(opts: {
   } finally {
     await prisma.scrapeLock.deleteMany({ where: { id: "scrape" } });
   }
+}
+
+function safeExternalUrl(value: string | null | undefined): string | null {
+  return value && isHttpUrl(value) ? value : null;
 }

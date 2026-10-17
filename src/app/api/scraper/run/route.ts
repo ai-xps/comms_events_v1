@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     const status = (error as Error & { status?: number }).status ?? 500;
-    return NextResponse.json({ error: error instanceof Error ? error.message : "Scraper failed." }, { status });
+    if (status !== 409) console.error("Manual scrape failed", error);
+    return NextResponse.json({ error: status === 409 ? "A scrape is already running." : "Scraper failed." }, { status });
   }
 }

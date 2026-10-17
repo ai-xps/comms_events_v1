@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { originAllowed, rejectOrigin } from "@/lib/origin";
 import { prisma } from "@/lib/db";
-import { parseMemberAttendeeView } from "@/lib/constants";
+import { CATEGORIES, DEFAULT_COLOURS, parseMemberAttendeeView } from "@/lib/constants";
+import { isHexColour, isHttpUrl } from "@/lib/security";
 import { writeAudit } from "@/lib/audit";
 
 export async function POST(request: NextRequest) {
@@ -14,27 +15,36 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const enabled = (body.enabled ?? {}) as Record<string, boolean>;
   const memberAttendeeView = parseMemberAttendeeView(body.memberAttendeeView);
+  const submittedColours = (body.colours ?? {}) as Record<string, unknown>;
+  const colours = Object.fromEntries(
+    CATEGORIES.map((c) => [c, isHexColour(submittedColours[c]) ? submittedColours[c] : DEFAULT_COLOURS[c]])
+  );
+  const priorityUrls = (Array.isArray(body.priorityUrls) ? body.priorityUrls : [])
+    .map((u: unknown) => String(u).trim())
+    .filter(isHttpUrl)
+    .slice(0, 50);
+  const locationLabel = String(body.locationLabel ?? "Birmingham").trim().slice(0, 80) || "Birmingham";
   const previous = await prisma.settings.findUnique({ where: { id: "default" } });
   const previousView = parseMemberAttendeeView(previous?.memberAttendeeView);
   await prisma.settings.upsert({
     where: { id: "default" },
     update: {
-      locationLabel: String(body.locationLabel ?? "Birmingham"),
+      locationLabel,
       memberAttendeeView,
       christianEnabled: !!enabled.Christian,
       networkingEnabled: !!enabled.Networking,
       professionalEnabled: !!enabled.Professional,
       studentEnabled: !!enabled.Student,
       meetupEnabled: !!enabled.Meetup,
-      categoryColours: JSON.stringify(body.colours ?? {}),
-      priorityUrls: JSON.stringify(Array.isArray(body.priorityUrls) ? body.priorityUrls : [])
+      categoryColours: JSON.stringify(colours),
+      priorityUrls: JSON.stringify(priorityUrls)
     },
     create: {
       id: "default",
-      locationLabel: String(body.locationLabel ?? "Birmingham"),
+      locationLabel,
       memberAttendeeView,
-      categoryColours: JSON.stringify(body.colours ?? {}),
-      priorityUrls: JSON.stringify([])
+      categoryColours: JSON.stringify(colours),
+      priorityUrls: JSON.stringify(priorityUrls)
     }
   });
   if (memberAttendeeView !== previousView) {

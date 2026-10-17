@@ -1,5 +1,7 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "./db";
 import { writeAudit } from "./audit";
+import { canBookFor, canCancelBooking } from "./policy";
 import type { SessionUser } from "./session";
 
 export class BookingError extends Error {
@@ -15,43 +17,50 @@ export async function attendEvent(opts: {
   userId: string;
   actor: SessionUser;
 }) {
-  const result = await prisma.$transaction(async (tx) => {
-    const event = await tx.event.findUnique({ where: { id: opts.eventId } });
-    if (!event || event.status !== "PUBLISHED") {
-      throw new BookingError("That event is not on the calendar.");
-    }
-    const target = await tx.user.findUnique({ where: { id: opts.userId } });
-    if (!target || !target.active) {
-      throw new BookingError("That member was not found.");
-    }
-    if (opts.actor.role === "member" && opts.actor.id !== opts.userId) {
-      throw new BookingError("You can only book yourself.", 403);
-    }
-    if (opts.actor.role === "cell leader") {
-      if (!opts.actor.cellId || target.cellId !== opts.actor.cellId) {
-        throw new BookingError("You can only book members of your own cell.", 403);
+  const result = await prisma
+    .$transaction(async (tx) => {
+      // Lock the event row so two people cannot both take the last place.
+      await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${opts.eventId} FOR UPDATE`;
+      const event = await tx.event.findUnique({ where: { id: opts.eventId } });
+      if (!event || event.status !== "PUBLISHED") {
+        throw new BookingError("That event is not on the calendar.");
       }
-    }
-    const existing = await tx.booking.findUnique({
-      where: { eventId_userId: { eventId: opts.eventId, userId: opts.userId } }
+      const target = await tx.user.findUnique({ where: { id: opts.userId } });
+      if (!target || !target.active) {
+        throw new BookingError("That member was not found.");
+      }
+      const decision = canBookFor(opts.actor, target);
+      if (!decision.ok) throw new BookingError(decision.reason, decision.status);
+      const existing = await tx.booking.findUnique({
+        where: { eventId_userId: { eventId: opts.eventId, userId: opts.userId } }
+      });
+      if (existing) return { booking: existing, created: false, title: event.title, targetName: target.name };
+      if (event.capacity !== null) {
+        const count = await tx.booking.count({ where: { eventId: opts.eventId } });
+        if (count >= event.capacity) {
+          throw new BookingError("This event is full.");
+        }
+      }
+      const booking = await tx.booking.create({
+        data: {
+          eventId: opts.eventId,
+          userId: opts.userId,
+          bookedById: opts.actor.id,
+          attendance: "UNCONFIRMED"
+        }
+      });
+      return { booking, created: true, title: event.title, targetName: target.name };
+    })
+    .catch(async (error) => {
+      // A double-click can race on the unique (eventId, userId) index; the place is already held.
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        const booking = await prisma.booking.findUniqueOrThrow({
+          where: { eventId_userId: { eventId: opts.eventId, userId: opts.userId } }
+        });
+        return { booking, created: false, title: "", targetName: "" };
+      }
+      throw error;
     });
-    if (existing) return { booking: existing, created: false, title: event.title, targetName: target.name };
-    if (event.capacity !== null) {
-      const count = await tx.booking.count({ where: { eventId: opts.eventId } });
-      if (count >= event.capacity) {
-        throw new BookingError("This event is full.");
-      }
-    }
-    const booking = await tx.booking.create({
-      data: {
-        eventId: opts.eventId,
-        userId: opts.userId,
-        bookedById: opts.actor.id,
-        attendance: "UNCONFIRMED"
-      }
-    });
-    return { booking, created: true, title: event.title, targetName: target.name };
-  });
   if (result.created) {
     await writeAudit({
       actorId: opts.actor.id,
@@ -77,15 +86,14 @@ export async function cancelBooking(opts: {
       include: { user: true }
     });
     if (!booking) throw new BookingError("There is no booking to cancel.");
-    if (opts.actor.role === "member") {
-      if (opts.actor.id !== opts.userId) throw new BookingError("You can only cancel your own booking.", 403);
-      if (event.startsAt <= new Date()) {
-        throw new BookingError("This event has already started.");
-      }
-    } else if (opts.actor.role === "cell leader") {
-      if (!opts.actor.cellId || booking.user.cellId !== opts.actor.cellId) {
-        throw new BookingError("You can only cancel bookings for your own cell.", 403);
-      }
+    const decision = canCancelBooking(
+      opts.actor,
+      { userId: booking.userId, userCellId: booking.user.cellId },
+      event.startsAt <= new Date()
+    );
+    if (!decision.ok) {
+      const ownStarted = opts.actor.role === "member" && opts.actor.id === opts.userId;
+      throw new BookingError(decision.reason, ownStarted ? 400 : decision.status);
     }
     await tx.booking.delete({ where: { id: booking.id } });
     return { ok: true, bookingId: booking.id, name: booking.user.name, title: event.title };
