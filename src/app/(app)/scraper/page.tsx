@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getSettings } from "@/lib/settings";
+import { getSettings, persistCleanPriorityUrls } from "@/lib/settings";
+import { droppedPriorityUrlMessage } from "@/lib/scraper/priority-copy";
 import { ScraperForm } from "@/components/ScraperForm";
 import { formatDateTime } from "@/lib/time";
 import type { SourceResult } from "@/lib/scraper/live-adapter";
@@ -15,10 +16,12 @@ function safeSources(raw: string): SourceResult[] {
 }
 
 export default async function ScraperPage() {
-  await requireUser(["admin"]);
+  const user = await requireUser(["admin"]);
+  const cleaned = await persistCleanPriorityUrls(user.id);
   const settings = await getSettings();
   const orgs = await prisma.organisation.findMany({ orderBy: { name: "asc" } });
   const runs = await prisma.scraperRun.findMany({ orderBy: { startedAt: "desc" }, take: 8 });
+  const droppedNotice = droppedPriorityUrlMessage(cleaned.dropped);
   return (
     <main className="stack">
       <div className="page-head">
@@ -28,7 +31,7 @@ export default async function ScraperPage() {
           unless SCRAPE_FIXTURES=0. Priority URLs are fetched only if they are https ICS or JSON-LD on the allowlist.
         </p>
       </div>
-      <ScraperForm settings={settings} organisations={orgs} />
+      <ScraperForm settings={settings} organisations={orgs} notice={droppedNotice} />
       <section>
         <h2>Recent runs</h2>
         {runs.length === 0 ? <p className="muted">No runs yet.</p> : null}

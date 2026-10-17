@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { scrapeDecision, isUpdatedScrapedRow } from "@/lib/scraper/apply";
 import { parsePriorityUrls, scrapeUrlAllowed } from "@/lib/scraper/allowlist";
+import { droppedPriorityUrlMessage } from "@/lib/scraper/priority-copy";
 import { inferCategory, TYPE_REVIEW_NOTE } from "@/lib/scraper/categorise";
 import { fixtureEvents } from "@/lib/scraper/fixtures";
 import { RUN_EVENT_CAP, selectHarvestEvents } from "@/lib/scraper/harvest";
@@ -129,6 +130,17 @@ describe("allowlist", () => {
     ]);
     expect(dup.urls).toHaveLength(1);
     expect(dup.rejected).toHaveLength(0);
+  });
+
+  it("keeps an allowlisted feed when a leftover Meetup line sits next to it", () => {
+    const mixed = parsePriorityUrls([
+      "https://www.meetup.com/find/?keywords=birmingham",
+      "https://birminghamcathedral.com/calendar.ics"
+    ]);
+    expect(mixed.urls).toEqual(["https://birminghamcathedral.com/calendar.ics"]);
+    expect(mixed.rejected).toHaveLength(1);
+    expect(droppedPriorityUrlMessage(mixed.rejected)).toMatch(/meetup\.com/i);
+    expect(droppedPriorityUrlMessage([])).toBeNull();
   });
 });
 

@@ -55,12 +55,16 @@ Applied: 17 October 2026, `experiment` branch. Live smoke on https://commsevents
 
 | What it does | Who | Agreed by | Why |
 | --- | --- | --- | --- |
-| Members, import (example table + CSV template), scraper settings, organisation rules, audit log. Return on member add/edit does not save. | Admin | Requirements; tester 17 Oct evening | Closed system. |
-| Audit covers publish/discard, booking, export, import, password reset, activate/deactivate, Insights export/share, attendee-visibility change. | Admin | Architecture sketches | Who did what. |
+| Members, import (example table + CSV template; page and API admin-only), scraper settings, organisation rules, audit log. Return on member add/edit does not save. | Admin | Requirements; tester 17 Oct evening | Closed system. A leader who types `/import` sees a sentence, not the form. |
+| Audit covers publish/discard, booking, export, import, password reset, activate/deactivate, Insights export/share, attendee-visibility change, dropped Priority URLs. | Admin | Architecture sketches | Who did what. |
 
 ## Out of this phase
 
 Public sign-up, email/SMS from Gather, member password reset, live website scrape, §16 phone UI, Prisma migrations, production backups. Address lookup is Nominatim only (Birmingham).
+
+## Engineering verification
+
+Walked on live Railway 17 October 2026 as admin, cell leader, and member. That is a build check, not product agreement. The table below stays blank until An, Becca and Guillaume choose to sign.
 
 ## Sign-off
 

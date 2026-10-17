@@ -3,6 +3,7 @@ import { prisma } from "../db";
 import { writeAudit } from "../audit";
 import { categoryEnabledKey, type Category, CATEGORIES } from "../constants";
 import { dropEndedStars } from "../stars";
+import { persistCleanPriorityUrls } from "../settings";
 import { scrapeDecision } from "./apply";
 import { fixtureEvents } from "./fixtures";
 import { selectHarvestEvents } from "./harvest";
@@ -38,7 +39,7 @@ export async function runScraper(opts: {
     });
     runId = run.id;
     const settings = await prisma.settings.findUnique({ where: { id: "default" } });
-    const urls: string[] = settings ? JSON.parse(settings.priorityUrls || "[]") : [];
+    const urls = (await persistCleanPriorityUrls(opts.actorId)).urls;
     await prisma.scraperRun.update({
       where: { id: runId },
       data: { priorityUrlsSnapshot: JSON.stringify(urls) }

@@ -21,10 +21,6 @@ export async function POST(request: NextRequest) {
     CATEGORIES.map((c) => [c, isHexColour(submittedColours[c]) ? submittedColours[c] : DEFAULT_COLOURS[c]])
   );
   const parsedUrls = parsePriorityUrls(Array.isArray(body.priorityUrls) ? body.priorityUrls : []);
-  if (parsedUrls.rejected.length) {
-    const listing = parsedUrls.rejected.map((row) => `${row.url} (${row.reason})`).join("; ");
-    return NextResponse.json({ error: `These Priority URLs cannot be saved: ${listing}` }, { status: 400 });
-  }
   const priorityUrls = parsedUrls.urls;
   const locationLabel = String(body.locationLabel ?? "Birmingham").trim().slice(0, 80) || "Birmingham";
   const previous = await prisma.settings.findUnique({ where: { id: "default" } });
@@ -59,5 +55,16 @@ export async function POST(request: NextRequest) {
       summary: `${user.name} changed what members see for attendees from ${previousView} to ${memberAttendeeView}`
     });
   }
-  return NextResponse.json({ ok: true });
+  if (parsedUrls.rejected.length) {
+    await writeAudit({
+      actorId: user.id,
+      action: "settings.priorityUrls.dropped",
+      entityType: "Settings",
+      entityId: "default",
+      summary: `${user.name} saved settings; left out ${parsedUrls.rejected.length} Priority URL(s) not on the allowlist: ${parsedUrls.rejected
+        .map((item) => item.url)
+        .join(", ")}`
+    });
+  }
+  return NextResponse.json({ ok: true, dropped: parsedUrls.rejected });
 }

@@ -22,6 +22,7 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | High | Cron secret in the query string, `!==` compare | **Fixed** — Bearer + `timingSafeEqual` |
 | Med | Spreadsheet formula injection | **Fixed** — `safeCell` |
 | Med | Import unbounded | **Fixed** — 2 MB / 2,000 rows |
+| Med | `/import` page was client-only; leaders who typed the URL saw the form | **Fixed** — page checks admin; API still 403 |
 | Med | Event Link any scheme | **Fixed** — http(s) only |
 | Med | Category colours unvalidated | **Fixed** — `#rrggbb` |
 | Med | No security headers | **Fixed** — CSP + HSTS + nosniff + frame deny |
@@ -54,6 +55,7 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | Med | Pending is a flat list; publish felt calendar-bound | **Fixed** — tiles by day; Save/Back stay on pending |
 | Med | Reports only one event at a time | **Fixed** — date-range event file |
 | Med | Import format not shown as a file | **Fixed** — example table + CSV template |
+| Med | Leftover Meetup Priority URL 400'd the whole settings save | **Fixed** — drop disallowed URLs, save the rest, say so |
 | High | Delete / discard / deactivate with no confirm | **Fixed** — `ConfirmDialog` |
 | High | Silent client fetch failures | **Fixed** — `requestJson` |
 | Med | No loading / error / not-found pages | **Fixed** |

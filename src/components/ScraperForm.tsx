@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, type Category, type MemberAttendeeView } from "@/lib/constants";
+import { droppedPriorityUrlMessage } from "@/lib/scraper/priority-copy";
 import { requestJson, type JsonResult } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
 
@@ -16,13 +17,15 @@ type Settings = {
 
 export function ScraperForm({
   settings,
-  organisations
+  organisations,
+  notice
 }: {
   settings: Settings;
   organisations: { id: string; name: string; status: string }[];
+  notice?: string | null;
 }) {
   const router = useRouter();
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(notice ?? null);
   const [kind, setKind] = useState<"info" | "error">("info");
 
   function show(result: JsonResult, success: string) {
@@ -34,7 +37,7 @@ export function ScraperForm({
   async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
-    const result = await requestJson("/api/settings", {
+    const result = await requestJson<{ dropped?: { url: string; reason: string }[] }>("/api/settings", {
       method: "POST",
       body: {
         locationLabel: form.get("locationLabel"),
@@ -47,7 +50,8 @@ export function ScraperForm({
           .filter(Boolean)
       }
     });
-    show(result, "Settings saved.");
+    const skipped = result.ok ? droppedPriorityUrlMessage(result.data.dropped ?? []) : null;
+    show(result, skipped ? `Settings saved. ${skipped}` : "Settings saved.");
   }
 
   async function runNow() {
@@ -106,8 +110,9 @@ export function ScraperForm({
           <textarea
             name="priorityUrls"
             defaultValue={settings.priorityUrls.join("\n")}
-            placeholder="https://birminghamcathedral.com/calendar.ics — not a Meetup search page"
+            placeholder="https://birminghamcathedral.com/calendar.ics"
           />
+          <span className="muted">Meetup search pages and any host not on the allowlist are dropped, not saved.</span>
         </label>
         <div className="row">
           <button type="submit">Save settings</button>
