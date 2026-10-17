@@ -47,7 +47,13 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 
 | Sev | Item | Status |
 | --- | --- | --- |
-| High | Day/week empty; All types stuck; map vanishes | **Fixed** |
+| High | Day/week empty; All types stuck; map vanishes | **Fixed** — re-checked 17 Oct evening; Week/Day are view tabs, not type chips |
+| Med | Type chips only one at a time | **Fixed** — multi-select `types=` |
+| Med | Login cell number free text | **Fixed** — dropdown of active numbers (no names) |
+| Med | Add event felt lat/lng-only | **Fixed** — Find on map + pin; Online by Event Link |
+| Med | Pending is a flat list; publish felt calendar-bound | **Fixed** — tiles by day; Save/Back stay on pending |
+| Med | Reports only one event at a time | **Fixed** — date-range event file |
+| Med | Import format not shown as a file | **Fixed** — example table + CSV template |
 | High | Delete / discard / deactivate with no confirm | **Fixed** — `ConfirmDialog` |
 | High | Silent client fetch failures | **Fixed** — `requestJson` |
 | Med | No loading / error / not-found pages | **Fixed** |

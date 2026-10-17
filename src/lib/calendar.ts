@@ -9,7 +9,7 @@ export type DayKey = { year: number; month: number; day: number };
 
 export type CalendarState = {
   view: CalendarView;
-  category: Category | "";
+  categories: Category[];
   format: CalendarFormat;
   anchor: DayKey;
 };
@@ -17,6 +17,7 @@ export type CalendarState = {
 export type CalendarParams = {
   view?: string;
   category?: string;
+  types?: string;
   format?: string;
   d?: string;
   y?: string;
@@ -85,9 +86,30 @@ export function parseDayKey(value: string | undefined): DayKey | null {
  * Turns untrusted search params into a calendar state. Anything invalid falls back to today,
  * so a hand-edited URL can never produce an unbounded query or a server error.
  */
+export function parseTypesParam(value: string | undefined): Category[] {
+  if (!value) return [];
+  const wanted = new Set(
+    value
+      .split(",")
+      .map((part) => part.trim())
+      .filter((part): part is Category => CATEGORIES.includes(part as Category))
+  );
+  return CATEGORIES.filter((c) => wanted.has(c));
+}
+
+export function toggleCategory(selected: Category[], category: Category): Category[] {
+  const next = new Set(selected);
+  if (next.has(category)) next.delete(category);
+  else next.add(category);
+  return CATEGORIES.filter((c) => next.has(c));
+}
+
 export function parseCalendarParams(params: CalendarParams, today: DayKey): CalendarState {
   const view: CalendarView = params.view === "week" || params.view === "day" ? params.view : "month";
-  const category = CATEGORIES.includes(params.category as Category) ? (params.category as Category) : "";
+  let categories = parseTypesParam(params.types);
+  if (!categories.length && CATEGORIES.includes(params.category as Category)) {
+    categories = [params.category as Category];
+  }
   const format: CalendarFormat = params.format === "online" || params.format === "inperson" ? params.format : "";
 
   let anchor = parseDayKey(params.d);
@@ -99,7 +121,7 @@ export function parseCalendarParams(params: CalendarParams, today: DayKey): Cale
       anchor = year === today.year && month === today.month ? today : legacy;
     }
   }
-  return { view, category, format, anchor: anchor ?? today };
+  return { view, categories, format, anchor: anchor ?? today };
 }
 
 export type CalendarRange = { from: Date; to: Date; days: DayKey[] };
@@ -138,12 +160,12 @@ export function stepAnchor(view: CalendarView, anchor: DayKey, direction: 1 | -1
 
 export type CalendarOverrides = Partial<CalendarState>;
 
-/** Builds a calendar link. An empty category or format in the overrides removes that filter. */
+/** Builds a calendar link. An empty categories or format in the overrides removes that filter. */
 export function calendarHref(state: CalendarState, overrides: CalendarOverrides = {}): string {
   const next = { ...state, ...overrides };
   const sp = new URLSearchParams();
   sp.set("view", next.view);
-  if (next.category) sp.set("category", next.category);
+  if (next.categories.length) sp.set("types", next.categories.join(","));
   if (next.format) sp.set("format", next.format);
   sp.set("d", formatDayKey(next.anchor));
   return `/calendar?${sp.toString()}`;

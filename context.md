@@ -176,7 +176,7 @@ Admin and cell leaders can also create an event by hand, once or weekly.
 Location differs by source (Guillaume, 16 October):
 
 - Scraped events keep the latitude and longitude the scraper pulls. Guillaume called that “quite good”.
-- Manual add and edit: type the place as text and pick the point on a map. Raw latitude and longitude boxes are not the main way in. Typing an address and looking it up (geocoding) was also suggested; it needs an external lookup service and is not in this build.
+- Manual add and edit: type the place as text, Find on map (Nominatim, Birmingham), or pick the point on a map. Raw latitude and longitude boxes stay under details. Online sits next to Event Link.
 
 The link to the host’s own page is labelled **Event Link** (was “Host URL”).
 

@@ -104,9 +104,14 @@ export function MemberForm({
           <input type="checkbox" name="active" defaultChecked={member.active} /> Active
         </label>
       ) : null}
-      <button type="submit" disabled={busy}>
-        Save
-      </button>
+      <div className="row">
+        <button type="submit" disabled={busy}>
+          Save
+        </button>
+        <button className="ghost" type="button" onClick={() => router.push("/members")}>
+          Return
+        </button>
+      </div>
       {dialog}
     </form>
   );

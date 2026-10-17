@@ -155,7 +155,7 @@ function card(s, x, y, w, h) {
   const roles = [
     ["Members", "Browse the calendar, click Attend, confirm later if you went."],
     ["Cell leaders", "Look after their own cell, review pending events, see Insights for that cell."],
-    ["Admin", "Sets people up, runs the scraper, sees the whole region."]
+    ["Admin", "Sets people up, runs the harvest, sees the whole region."]
   ];
   roles.forEach(([title, body], i) => {
     const y = 2.0 + i * 1.4;
@@ -245,13 +245,15 @@ function card(s, x, y, w, h) {
   });
   s.addText(
     [
-      { text: "Week and day for today.", options: { breakLine: true } },
-      { text: "A type chip, then All types.", options: { breakLine: true } },
+      { text: "Week and day for today — a list, not a tiny month.", options: { breakLine: true } },
+      { text: "One type or two, then All types.", options: { breakLine: true } },
       { text: "Scroll to the map.", options: { breakLine: true } },
       { text: "Open an event and click Attend.", options: { breakLine: true } },
-      { text: "If you can add events: drop a pin, add a link, publish — you should land back on pending." }
+      { text: "If you review events: pending is by day. Publish or discard — you land back there.", options: { breakLine: true } },
+      { text: "If you admin: Run now. Demo events go to pending. Members only see what you publish.", options: { breakLine: true } },
+      { text: "Save a published event, Run now again — your wording should stay." }
     ],
-    { x: 0.75, y: 1.85, w: 5.7, h: 4.5, fontFace: "Calibri", fontSize: 17, color: INK, paraSpaceAfter: 12 }
+    { x: 0.75, y: 1.75, w: 5.7, h: 4.7, fontFace: "Calibri", fontSize: 16, color: INK, paraSpaceAfter: 10 }
   );
   s.addText("Not this round", {
     x: 7.2,
@@ -266,11 +268,12 @@ function card(s, x, y, w, h) {
   s.addText(
     [
       { text: "No public sign-up, email or texts from Gather.", options: { breakLine: true } },
+      { text: "Gather does not crawl the open web. A calendar feed is optional, later.", options: { breakLine: true } },
       { text: "Share opens your own app. Gather does not send the message.", options: { breakLine: true } },
       { text: "The phone-first look is still to come. This demo is the cream paper one.", options: { breakLine: true } },
       { text: "If something feels off, say so. That is the point of looking." }
     ],
-    { x: 7.2, y: 1.85, w: 5.4, h: 4.5, fontFace: "Calibri", fontSize: 17, color: INK, paraSpaceAfter: 12 }
+    { x: 7.2, y: 1.75, w: 5.4, h: 4.7, fontFace: "Calibri", fontSize: 16, color: INK, paraSpaceAfter: 10 }
   );
   footer(s, 6);
 }

@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { calendarHref, rangeLabel, stepAnchor, type CalendarState, type DayKey } from "@/lib/calendar";
-import { Chip } from "./FilterBar";
 
 const VIEWS = [
   { id: "month", label: "Month" },
@@ -11,11 +10,18 @@ const VIEWS = [
 export function RangeNav({ state, today }: { state: CalendarState; today: DayKey }) {
   return (
     <div className="calendar-nav">
-      <div className="filters" role="group" aria-label="Calendar view">
+      <div className="view-tabs" role="tablist" aria-label="Calendar view">
         {VIEWS.map((v) => (
-          <Chip key={v.id} href={calendarHref(state, { view: v.id })} current={state.view === v.id}>
+          <Link
+            key={v.id}
+            role="tab"
+            aria-selected={state.view === v.id}
+            className="view-tab"
+            href={calendarHref(state, { view: v.id })}
+            scroll={false}
+          >
             {v.label}
-          </Chip>
+          </Link>
         ))}
       </div>
       <div className="row">

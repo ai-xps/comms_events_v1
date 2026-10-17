@@ -20,6 +20,7 @@ export default defineConfig({
         "src/lib/insights/format.ts",
         "src/lib/insights/share.ts",
         "src/lib/export-format.ts",
+        "src/lib/geocode.ts",
         "src/lib/scraper/apply.ts",
         "src/lib/scraper/allowlist.ts",
         "src/lib/scraper/harvest.ts",

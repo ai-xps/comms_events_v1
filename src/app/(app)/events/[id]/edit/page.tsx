@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
@@ -15,6 +16,11 @@ export default async function EditEventPage({ params }: { params: Promise<{ id: 
   return (
     <main>
       <h1>{event.status === "PENDING" ? "Review event" : "Edit event"}</h1>
+      {event.status === "PENDING" ? (
+        <p className="lede">
+          <Link href="/pending">Back to pending</Link>
+        </p>
+      ) : null}
       <EventForm
         organisations={orgs}
         colours={settings.colours}

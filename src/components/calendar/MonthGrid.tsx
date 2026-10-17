@@ -9,13 +9,15 @@ export function MonthGrid({
   days,
   today,
   events,
-  colours
+  colours,
+  canAdd
 }: {
   state: CalendarState;
   days: DayKey[];
   today: DayKey;
   events: GridEvent[];
   colours: Record<string, string>;
+  canAdd?: boolean;
 }) {
   const weeks = Array.from({ length: days.length / 7 }, (_, i) => days.slice(i * 7, i * 7 + 7));
   return (
@@ -37,14 +39,21 @@ export function MonthGrid({
               const outside = day.month !== state.anchor.month;
               return (
                 <td key={formatDayKey(day)} className={outside ? "outside" : undefined}>
-                  <Link
-                    className="daynum"
-                    href={calendarHref(state, { view: "day", anchor: day })}
-                    aria-label={`${formatDayLabel(day)}, ${dayEvents.length} events. Open day view.`}
-                    aria-current={sameDayKey(day, today) ? "date" : undefined}
-                  >
-                    {day.day}
-                  </Link>
+                  <div className="day-cell-head">
+                    <Link
+                      className="daynum"
+                      href={calendarHref(state, { view: "day", anchor: day })}
+                      aria-label={`${formatDayLabel(day)}, ${dayEvents.length} events. Open day view.`}
+                      aria-current={sameDayKey(day, today) ? "date" : undefined}
+                    >
+                      {day.day}
+                    </Link>
+                    {canAdd ? (
+                      <Link className="day-add" href={`/events/new?d=${formatDayKey(day)}`} aria-label={`Add event on ${formatDayLabel(day)}`}>
+                        Add
+                      </Link>
+                    ) : null}
+                  </div>
                   {dayEvents.map((event) => {
                     const labelText = `${formatTime(event.startsAt)} ${event.title}`;
                     return (

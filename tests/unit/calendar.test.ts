@@ -6,10 +6,12 @@ import {
   formatDayKey,
   parseCalendarParams,
   parseDayKey,
+  parseTypesParam,
   rangeFor,
   rangeLabel,
   sameDayKey,
   stepAnchor,
+  toggleCategory,
   weekdayMondayFirst,
   type CalendarState
 } from "@/lib/calendar";
@@ -18,12 +20,17 @@ const today = { year: 2026, month: 10, day: 17 };
 
 describe("parseCalendarParams", () => {
   it("defaults to month view on today", () => {
-    expect(parseCalendarParams({}, today)).toEqual({ view: "month", category: "", format: "", anchor: today });
+    expect(parseCalendarParams({}, today)).toEqual({ view: "month", categories: [], format: "", anchor: today });
   });
 
   it("accepts a valid anchor date and filters", () => {
     const state = parseCalendarParams({ view: "week", category: "Christian", format: "online", d: "2026-10-20" }, today);
-    expect(state).toEqual({ view: "week", category: "Christian", format: "online", anchor: { year: 2026, month: 10, day: 20 } });
+    expect(state).toEqual({
+      view: "week",
+      categories: ["Christian"],
+      format: "online",
+      anchor: { year: 2026, month: 10, day: 20 }
+    });
   });
 
   it.each([
@@ -39,7 +46,7 @@ describe("parseCalendarParams", () => {
   it("ignores unknown view, category and format", () => {
     const state = parseCalendarParams({ view: "year", category: "Party", format: "hybrid" }, today);
     expect(state.view).toBe("month");
-    expect(state.category).toBe("");
+    expect(state.categories).toEqual([]);
     expect(state.format).toBe("");
   });
 
@@ -94,18 +101,37 @@ describe("stepAnchor", () => {
 });
 
 describe("calendarHref — regression: 'All types' kept the selected type", () => {
-  const state: CalendarState = { view: "week", category: "Christian", format: "online", anchor: today };
+  const state: CalendarState = {
+    view: "week",
+    categories: ["Christian"],
+    format: "online",
+    anchor: today
+  };
 
-  it("clearing the category removes it but keeps the other filters", () => {
-    expect(calendarHref(state, { category: "" })).toBe("/calendar?view=week&format=online&d=2026-10-17");
+  it("clearing types removes them but keeps the other filters", () => {
+    expect(calendarHref(state, { categories: [] })).toBe("/calendar?view=week&format=online&d=2026-10-17");
   });
 
-  it("clearing the format removes it but keeps the type", () => {
-    expect(calendarHref(state, { format: "" })).toBe("/calendar?view=week&category=Christian&d=2026-10-17");
+  it("clearing the format removes it but keeps the types", () => {
+    expect(calendarHref(state, { format: "" })).toBe("/calendar?view=week&types=Christian&d=2026-10-17");
   });
 
   it("switching view keeps filters and date", () => {
-    expect(calendarHref(state, { view: "day" })).toBe("/calendar?view=day&category=Christian&format=online&d=2026-10-17");
+    expect(calendarHref(state, { view: "day" })).toBe(
+      "/calendar?view=day&types=Christian&format=online&d=2026-10-17"
+    );
+  });
+
+  it("puts two types on the query and All types drops them", () => {
+    const both = toggleCategory(["Christian"], "Networking");
+    expect(both).toEqual(["Christian", "Networking"]);
+    expect(toggleCategory(["Christian"], "Christian")).toEqual([]);
+    expect(calendarHref(state, { categories: both })).toContain("types=Christian%2CNetworking");
+    expect(parseTypesParam("Christian,Networking,Party")).toEqual(["Christian", "Networking"]);
+    expect(parseCalendarParams({ types: "Christian,Networking" }, today).categories).toEqual([
+      "Christian",
+      "Networking"
+    ]);
   });
 });
 

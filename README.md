@@ -96,6 +96,6 @@ An admin opens **Members**, edits the person, types a new password, and tells th
 - Overlap warnings
 - Attendance reminders
 - A second city in this calendar
-- Live HTTP scraping or geocoding
+- Live HTML scraping of third-party pages (ICS/JSON-LD only)
 - Weeks past the 12th occurrence of a series
 - A hierarchy manager

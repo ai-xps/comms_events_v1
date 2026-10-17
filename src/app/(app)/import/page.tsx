@@ -45,10 +45,35 @@ export default function ImportPage() {
       <div className="page-head">
         <h1>Import people</h1>
         <p className="lede">
-          CSV, Excel, or JSON. Columns: Name, Cell number, Cell, Password, Permission. If any row fails, nobody is
-          created.
+          CSV, Excel, or JSON. If any row fails, nobody is created. Use this column order:
         </p>
       </div>
+      <div className="table-wrap" style={{ marginBottom: "var(--space-5)" }}>
+        <table className="data stack-sm">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Cell number</th>
+              <th>Cell</th>
+              <th>Password</th>
+              <th>Permission</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Name">Example Person</td>
+              <td data-label="Cell number">07000000999</td>
+              <td data-label="Cell">Sparkbrook</td>
+              <td data-label="Password">ChangeMe1!</td>
+              <td data-label="Permission">member</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p className="muted" style={{ marginBottom: "var(--space-4)" }}>
+        <a href="/api/import/template">Download CSV template</a>
+        . Permission is admin, cell leader, or member.
+      </p>
       <form className="card stack" onSubmit={onSubmit}>
         <StatusBanner message={message} kind={kind} />
         <label>

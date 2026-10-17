@@ -8,6 +8,9 @@ import { writeAudit } from "./audit";
 import { LIMITS } from "./security";
 import type { SessionUser } from "./session";
 
+export const IMPORT_TEMPLATE_CSV =
+  "Name,Cell number,Cell,Password,Permission\r\nExample Person,07000000999,Sparkbrook,ChangeMe1!,member\r\n";
+
 type Row = {
   name: string;
   cellNumber: string;

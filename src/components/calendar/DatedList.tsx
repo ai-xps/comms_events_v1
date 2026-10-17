@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { dayKeyOf, formatDayKey, formatDayLabel, sameDayKey, type DayKey } from "@/lib/calendar";
+import { dayKeyOf, formatDayKey, formatDayLabel, sameDayKey, type CalendarView, type DayKey } from "@/lib/calendar";
 import { formatTime } from "@/lib/time";
 
 type ListEvent = {
@@ -16,15 +16,27 @@ export function DatedList({
   days,
   today,
   events,
-  colours
+  colours,
+  view,
+  canAdd
 }: {
   days: DayKey[];
   today: DayKey;
   events: ListEvent[];
   colours: Record<string, string>;
+  view: CalendarView;
+  canAdd?: boolean;
 }) {
+  const hasAny = events.length > 0;
   return (
     <div className="dated-list">
+      {!hasAny ? (
+        <p className="muted">
+          {view === "week"
+            ? "No events in this week. Try All types."
+            : "No events on this day. Try All types."}
+        </p>
+      ) : null}
       {days.map((day) => {
         const dayEvents = events.filter((e) => sameDayKey(dayKeyOf(e.startsAt), day));
         return (
@@ -32,6 +44,11 @@ export function DatedList({
             <h3>
               {formatDayLabel(day)}
               {sameDayKey(day, today) ? <span className="today-tag">Today</span> : null}
+              {canAdd ? (
+                <Link className="day-add heading-add" href={`/events/new?d=${formatDayKey(day)}`}>
+                  Add
+                </Link>
+              ) : null}
             </h3>
             {dayEvents.length === 0 ? (
               <p className="muted">No events.</p>

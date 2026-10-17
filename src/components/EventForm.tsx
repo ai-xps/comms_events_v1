@@ -1,12 +1,14 @@
 "use client";
 
 import { FormEvent, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CATEGORIES } from "@/lib/constants";
 import { requestJson } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
 import { LocationPicker } from "./LocationPicker";
 import { useConfirm } from "./ConfirmDialog";
+import type { GeocodeHit } from "@/lib/geocode";
 
 type Org = { id: string; name: string };
 type EventValue = {
@@ -32,11 +34,15 @@ type EventValue = {
 export function EventForm({
   organisations,
   colours,
-  event
+  event,
+  defaultStartsAt,
+  defaultEndsAt
 }: {
   organisations: Org[];
   colours: Record<string, string>;
   event?: EventValue;
+  defaultStartsAt?: string;
+  defaultEndsAt?: string;
 }) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -44,13 +50,21 @@ export function EventForm({
   const [kind, setKind] = useState<"info" | "error">("info");
   const [dialog, confirm] = useConfirm();
   const [online, setOnline] = useState(event?.online ?? false);
+  const [placeName, setPlaceName] = useState(event?.placeName ?? "");
   const [lat, setLat] = useState(event?.lat != null ? String(event.lat) : "");
   const [lng, setLng] = useState(event?.lng != null ? String(event.lng) : "");
+  const [looking, setLooking] = useState(false);
   const point = useMemo(() => {
     const la = Number(lat);
     const ln = Number(lng);
     return lat !== "" && lng !== "" && Number.isFinite(la) && Number.isFinite(ln) ? { lat: la, lng: ln } : null;
   }, [lat, lng]);
+  const pending = event?.status === "PENDING";
+
+  function leave(path: string) {
+    router.push(path);
+    router.refresh();
+  }
 
   async function submit(extra: Record<string, string> = {}) {
     if (!formRef.current) return;
@@ -74,12 +88,39 @@ export function EventForm({
       setMessage(result.error);
       return;
     }
-    if (event?.status === "PENDING" && (extra.status === "PUBLISHED" || extra.status === "DISCARDED")) {
-      router.push("/pending");
-    } else {
-      router.push(result.data.id ? `/events/${result.data.id}` : "/calendar");
+    if (pending) leave("/pending");
+    else leave(result.data.id ? `/events/${result.data.id}` : "/calendar");
+  }
+
+  async function findOnMap() {
+    const q = placeName.trim();
+    if (q.length < 3) {
+      setKind("error");
+      setMessage("Type a bit more of the place name, then Find on map.");
+      return;
     }
-    router.refresh();
+    setLooking(true);
+    const result = await requestJson<{ hits?: GeocodeHit[]; error?: string }>("/api/geocode", {
+      method: "POST",
+      body: { q }
+    });
+    setLooking(false);
+    if (!result.ok) {
+      setKind("error");
+      setMessage(result.error);
+      return;
+    }
+    const hit = result.data.hits?.[0];
+    if (!hit) {
+      setKind("info");
+      setMessage("No place found. Click the map instead.");
+      return;
+    }
+    setLat(String(hit.lat));
+    setLng(String(hit.lng));
+    if (hit.label && !placeName.trim()) setPlaceName(hit.label);
+    setKind("info");
+    setMessage("Pin set from the address. Click the map to move it.");
   }
 
   async function remove(mode: "this" | "future") {
@@ -106,8 +147,7 @@ export function EventForm({
       setMessage(result.error);
       return;
     }
-    router.push("/calendar");
-    router.refresh();
+    leave("/calendar");
   }
 
   return (
@@ -146,25 +186,27 @@ export function EventForm({
       <div className="row">
         <label>
           Starts
-          <input type="datetime-local" name="startsAt" required defaultValue={event?.startsAt} />
+          <input type="datetime-local" name="startsAt" required defaultValue={event?.startsAt ?? defaultStartsAt} />
         </label>
         <label>
           Ends
-          <input type="datetime-local" name="endsAt" required defaultValue={event?.endsAt} />
+          <input type="datetime-local" name="endsAt" required defaultValue={event?.endsAt ?? defaultEndsAt} />
         </label>
       </div>
       <label>
-        <input type="checkbox" name="online" checked={online} onChange={(e) => setOnline(e.target.checked)} /> Online
-      </label>
-      <label>
         Place
-        <input name="placeName" defaultValue={event?.placeName} />
+        <input name="placeName" value={placeName} onChange={(e) => setPlaceName(e.target.value)} />
       </label>
       {!online ? (
         <div className="location-field">
+          <div className="row">
+            <button className="secondary" type="button" onClick={findOnMap} disabled={looking}>
+              {looking ? "Finding…" : "Find on map"}
+            </button>
+          </div>
           <span className="field-label">Map pin</span>
           <p className="muted">
-            {point ? `Pin set at ${point.lat}, ${point.lng}. Click the map to move it.` : "Click the map to set where the event is."}
+            {point ? "Pin set. Click the map to move it, or find an address above." : "Click the map, or find an address above."}
           </p>
           <LocationPicker
             value={point}
@@ -173,25 +215,37 @@ export function EventForm({
               setLng(String(p.lng));
             }}
           />
+          <input type="hidden" name="lat" value={lat} />
+          <input type="hidden" name="lng" value={lng} />
           <details>
             <summary>Enter coordinates instead</summary>
             <div className="row">
               <label>
                 Latitude
-                <input name="lat" inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} />
+                <input inputMode="decimal" value={lat} onChange={(e) => setLat(e.target.value)} />
               </label>
               <label>
                 Longitude
-                <input name="lng" inputMode="decimal" value={lng} onChange={(e) => setLng(e.target.value)} />
+                <input inputMode="decimal" value={lng} onChange={(e) => setLng(e.target.value)} />
               </label>
             </div>
           </details>
         </div>
       ) : null}
-      <label>
-        Event Link
-        <input name="externalUrl" placeholder="https://" defaultValue={event?.externalUrl} />
-      </label>
+      <div className="event-link-row">
+        <label className="event-link-field">
+          Event Link
+          <input
+            name="externalUrl"
+            placeholder="https://… event page or Zoom"
+            defaultValue={event?.externalUrl}
+          />
+        </label>
+        <label className="online-check">
+          <input type="checkbox" name="online" checked={online} onChange={(e) => setOnline(e.target.checked)} />
+          Online
+        </label>
+      </div>
       <label>
         Notes
         <textarea name="notes" defaultValue={event?.notes} />
@@ -211,7 +265,7 @@ export function EventForm({
       ) : null}
       <div className="row">
         <button type="submit">Save</button>
-        {event?.status === "PENDING" ? (
+        {pending ? (
           <>
             <button type="button" onClick={() => submit({ status: "PUBLISHED" })}>
               Publish
@@ -219,6 +273,9 @@ export function EventForm({
             <button className="secondary" type="button" onClick={() => submit({ status: "DISCARDED" })}>
               Discard
             </button>
+            <Link className="button ghost" href="/pending">
+              Back to pending
+            </Link>
           </>
         ) : null}
         {event ? (

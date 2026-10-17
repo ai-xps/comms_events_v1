@@ -87,7 +87,7 @@ export function ScraperForm({
           <select name="memberAttendeeView" defaultValue={settings.memberAttendeeView}>
             <option value="COUNT">Count only</option>
             <option value="COUNT_AND_INITIALS">Count and initials</option>
-            <option value="COUNT_AND_NAME_CELL">Count and name + cell</option>
+            <option value="COUNT_AND_NAME_CELL">Count and Name + Cell</option>
           </select>
           <span className="muted">Name + cell shows every member the name and cell number of everyone booked.</span>
         </label>

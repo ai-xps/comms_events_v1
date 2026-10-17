@@ -2,9 +2,12 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { formatDateTime } from "@/lib/time";
+import { addDaysKey, dayKeyOf, formatDayKey } from "@/lib/calendar";
+import { ReportsExport } from "@/components/ReportsExport";
 
 export default async function ReportsPage() {
   await requireUser(["admin", "cell leader"]);
+  const today = dayKeyOf(new Date());
   const events = await prisma.event.findMany({
     where: { status: "PUBLISHED" },
     include: { _count: { select: { bookings: true } } },
@@ -15,8 +18,9 @@ export default async function ReportsPage() {
     <main>
       <div className="page-head">
         <h1>Reports</h1>
-        <p className="lede">Export one occurrence at a time. Cell leaders only see their own cell in the file.</p>
+        <p className="lede">Take a file of events for a date range, or export who clicked Attend on one event. Cell leaders only see their own cell in attendee files.</p>
       </div>
+      <ReportsExport defaultFrom={formatDayKey(today)} defaultTo={formatDayKey(addDaysKey(today, 30))} />
       <div className="table-wrap">
         <table className="data stack-sm">
           <thead>

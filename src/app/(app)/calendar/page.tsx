@@ -22,7 +22,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     where: {
       status: "PUBLISHED",
       startsAt: { gte: range.from, lt: range.to },
-      category: state.category ? state.category : { in: enabledCategories },
+      category: state.categories.length ? { in: state.categories } : { in: enabledCategories },
       ...(state.format === "online" ? { online: true } : {}),
       ...(state.format === "inperson" ? { online: false } : {})
     },
@@ -71,11 +71,20 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       <RangeNav state={state} today={today} />
 
       {state.view === "month" ? (
-        <MonthGrid state={state} days={range.days} today={today} events={events} colours={settings.colours} />
+        <MonthGrid
+          state={state}
+          days={range.days}
+          today={today}
+          events={events}
+          colours={settings.colours}
+          canAdd={canReview(user)}
+        />
       ) : (
         <DatedList
           days={range.days}
           today={today}
+          view={state.view}
+          canAdd={canReview(user)}
           events={events.map((e) => ({
             id: e.id,
             title: e.title,
