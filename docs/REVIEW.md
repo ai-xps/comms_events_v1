@@ -1,6 +1,6 @@
 # Gather — review, 17 October 2026
 
-Read of the working tree on 17 October 2026, after Guillaume’s 16 October notes and the calendar tester notes. Scores are against a closed community demo, not an NHS production system.
+Read of the working tree on 17 October 2026, after Guillaume’s 16 October notes and the calendar tester notes. Scores are against a closed community demo, not an NHS production system. Dated ship notes (what each build put on the board): [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Scorecard
 
@@ -56,6 +56,7 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | Med | Reports only one event at a time | **Fixed** — date-range event file |
 | Med | Import format not shown as a file | **Fixed** — example table + CSV template |
 | Med | Leftover Meetup Priority URL 400'd the whole settings save | **Fixed** — drop disallowed URLs, save the rest, say so |
+| — | 17 Oct evening tester list (multi-select, login dropdown, Find on map, Online by Event Link, quiet Add, pending tiles, Return, import template, reports range) | **Shipped** on `experiment` (`da8c50d`–`28a9929`). Re-smoke after each deploy (below). |
 | High | Delete / discard / deactivate with no confirm | **Fixed** — `ConfirmDialog` |
 | High | Silent client fetch failures | **Fixed** — `requestJson` |
 | Med | No loading / error / not-found pages | **Fixed** |
@@ -76,13 +77,14 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 
 ## Live smoke (run after each deploy)
 
-Run 17 October 2026 on https://commseventsv1-production.up.railway.app (admin session unless noted).
+Re-run 18 October 2026 on https://commseventsv1-production.up.railway.app (admin, then leader, then member).
 
-1. **Pass.** Day view 17 Oct lists Sunday gathering and Test Guillaume. Week view 12–18 Oct lists Friday prayer through Sunday breakfast. Christian then All types restores Student, Networking, Meetup, Professional. Map stays (Birmingham pins).
-2. **Pass.** `/login?next=https://example.com` signed in to `/calendar`, not example.com.
-3. **Pass.** Login HEAD: `Content-Security-Policy`, `Strict-Transport-Security` (max-age=31536000; includeSubDomains), `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`. Map tiles loaded.
-4. **Pass (admin).** Insights loads (4 published, 3 Attend clicks, k-anon cells). Export CSV / TXT / JSON / XLSX and share buttons present. Member menu not checked this run.
-5. **Partial.** Attend already recorded on Test Guillaume; “Didn’t attend” confirmation stuck. Publish→pending not re-clicked this run.
+1. **Pass.** Week `d=2026-10-18` with Christian lists prayer / gathering / Test Guillaume / Eucharist only. All types restores Networking breakfast. Day view same date works. Map stays.
+2. **Pass.** Login dropdown: numbers only, “Choose your cell number”. `/login?next=https://example.com` as member lands on `/calendar`.
+3. **Pass (admin).** Pending tiles by London day; Add event `?d=` prefills 09:00–10:00; Find on map + Online by Event Link; Reports “Events in a date range”; Import example + CSV template; Members Return present. Menu at 390px.
+4. **Pass (leader).** Add on days; no Import/Scraper/Audit in nav; `/import` is a sentence + Back to calendar (not the form).
+5. **Pass (member).** Nav is Calendar + My bookings only; no Add event / day Add.
+6. **Known leftover.** Attend already recorded on Test Guillaume from earlier smoke; “Didn’t attend” sticky from 17 Oct not re-checked this run.
 
 Attendance prompt “Ask me next time” is session-snoozed (`sessionStorage`), so it no longer returns on every navigation. Confirming Attended / Didn’t attend still clears it for good.
 

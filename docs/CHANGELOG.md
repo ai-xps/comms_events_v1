@@ -1,0 +1,68 @@
+# Changelog
+
+What each Gather demo build shipped. Newest first.
+
+A **changelog** is a dated notebook of “what we put on the noticeboard,” not the full story of *why* (that stays in [`DECISIONS.md`](../DECISIONS.md)).
+
+| Branch | Live demo | `package.json` |
+| --- | --- | --- |
+| `experiment` | https://commseventsv1-production.up.railway.app | `1.0.0` (demo label only — bump when church go-live needs numbered releases) |
+
+Git history is the source of truth. Smoke checklists live in [`REVIEW.md`](REVIEW.md). Sign-off stays blank in [`FUNCTIONAL.md`](FUNCTIONAL.md) until An, Becca and Guillaume choose to sign.
+
+Style later: [Keep a Changelog](https://keepachangelog.com/).
+
+---
+
+## 2026-10-18 — tester evening + live smoke (`28a9929`)
+
+Commits `da8c50d` … `28a9929`.
+
+- Multi-select event types (`types=`), Month/Week/Day as view tabs, All types clears the filter.
+- Login: dropdown of active cell numbers (no names); “Choose your cell number.”
+- Event form: Find on map, Online beside Event Link, `?d=` prefills 09:00 London; pending Save/Publish/Discard/Back stay on `/pending`.
+- Quiet Add on month cells and week/day headings (reviewers only).
+- Pending queue as noticeboard tiles by London day; equal-height tiles.
+- Members Return without save; import example table + CSV template (admin only; leaders who type `/import` see a sentence).
+- Reports: “Events in a date range” card (CSV/Excel); per-event attendee export kept.
+- Drop stale scraper Priority URLs instead of blocking the whole settings save.
+- Railway: stop login prerender so the image builds without Postgres (`force-dynamic`).
+- Live smoke as admin, cell leader, and member — see [`REVIEW.md`](REVIEW.md).
+
+**Known leftover:** “Didn’t attend” sticky on Test Guillaume from an earlier smoke not re-checked this run. §16 phone redesign still backlog.
+
+---
+
+## 2026-10-17 — calendar fix, Insights, scraper 8, tester deck (`dc1fbc6` … `6378449`)
+
+- Day/week follow `d=YYYY-MM-DD`; Previous/Today/Next step by view; map stays when empty.
+- Insights for admin (region) and cell leader (own cell); export and share totals only.
+- High-severity review fixes (open redirect, session bump, cron secret, last-place booking lock, confirm dialogs).
+- Scraper: DST-safe fixtures, allowlisted ICS/JSON-LD, freeze human-edited rows, bound live fetches.
+- Tester deck (no secrets); attendance prompt session-snooze; blank FUNCTIONAL sign-off named for An, Becca, Guillaume.
+- Docs: calendar notes, Insights decisions, REVIEW and FUNCTIONAL written.
+
+---
+
+## 2026-10-16 — Guillaume demo asks (`96bf9d2`, `dc0de12`)
+
+- Member attendee view: Count / initials / **Count and Name + Cell**.
+- Manual events: place text + map pin; Event Link label; return to pending after publish/discard.
+- Mobile mockups recorded in `context.md` §16 (target look; not shipped UI).
+
+---
+
+## 2026-10 — first Railway deploy (`cf89aa6` … `902a286`)
+
+- Initial Gather app (Next.js, Prisma, cream parish UI).
+- Postgres on Railway; Railpack builder; bind to `PORT`.
+
+---
+
+## How to add the next entry
+
+1. Ship on `experiment` (commit SHA at the top).
+2. Add a new `## YYYY-MM-DD — short title (\`abc1234\`)` section **above** this list.
+3. Bullet what people can *do*, not every file touched.
+4. Point leftovers and smoke steps at [`REVIEW.md`](REVIEW.md).
+5. When go-live needs numbered releases: bump `package.json` and use `## 1.1.0 — …` as the heading.
