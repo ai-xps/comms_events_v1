@@ -14,10 +14,15 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## 2026-10-19 — Apple/tech UX + stakeholder pack + login rules (local; commit when ready)
+## 2026-10-19 — Shared cell number + unique password login
+
+- Several people may share one cell number; login picks the person by unique password (Guillaume B).
+- Create/import reject reused passwords; Prisma drops unique on `cellNumber` (index kept).
+
+## 2026-10-19 — Apple/tech UX + stakeholder pack + login rules
 
 - Cool Apple/tech UI tokens (less cream); SF-style system stack; blue accent.
-- Cell login IDs: alphanumeric, any length (still unique). Passwords: non-empty, any length.
+- Cell login IDs: alphanumeric, any length. Passwords: non-empty, any length.
 - Stakeholder Canva brief, requirements-loop, checklist, `npm run deck:stakeholder`.
 - README hero screenshot + presentation links.
 

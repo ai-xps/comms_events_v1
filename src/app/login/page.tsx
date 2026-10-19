@@ -10,5 +10,6 @@ export default async function LoginPage() {
     select: { cellNumber: true },
     orderBy: { cellNumber: "asc" }
   });
-  return <LoginForm cellNumbers={users.map((u) => u.cellNumber)} />;
+  const cellNumbers = [...new Set(users.map((u) => u.cellNumber))];
+  return <LoginForm cellNumbers={cellNumbers} />;
 }

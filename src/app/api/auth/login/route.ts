@@ -17,9 +17,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: GENERIC_LOGIN_ERROR }, { status: 401 });
   }
 
-  const user = await prisma.user.findUnique({ where: { cellNumber } });
-  const ok = user && user.active ? await verifyPassword(password, user.passwordHash) : false;
-  if (!ok) {
+  const candidates = cellNumber
+    ? await prisma.user.findMany({ where: { cellNumber, active: true } })
+    : [];
+  let matched: (typeof candidates)[number] | null = null;
+  for (const candidate of candidates) {
+    if (await verifyPassword(password, candidate.passwordHash)) {
+      matched = candidate;
+      break;
+    }
+  }
+
+  if (!matched) {
     const windowStart = throttle?.windowStart ?? new Date();
     const inWindow = Date.now() - windowStart.getTime() < 15 * 60 * 1000;
     const failures = inWindow ? (throttle?.failures ?? 0) + 1 : 1;
@@ -38,12 +47,12 @@ export async function POST(request: NextRequest) {
 
   await prisma.loginThrottle.deleteMany({ where: { cellNumber } });
   await writeSession({
-    id: user!.id,
-    name: user!.name,
-    cellNumber: user!.cellNumber,
-    role: user!.role as Role,
-    cellId: user!.cellId,
-    sv: user!.sessionVersion
+    id: matched.id,
+    name: matched.name,
+    cellNumber: matched.cellNumber,
+    role: matched.role as Role,
+    cellId: matched.cellId,
+    sv: matched.sessionVersion
   });
   return NextResponse.json({ ok: true });
 }

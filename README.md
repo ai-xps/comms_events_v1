@@ -2,7 +2,7 @@
 
 ![Gather sign-in (Apple/tech UI)](docs/presentation/shots/readme-hero.png)
 
-A closed calendar for one community in Birmingham. An admin creates accounts from a file. Members sign in with a **cell number** (unique login ID — letters and digits) and a **password** (any length, must not be blank), browse events, click Attend, and later confirm they went. Cell leaders review scraped events and look after their own cell.
+A closed calendar for one community in Birmingham. An admin creates accounts from a file. Members sign in with a **cell number** (letters and digits; several people may share one) and a **password** (any length, must not be blank, **unique** per person so login can tell them apart), browse events, click Attend, and later confirm they went. Cell leaders review scraped events and look after their own cell.
 
 **Live demo (Railway for speed now; hosting can move later):** https://commseventsv1-production.up.railway.app
 
@@ -96,7 +96,7 @@ The demo harvest runs unless `SCRAPE_FIXTURES=0`. If Priority URLs are set, Gath
 
 Name, Cell number, Cell, Password, Permission.
 
-Permission is `admin`, `cell leader`, or `member`. Cell number is letters and digits only (any length, unique per person). Password must be non-empty (any length). CSV, Excel, and JSON are accepted. If any row fails, nobody is created.
+Permission is `admin`, `cell leader`, or `member`. Cell number is letters and digits only (any length; can be shared). Password must be non-empty (any length) and unique across people. CSV, Excel, and JSON are accepted. If any row fails, nobody is created.
 
 ## Replacing a password
 

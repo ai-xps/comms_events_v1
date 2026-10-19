@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { originAllowed, rejectOrigin } from "@/lib/origin";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
+import { passwordInUse } from "@/lib/password-unique";
 import { normaliseCellNumber, isValidCellNumber } from "@/lib/cell-number";
 import { parseRole } from "@/lib/constants";
 import { writeAudit } from "@/lib/audit";
@@ -30,8 +31,12 @@ export async function POST(request: NextRequest) {
   if (role !== "admin" && !body.cellId) {
     return NextResponse.json({ error: "Leaders and members need a cell." }, { status: 400 });
   }
-  const exists = await prisma.user.findUnique({ where: { cellNumber } });
-  if (exists) return NextResponse.json({ error: "That cell number already exists." }, { status: 400 });
+  if (await passwordInUse(password)) {
+    return NextResponse.json(
+      { error: "That password is already used. Each person needs a unique password." },
+      { status: 400 }
+    );
+  }
   const user = await prisma.user.create({
     data: {
       name: String(body.name ?? "").trim(),

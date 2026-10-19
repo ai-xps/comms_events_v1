@@ -10,7 +10,8 @@ datasource db {
 model User {
   id           String    @id @default(cuid())
   name         String
-  cellNumber   String    @unique
+  // Shared login ID allowed; password must be unique so login can pick the person.
+  cellNumber   String
   passwordHash String
   role         String
   cellId       String?
@@ -25,6 +26,8 @@ model User {
   createdEvents Event[]  @relation("EventCreatedBy")
   reviewedEvents Event[] @relation("EventReviewedBy")
   auditLogs    AuditLog[]
+
+  @@index([cellNumber])
 }
 
 model Cell {

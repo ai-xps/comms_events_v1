@@ -12,7 +12,7 @@ function at(daysFromToday: number, hour: number, minute = 0) {
 }
 
 async function main() {
-  const already = await prisma.user.findUnique({ where: { cellNumber: "07000000001" } });
+  const already = await prisma.user.findFirst({ where: { cellNumber: "07000000001" } });
   if (already) {
     console.log("Seed skipped: demo users already present.");
     return;

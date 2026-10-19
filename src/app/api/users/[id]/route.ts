@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { originAllowed, rejectOrigin } from "@/lib/origin";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
+import { passwordInUse } from "@/lib/password-unique";
 import { normaliseCellNumber, isValidCellNumber } from "@/lib/cell-number";
 import { parseRole } from "@/lib/constants";
 import { writeAudit } from "@/lib/audit";
@@ -22,12 +23,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (!isValidCellNumber(cellNumber) || !role) {
     return NextResponse.json({ error: "Cell number or permission is not valid." }, { status: 400 });
   }
-  const clash = await prisma.user.findFirst({ where: { cellNumber, NOT: { id } } });
-  if (clash) return NextResponse.json({ error: "That cell number already exists." }, { status: 400 });
   const password = String(body.password ?? "").trim();
   const active = parseActive(body.active, existing.active);
   if (id === actor.id && !active) {
     return NextResponse.json({ error: "You cannot deactivate your own account." }, { status: 400 });
+  }
+  if (password && (await passwordInUse(password, id))) {
+    return NextResponse.json(
+      { error: "That password is already used. Each person needs a unique password." },
+      { status: 400 }
+    );
   }
   const data: {
     name: string;

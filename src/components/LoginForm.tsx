@@ -53,7 +53,10 @@ function LoginFields({ cellNumbers }: { cellNumbers: string[] }) {
       <div className="login-card card">
         <p className="wordmark">Gather</p>
         <h1>Birmingham community events</h1>
-        <p className="lede">Sign in with the cell number and password your cell leader gave you.</p>
+        <p className="lede">
+          Sign in with the cell number and password your cell leader gave you. If several people share a
+          cell number, your password picks which person you are.
+        </p>
         <StatusBanner message={error} kind="error" />
         <form className="stack" onSubmit={onSubmit}>
           <label>

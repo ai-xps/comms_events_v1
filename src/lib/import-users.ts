@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import Papa from "papaparse";
 import { prisma } from "./db";
-import { hashPassword } from "./password";
+import { hashPassword, verifyPassword } from "./password";
 import { normaliseCellNumber, isValidCellNumber } from "./cell-number";
 import { parseRole, type Role } from "./constants";
 import { writeAudit } from "./audit";
@@ -138,7 +138,7 @@ export async function importUsers(opts: {
       errors: [{ row: 0, reason: `The file has ${rows.length} rows. The limit is ${LIMITS.importRows} per import.` }]
     };
   }
-  const seen = new Set<string>();
+  const seenPasswords = new Set<string>();
   const prepared: Array<Row & { role: Role; cellNumber: string }> = [];
 
   rows.forEach((row, i) => {
@@ -154,27 +154,33 @@ export async function importUsers(opts: {
     if (!row.cell) errors.push({ row: rowNumber, reason: "Cell is missing." });
     if (!row.password) {
       errors.push({ row: rowNumber, reason: "Password is required." });
+    } else if (seenPasswords.has(row.password)) {
+      errors.push({
+        row: rowNumber,
+        reason: "Password is repeated in this file. Each person needs a unique password."
+      });
+    } else {
+      seenPasswords.add(row.password);
     }
     const role = parseRole(row.permission);
     if (!role) errors.push({ row: rowNumber, reason: "Permission must be admin, cell leader, or member." });
-    if (cellNumber && seen.has(cellNumber)) {
-      errors.push({ row: rowNumber, reason: "Cell number is repeated in this file." });
-    }
-    if (cellNumber) seen.add(cellNumber);
     if (role) prepared.push({ ...row, role, cellNumber });
   });
 
   if (prepared.length) {
-    const existing = await prisma.user.findMany({
-      where: { cellNumber: { in: prepared.map((r) => r.cellNumber) } },
-      select: { cellNumber: true }
-    });
-    const existingSet = new Set(existing.map((u) => u.cellNumber));
-    prepared.forEach((row, i) => {
-      if (existingSet.has(row.cellNumber)) {
-        errors.push({ row: i + 2, reason: "Cell number already exists." });
+    const existing = await prisma.user.findMany({ select: { passwordHash: true } });
+    for (let i = 0; i < prepared.length; i++) {
+      const row = prepared[i];
+      for (const user of existing) {
+        if (await verifyPassword(row.password, user.passwordHash)) {
+          errors.push({
+            row: i + 2,
+            reason: "Password is already used. Each person needs a unique password."
+          });
+          break;
+        }
       }
-    });
+    }
   }
 
   if (errors.length) {
