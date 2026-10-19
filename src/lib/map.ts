@@ -5,8 +5,8 @@ export const TILE_ATTRIBUTION = "&copy; OpenStreetMap contributors";
 
 export const MARKER_STYLE = {
   radius: 8,
-  color: "#8b3a24",
+  color: "#0071e3",
   weight: 2,
-  fillColor: "#8b3a24",
+  fillColor: "#0071e3",
   fillOpacity: 0.85
 };

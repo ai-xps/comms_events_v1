@@ -10,3 +10,6 @@ prisma/dev.db-journal
 .DS_Store
 tsconfig.tsbuildinfo
 coverage
+.tmp-emil-skills/
+.tmp-emil-skills/
+.tmp-vid/

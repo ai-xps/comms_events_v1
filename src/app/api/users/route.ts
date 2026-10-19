@@ -16,13 +16,16 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const cellNumber = normaliseCellNumber(String(body.cellNumber ?? ""));
   const role = parseRole(String(body.role ?? ""));
-  const password = String(body.password ?? "");
+  const password = String(body.password ?? "").trim();
   if (!isValidCellNumber(cellNumber)) {
-    return NextResponse.json({ error: "Cell number must be 6–15 digits." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Cell number must be letters and digits only (no spaces)." },
+      { status: 400 }
+    );
   }
   if (!role) return NextResponse.json({ error: "Permission is not valid." }, { status: 400 });
-  if (password.length < 8) {
-    return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
+  if (!password) {
+    return NextResponse.json({ error: "Password is required." }, { status: 400 });
   }
   if (role !== "admin" && !body.cellId) {
     return NextResponse.json({ error: "Leaders and members need a cell." }, { status: 400 });

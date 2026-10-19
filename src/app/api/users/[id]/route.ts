@@ -6,7 +6,6 @@ import { hashPassword } from "@/lib/password";
 import { normaliseCellNumber, isValidCellNumber } from "@/lib/cell-number";
 import { parseRole } from "@/lib/constants";
 import { writeAudit } from "@/lib/audit";
-import { LIMITS } from "@/lib/security";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!originAllowed(request)) return rejectOrigin();
@@ -25,7 +24,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   }
   const clash = await prisma.user.findFirst({ where: { cellNumber, NOT: { id } } });
   if (clash) return NextResponse.json({ error: "That cell number already exists." }, { status: 400 });
-  const password = String(body.password ?? "");
+  const password = String(body.password ?? "").trim();
   const active = parseActive(body.active, existing.active);
   if (id === actor.id && !active) {
     return NextResponse.json({ error: "You cannot deactivate your own account." }, { status: 400 });
@@ -46,12 +45,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     active
   };
   if (password) {
-    if (password.length < 8 || password.length > LIMITS.passwordMax) {
-      return NextResponse.json(
-        { error: `Password must be 8 to ${LIMITS.passwordMax} characters.` },
-        { status: 400 }
-      );
-    }
     data.passwordHash = await hashPassword(password);
   }
   const deactivated = existing.active && !active;

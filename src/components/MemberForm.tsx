@@ -67,7 +67,7 @@ export function MemberForm({
       </label>
       <label>
         Cell number
-        <input name="cellNumber" required inputMode="tel" defaultValue={member?.cellNumber} />
+        <input name="cellNumber" required inputMode="text" autoComplete="username" defaultValue={member?.cellNumber} />
       </label>
       <label>
         Cell
@@ -94,8 +94,6 @@ export function MemberForm({
           name="password"
           type="password"
           autoComplete="new-password"
-          minLength={member ? 0 : 8}
-          maxLength={128}
           required={!member}
         />
       </label>

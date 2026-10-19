@@ -1,8 +1,23 @@
 # Gather — Birmingham Community Events
 
-A closed calendar for one community in Birmingham. An admin creates accounts from a file. Members sign in with a cell number and password, browse events, click Attend, and later confirm they went. Cell leaders review scraped events and look after their own cell.
+![Gather sign-in (Apple/tech UI)](docs/presentation/shots/readme-hero.png)
+
+A closed calendar for one community in Birmingham. An admin creates accounts from a file. Members sign in with a **cell number** (unique login ID — letters and digits) and a **password** (any length, must not be blank), browse events, click Attend, and later confirm they went. Cell leaders review scraped events and look after their own cell.
+
+**Live demo (Railway for speed now; hosting can move later):** https://commseventsv1-production.up.railway.app
 
 This deployment is Birmingham only. Another region would be a separate copy with its own database, admin, and calendar.
+
+## Presentation (stakeholders)
+
+Day-of talk uses Guillaume/Rebecca **Canva** (tech, non-tutorial). An’s pack:
+
+- [`docs/presentation/CANVA-TECH-BRIEF.md`](docs/presentation/CANVA-TECH-BRIEF.md) — colours + slide beats  
+- [`docs/presentation/requirements-loop.md`](docs/presentation/requirements-loop.md) — requirements flow + GitHub  
+- [`docs/presentation/STAKEHOLDER-CHECKLIST.md`](docs/presentation/STAKEHOLDER-CHECKLIST.md) — human owners  
+- `npm run deck:stakeholder` → `docs/presentation/Gather-stakeholder.pptx`
+
+Member tester guide (separate): [`docs/presentation/Gather-tester-guide.pptx`](docs/presentation/Gather-tester-guide.pptx) (`npm run deck`).
 
 ## Prerequisites
 
@@ -45,7 +60,7 @@ npm run typecheck
 
 CI (`.github/workflows/ci.yml`) on push to `experiment` or `main`: typecheck, tests against Postgres 16, then `next build`.
 
-What the app does, with who agreed it: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Weak points and the live smoke list: [`docs/REVIEW.md`](docs/REVIEW.md). What each demo build shipped: [`docs/CHANGELOG.md`](docs/CHANGELOG.md). Six-slide tester guide: [`docs/presentation/Gather-tester-guide.pptx`](docs/presentation/Gather-tester-guide.pptx) (`npm run deck` to rebuild).
+What the app does, with who agreed it: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Weak points and the live smoke list: [`docs/REVIEW.md`](docs/REVIEW.md). What each demo build shipped: [`docs/CHANGELOG.md`](docs/CHANGELOG.md). Agent briefing (commands, always/ask/never): [`AGENTS.md`](AGENTS.md). Emil Kowalski UI/motion skills (how to invoke): [`docs/EMIL-SKILLS.md`](docs/EMIL-SKILLS.md).
 
 To start again:
 
@@ -81,7 +96,7 @@ The demo harvest runs unless `SCRAPE_FIXTURES=0`. If Priority URLs are set, Gath
 
 Name, Cell number, Cell, Password, Permission.
 
-Permission is `admin`, `cell leader`, or `member`. Password must be at least 8 characters. CSV, Excel, and JSON are accepted. If any row fails, nobody is created.
+Permission is `admin`, `cell leader`, or `member`. Cell number is letters and digits only (any length, unique per person). Password must be non-empty (any length). CSV, Excel, and JSON are accepted. If any row fails, nobody is created.
 
 ## Replacing a password
 

@@ -11,11 +11,11 @@ export const CATEGORIES = [
 export type Category = (typeof CATEGORIES)[number];
 
 export const DEFAULT_COLOURS: Record<Category, string> = {
-  Christian: "#2f5d50",
-  Networking: "#3d5a80",
-  Professional: "#5c4a3a",
-  Student: "#6b4c7a",
-  Meetup: "#8a5a2b"
+  Christian: "#34c759",
+  Networking: "#0071e3",
+  Professional: "#5856d6",
+  Student: "#af52de",
+  Meetup: "#ff9500"
 };
 
 // COUNT_AND_NAME_CELL lets every member read the name and cell number of everyone booked

@@ -146,11 +146,14 @@ export async function importUsers(opts: {
     const cellNumber = normaliseCellNumber(row.cellNumber);
     if (!row.name) errors.push({ row: rowNumber, reason: "Name is missing." });
     if (!isValidCellNumber(cellNumber)) {
-      errors.push({ row: rowNumber, reason: "Cell number must be 6–15 digits." });
+      errors.push({
+        row: rowNumber,
+        reason: "Cell number must be letters and digits only (no spaces)."
+      });
     }
     if (!row.cell) errors.push({ row: rowNumber, reason: "Cell is missing." });
-    if (!row.password || row.password.length < 8 || row.password.length > LIMITS.passwordMax) {
-      errors.push({ row: rowNumber, reason: `Password must be 8 to ${LIMITS.passwordMax} characters.` });
+    if (!row.password) {
+      errors.push({ row: rowNumber, reason: "Password is required." });
     }
     const role = parseRole(row.permission);
     if (!role) errors.push({ row: rowNumber, reason: "Permission must be admin, cell leader, or member." });

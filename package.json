@@ -15,7 +15,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
-    "deck": "node docs/presentation/build-deck.mjs"
+    "deck": "node docs/presentation/build-deck.mjs",
+    "deck:stakeholder": "node docs/presentation/build-stakeholder-deck.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.16.2",
