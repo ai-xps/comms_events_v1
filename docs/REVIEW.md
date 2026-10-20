@@ -61,6 +61,7 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | High | Silent client fetch failures | **Fixed** — `requestJson` |
 | Med | No loading / error / not-found pages | **Fixed** |
 | Med | Member cannot be deactivated | **Fixed** — form sends `on`/`off` |
+| Med | Guillaume 20 Oct: prefer **delete** members (remove) over deactivate-only | **Backlog** — hard-delete + confirm; mind bookings/audit FKs |
 | Med | Empty tables have no message | **Backlog** |
 | Low | Attend vs “booked” copy mix | **Backlog** |
 | — | §16 mobile redesign | **Backlog** (track A) |
