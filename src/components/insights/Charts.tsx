@@ -214,7 +214,7 @@ export function KpiStrip(
     <ul className="kpi-grid" aria-label="Insight totals">
       {items.map(([label, value]) => (
         <li key={label} className="card">
-          <p className="muted">{label}</p>
+          <p className="kpi-label">{label}</p>
           <p className="kpi-value">{value}</p>
         </li>
       ))}
