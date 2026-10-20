@@ -14,10 +14,10 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## 2026-10-20 — Soft glass / purple–blue UI (style only)
+## 2026-10-20 — Soft blush / berry UI (style only)
 
-- Visual restyle from stakeholder podcast-app refs: frosted pill header, gradient CTAs, selected chips, soft shadows.
-- Tokens in `globals.css`; map/Insights accents follow. No behaviour changes.
+- Visual restyle from Gelain-style refs: blush paper, berry CTAs, sage/gold gentle accents.
+- Tokens in `globals.css`; map/Insights/category art follow. No behaviour changes.
 - Nav fits admin links: shorter labels, wrapping flex topbar, secondary Sign out.
 - Insights KPIs: even 3×3 grid + frosted filter bar.
 - Event cards: small category illustrations + soft colour washes (calendar, bookings, pending, detail).

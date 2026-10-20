@@ -2,7 +2,7 @@
 
 ## UI restyle (visual only)
 
-Soft glass / “Vibes” surface (20 Oct 2026, style only from stakeholder mock refs): cool paper `#F3F4F8` with a light purple–blue wash and soft dot grid; ink `#1A1A2E`; accent gradient `#7B2FF7` → `#2E6BFF` (solid alias `--terracotta` / `--accent` = `#6D5EFC` for borders and map pins). Pill nav + selected chips/buttons use the gradient; floating frosted topbar; cards radius ~22px with soft violet-tinted shadow. Spacing scale `--space-1`…`--space-6` unchanged. At ≤700px: wordmark | Menu | Sign out; Menu still opens the role-scoped panel. Leaflet markers match accent purple. No booking, role, route, or API changes.
+Soft blush / “Gelain” surface (20 Oct 2026, style only from stakeholder mock refs): paper `#FDF2F0` with gentle pink / sage / gold washes; warm ink `#3D2A2C`; accent berry `#A8434D` (gradient `#C45C66` → `#A8434D`; `--terracotta` / `--accent` alias). Soft secondary tokens `--sage` / `--gold`. Pill nav + selected chips/buttons use berry; frosted topbar; cards ~24px radius with rose-tinted shadow. Category defaults use sage / teal / berry / mauve / gold. Spacing scale unchanged. Leaflet markers match berry. No booking, role, route, or API changes.
 
 Where `context.md` and the discovery-document comments disagree, this build follows the values below. See `context.md` section 15 for the source threads.
 

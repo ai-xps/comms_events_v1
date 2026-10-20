@@ -53,9 +53,9 @@ export function LineBars({
   return (
     <svg className="chart-svg" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Attend clicks each week">
       <path d={line(previous)} fill="none" stroke="#c5c8d8" strokeDasharray="4 4" strokeWidth="2" />
-      <path d={line(weeks)} fill="none" stroke="#6d5efc" strokeWidth="2.5" />
+      <path d={line(weeks)} fill="none" stroke="#a8434d" strokeWidth="2.5" />
       {weeks.map((w, i) => (
-        <circle key={w.weekStart} cx={x(i, weeks.length)} cy={y(w.attendClicks)} r="3.5" fill="#6d5efc" />
+        <circle key={w.weekStart} cx={x(i, weeks.length)} cy={y(w.attendClicks)} r="3.5" fill="#a8434d" />
       ))}
     </svg>
   );
@@ -91,7 +91,7 @@ export function NamedBars({ rows, colours }: { rows: NamedCount[]; colours?: Rec
       {rows.map((r) => (
         <li key={r.key}>
           <span>
-            {colours ? <span className="swatch" style={{ background: colours[r.key] ?? "#6d5efc" }} /> : null}
+            {colours ? <span className="swatch" style={{ background: colours[r.key] ?? "#a8434d" }} /> : null}
             {r.suppressed ? `${r.label} (fewer than 3 people)` : r.label}
           </span>
           <span className="bar-track">

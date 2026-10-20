@@ -19,7 +19,7 @@ export function categoryArt(category: string): { src: string; label: string } {
 
 /** Soft wash for inline style — gentle tint of the category colour. */
 export function categoryAccentStyle(colour: string | undefined): CSSProperties {
-  const c = colour && /^#[0-9A-Fa-f]{6}$/.test(colour) ? colour : "#6d5efc";
+  const c = colour && /^#[0-9A-Fa-f]{6}$/.test(colour) ? colour : "#a8434d";
   return {
     ["--cat" as string]: c,
     ["--cat-soft" as string]: `color-mix(in srgb, ${c} 14%, white)`,
