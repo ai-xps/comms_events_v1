@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CategoryThumb } from "@/components/CategoryThumb";
+import { categoryAccentStyle } from "@/lib/category-art";
 import { calendarHref, dayKeyOf, formatDayKey, formatDayLabel, sameDayKey, type CalendarState, type DayKey } from "@/lib/calendar";
 import { formatTime } from "@/lib/time";
 
@@ -61,11 +63,12 @@ export function MonthGrid({
                         key={event.id}
                         className="event-link"
                         href={`/events/${event.id}`}
-                        title={labelText}
-                        style={{ ["--cat" as string]: colours[event.category] }}
+                        title={`${event.category}: ${labelText}`}
+                        style={categoryAccentStyle(colours[event.category])}
                       >
+                        <CategoryThumb category={event.category} size="sm" />
                         <span className="sr-only">{event.category}: </span>
-                        {labelText}
+                        <span className="event-link-text">{labelText}</span>
                       </Link>
                     );
                   })}

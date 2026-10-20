@@ -20,6 +20,7 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 - Tokens in `globals.css`; map/Insights accents follow. No behaviour changes.
 - Nav fits admin links: shorter labels, wrapping flex topbar, secondary Sign out.
 - Insights KPIs: even 3×3 grid + frosted filter bar.
+- Event cards: small category illustrations + soft colour washes (calendar, bookings, pending, detail).
 
 ## 2026-10-20 — Fix scraper / members / import after shared-cell login
 

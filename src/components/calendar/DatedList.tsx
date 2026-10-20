@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { CategoryThumb } from "@/components/CategoryThumb";
+import { categoryAccentStyle } from "@/lib/category-art";
 import { dayKeyOf, formatDayKey, formatDayLabel, sameDayKey, type CalendarView, type DayKey } from "@/lib/calendar";
 import { formatTime } from "@/lib/time";
 
@@ -55,12 +57,23 @@ export function DatedList({
             ) : (
               <div className="list">
                 {dayEvents.map((event) => (
-                  <Link key={event.id} className="card" href={`/events/${event.id}`}>
-                    <span className="swatch" style={{ background: colours[event.category] }} /> {event.category}
-                    <span className="event-title">{event.title}</span>
-                    <span className="muted">
-                      {formatTime(event.startsAt)} · {event.online ? "Online" : event.placeName}
-                      {event.sourceKey ? " · From scrape" : ""}
+                  <Link
+                    key={event.id}
+                    className="card event-card"
+                    href={`/events/${event.id}`}
+                    style={categoryAccentStyle(colours[event.category])}
+                  >
+                    <CategoryThumb category={event.category} size="md" />
+                    <span className="event-card-body">
+                      <span className="event-card-meta">
+                        <span className="swatch" style={{ background: colours[event.category] }} />
+                        {event.category}
+                      </span>
+                      <span className="event-title">{event.title}</span>
+                      <span className="muted">
+                        {formatTime(event.startsAt)} · {event.online ? "Online" : event.placeName}
+                        {event.sourceKey ? " · From scrape" : ""}
+                      </span>
                     </span>
                   </Link>
                 ))}

@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { requireUser, canReview } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { getSettings } from "@/lib/settings";
-import { formatDateTime } from "@/lib/time";
-import { initialsFromName } from "@/lib/initials";
+import { CategoryThumb } from "@/components/CategoryThumb";
 import { EventActions } from "@/components/EventActions";
 import { EventMap } from "@/components/EventMap";
+import { requireUser, canReview } from "@/lib/auth";
+import { categoryAccentStyle } from "@/lib/category-art";
+import { prisma } from "@/lib/db";
+import { initialsFromName } from "@/lib/initials";
+import { getSettings } from "@/lib/settings";
+import { formatDateTime } from "@/lib/time";
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -45,13 +47,19 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
       <p>
         <Link href="/calendar">Back to calendar</Link>
       </p>
-      <div className="page-head">
-        <h1>{event.title}</h1>
-        <p className="lede">
-          <span className="swatch" style={{ background: settings.colours[event.category as keyof typeof settings.colours] }} />{" "}
-          {event.category} · {event.online ? "Online" : "In person"} · {formatDateTime(event.startsAt)}–
-          {formatDateTime(event.endsAt)}
-        </p>
+      <div
+        className="page-head event-hero card"
+        style={categoryAccentStyle(settings.colours[event.category as keyof typeof settings.colours])}
+      >
+        <CategoryThumb category={event.category} size="lg" />
+        <div>
+          <h1>{event.title}</h1>
+          <p className="lede">
+            <span className="swatch" style={{ background: settings.colours[event.category as keyof typeof settings.colours] }} />{" "}
+            {event.category} · {event.online ? "Online" : "In person"} · {formatDateTime(event.startsAt)}–
+            {formatDateTime(event.endsAt)}
+          </p>
+        </div>
       </div>
       <section className="card stack">
         <p>

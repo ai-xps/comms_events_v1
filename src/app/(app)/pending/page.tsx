@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { CategoryThumb } from "@/components/CategoryThumb";
 import { requireUser } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { formatDateTime, formatDate } from "@/lib/time";
-import { isUpdatedScrapedRow } from "@/lib/scraper/apply";
+import { categoryAccentStyle } from "@/lib/category-art";
 import { dayKeyOf, formatDayKey } from "@/lib/calendar";
+import { prisma } from "@/lib/db";
+import { isUpdatedScrapedRow } from "@/lib/scraper/apply";
+import { getSettings } from "@/lib/settings";
+import { formatDateTime, formatDate } from "@/lib/time";
 
 function displayEventLink(url: string) {
   return url.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
@@ -11,6 +14,7 @@ function displayEventLink(url: string) {
 
 export default async function PendingPage() {
   await requireUser(["admin", "cell leader"]);
+  const settings = await getSettings();
   const events = await prisma.event.findMany({
     where: { status: "PENDING" },
     orderBy: { startsAt: "asc" }
@@ -41,8 +45,16 @@ export default async function PendingPage() {
             {group.events.map((event) => {
               const updated = isUpdatedScrapedRow(event.createdAt, event.updatedAt);
               return (
-                <Link key={event.id} className="card pending-tile" href={`/events/${event.id}/edit`}>
-                  <p className="pending-kicker muted">{updated ? "Updated" : "New"}</p>
+                <Link
+                  key={event.id}
+                  className="card pending-tile"
+                  href={`/events/${event.id}/edit`}
+                  style={categoryAccentStyle(settings.colours[event.category as keyof typeof settings.colours])}
+                >
+                  <div className="pending-tile-top">
+                    <p className="pending-kicker muted">{updated ? "Updated" : "New"}</p>
+                    <CategoryThumb category={event.category} size="md" />
+                  </div>
                   <h3>{event.title}</h3>
                   <p className="pending-meta muted">
                     <span>

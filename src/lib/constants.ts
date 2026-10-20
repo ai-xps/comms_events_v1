@@ -10,12 +10,13 @@ export const CATEGORIES = [
 ] as const;
 export type Category = (typeof CATEGORIES)[number];
 
+/** Soft but distinct accents — used as gentle washes on cards, not loud fills. */
 export const DEFAULT_COLOURS: Record<Category, string> = {
   Christian: "#34c759",
-  Networking: "#0071e3",
-  Professional: "#5856d6",
-  Student: "#af52de",
-  Meetup: "#ff9500"
+  Networking: "#5b8def",
+  Professional: "#7c6cf0",
+  Student: "#b06def",
+  Meetup: "#f2953d"
 };
 
 // COUNT_AND_NAME_CELL lets every member read the name and cell number of everyone booked

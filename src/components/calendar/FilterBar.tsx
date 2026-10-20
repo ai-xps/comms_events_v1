@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CategoryThumb } from "@/components/CategoryThumb";
 import { calendarHref, toggleCategory, type CalendarState } from "@/lib/calendar";
 import type { Category } from "@/lib/constants";
 
@@ -28,6 +29,7 @@ export function FilterBar({
               current={on}
               pressed={on}
             >
+              <CategoryThumb category={c} size="sm" />
               <span className="swatch" style={{ background: colours[c] }} />
               {c}
             </Chip>
