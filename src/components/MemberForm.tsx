@@ -31,6 +31,12 @@ export function MemberForm({
     e.preventDefault();
     const form = new FormData(e.currentTarget);
     const payload: Record<string, unknown> = Object.fromEntries(form.entries());
+    const role = String(payload.role ?? "member");
+    const cellId = String(payload.cellId ?? "");
+    if (role !== "admin" && !cellId) {
+      setMessage("Choose a cell for leaders and members.");
+      return;
+    }
     if (member) {
       const active = form.get("active") === "on";
       payload.active = active ? "on" : "off";
@@ -45,6 +51,7 @@ export function MemberForm({
       }
     }
     setBusy(true);
+    setMessage(null);
     const result = await requestJson(member ? `/api/users/${member.id}` : "/api/users", {
       method: member ? "PATCH" : "POST",
       body: payload
@@ -104,7 +111,7 @@ export function MemberForm({
       ) : null}
       <div className="row">
         <button type="submit" disabled={busy}>
-          Save
+          {busy ? "Saving…" : "Save"}
         </button>
         <button className="ghost" type="button" onClick={() => router.push("/members")}>
           Return

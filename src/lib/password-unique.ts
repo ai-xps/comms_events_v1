@@ -2,14 +2,16 @@ import { prisma } from "./db";
 import { verifyPassword } from "./password";
 
 /**
- * Passwords must be unique so shared cell numbers can pick the right person.
- * Demo-sized user lists only — bcrypt-compare against each hash.
+ * Among people who share this cell number, passwords must be unique
+ * so login can tell them apart. Different cell numbers may reuse a password.
  */
 export async function passwordInUse(
   plain: string,
+  cellNumber: string,
   exceptUserId?: string
 ): Promise<boolean> {
   const users = await prisma.user.findMany({
+    where: { cellNumber },
     select: { id: true, passwordHash: true }
   });
   for (const user of users) {

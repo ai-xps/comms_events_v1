@@ -65,11 +65,28 @@ function walkTree(node: unknown, path: string[], cells: CellMeta[]) {
   }
 }
 
+/** Excel/Google Sheets cells may be plain strings or rich-text / hyperlink objects. */
+export function excelCellText(value: unknown): string {
+  if (value == null) return "";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+    return String(value).trim();
+  }
+  if (typeof value === "object") {
+    const v = value as Record<string, unknown>;
+    if (typeof v.text === "string") return v.text.trim();
+    if (v.result !== undefined) return excelCellText(v.result);
+    if (Array.isArray(v.richText)) {
+      return (v.richText as { text?: string }[]).map((part) => part.text ?? "").join("").trim();
+    }
+  }
+  return String(value).trim();
+}
+
 function pick(row: Record<string, unknown>, keys: string[]): string {
   const map = new Map(Object.keys(row).map((k) => [k.toLowerCase().replace(/[^a-z]/g, ""), k]));
   for (const key of keys) {
     const found = map.get(key.toLowerCase().replace(/[^a-z]/g, ""));
-    if (found && row[found] != null) return String(row[found]).trim();
+    if (found && row[found] != null) return excelCellText(row[found]);
   }
   return "";
 }
@@ -110,14 +127,14 @@ export async function parseImportFile(filename: string, buffer: Buffer): Promise
   if (!sheet) return { rows: [], cells: [] };
   const header: string[] = [];
   sheet.getRow(1).eachCell((cell, col) => {
-    header[col] = String(cell.value ?? "");
+    header[col] = excelCellText(cell.value);
   });
   const rows: Row[] = [];
   sheet.eachRow((row, index) => {
     if (index === 1) return;
     const raw: Record<string, unknown> = {};
     row.eachCell((cell, col) => {
-      raw[header[col] ?? `col${col}`] = cell.value;
+      raw[header[col] || `col${col}`] = cell.value;
     });
     rows.push(toRow(raw));
   });
@@ -129,8 +146,32 @@ export async function importUsers(opts: {
   filename: string;
   buffer: Buffer;
 }) {
-  const { rows, cells } = await parseImportFile(opts.filename, opts.buffer);
+  let rows: Row[];
+  let cells: CellMeta[];
+  try {
+    ({ rows, cells } = await parseImportFile(opts.filename, opts.buffer));
+  } catch (error) {
+    console.error("import parse failed", error);
+    return {
+      ok: false as const,
+      created: 0,
+      errors: [
+        {
+          row: 0,
+          reason: "Could not read that file. Save as .xlsx or .csv with the template column headers and try again."
+        }
+      ]
+    };
+  }
+
   const errors: { row: number; reason: string }[] = [];
+  if (rows.length === 0) {
+    return {
+      ok: false as const,
+      created: 0,
+      errors: [{ row: 0, reason: "No data rows found. Check the header row and that people are listed underneath." }]
+    };
+  }
   if (rows.length > LIMITS.importRows) {
     return {
       ok: false as const,
@@ -138,7 +179,8 @@ export async function importUsers(opts: {
       errors: [{ row: 0, reason: `The file has ${rows.length} rows. The limit is ${LIMITS.importRows} per import.` }]
     };
   }
-  const seenPasswords = new Set<string>();
+
+  const seenPasswordsByCell = new Map<string, Set<string>>();
   const prepared: Array<Row & { role: Role; cellNumber: string }> = [];
 
   rows.forEach((row, i) => {
@@ -148,34 +190,44 @@ export async function importUsers(opts: {
     if (!isValidCellNumber(cellNumber)) {
       errors.push({
         row: rowNumber,
-        reason: "Cell number must be letters and digits only (no spaces)."
+        reason: "Cell number must be letters and digits only (spaces are removed automatically)."
       });
     }
     if (!row.cell) errors.push({ row: rowNumber, reason: "Cell is missing." });
     if (!row.password) {
       errors.push({ row: rowNumber, reason: "Password is required." });
-    } else if (seenPasswords.has(row.password)) {
-      errors.push({
-        row: rowNumber,
-        reason: "Password is repeated in this file. Each person needs a unique password."
-      });
-    } else {
-      seenPasswords.add(row.password);
+    } else if (cellNumber) {
+      const seen = seenPasswordsByCell.get(cellNumber) ?? new Set<string>();
+      if (seen.has(row.password)) {
+        errors.push({
+          row: rowNumber,
+          reason: "Password is repeated for this cell number in the file. Each person on the same cell number needs a unique password."
+        });
+      } else {
+        seen.add(row.password);
+        seenPasswordsByCell.set(cellNumber, seen);
+      }
     }
     const role = parseRole(row.permission);
     if (!role) errors.push({ row: rowNumber, reason: "Permission must be admin, cell leader, or member." });
-    if (role) prepared.push({ ...row, role, cellNumber });
+    if (role && cellNumber) prepared.push({ ...row, role, cellNumber });
   });
 
   if (prepared.length) {
-    const existing = await prisma.user.findMany({ select: { passwordHash: true } });
+    const cellNumbers = [...new Set(prepared.map((r) => r.cellNumber))];
+    const existing = await prisma.user.findMany({
+      where: { cellNumber: { in: cellNumbers } },
+      select: { cellNumber: true, passwordHash: true }
+    });
     for (let i = 0; i < prepared.length; i++) {
       const row = prepared[i];
       for (const user of existing) {
+        if (user.cellNumber !== row.cellNumber) continue;
         if (await verifyPassword(row.password, user.passwordHash)) {
           errors.push({
             row: i + 2,
-            reason: "Password is already used. Each person needs a unique password."
+            reason:
+              "Password is already used by someone with this cell number. Each person on the same cell number needs a unique password."
           });
           break;
         }
@@ -185,6 +237,11 @@ export async function importUsers(opts: {
 
   if (errors.length) {
     return { ok: false as const, created: 0, errors };
+  }
+
+  const hashed: Array<(typeof prepared)[number] & { passwordHash: string }> = [];
+  for (const row of prepared) {
+    hashed.push({ ...row, passwordHash: await hashPassword(row.password) });
   }
 
   const created = await prisma.$transaction(async (tx) => {
@@ -206,7 +263,7 @@ export async function importUsers(opts: {
       }
     }
     let count = 0;
-    for (const row of prepared) {
+    for (const row of hashed) {
       const key = row.cell.toLowerCase();
       let cellId = cellByName.get(key);
       if (!cellId) {
@@ -221,13 +278,12 @@ export async function importUsers(opts: {
         cellId = cell.id;
         cellByName.set(key, cellId);
       }
-      const hash = await hashPassword(row.password);
       const needsCell = row.role !== "admin";
       await tx.user.create({
         data: {
           name: row.name,
           cellNumber: row.cellNumber,
-          passwordHash: hash,
+          passwordHash: row.passwordHash,
           role: row.role,
           cellId: needsCell ? cellId : row.cell ? cellId : null,
           active: true
@@ -238,11 +294,15 @@ export async function importUsers(opts: {
     return count;
   });
 
-  await writeAudit({
-    actorId: opts.actor.id,
-    action: "users.import",
-    entityType: "User",
-    summary: `${opts.actor.name} imported ${created} users from ${opts.filename}`
-  });
+  try {
+    await writeAudit({
+      actorId: opts.actor.id,
+      action: "users.import",
+      entityType: "User",
+      summary: `${opts.actor.name} imported ${created} users from ${opts.filename}`
+    });
+  } catch (error) {
+    console.error("users.import audit failed", error);
+  }
   return { ok: true as const, created, errors: [] };
 }

@@ -31,9 +31,12 @@ export async function POST(request: NextRequest) {
   if (role !== "admin" && !body.cellId) {
     return NextResponse.json({ error: "Leaders and members need a cell." }, { status: 400 });
   }
-  if (await passwordInUse(password)) {
+  if (await passwordInUse(password, cellNumber)) {
     return NextResponse.json(
-      { error: "That password is already used. Each person needs a unique password." },
+      {
+        error:
+          "That password is already used by someone with this cell number. Each person on the same cell number needs a unique password."
+      },
       { status: 400 }
     );
   }
@@ -46,12 +49,16 @@ export async function POST(request: NextRequest) {
       cellId: body.cellId ? String(body.cellId) : null
     }
   });
-  await writeAudit({
-    actorId: actor.id,
-    action: "user.create",
-    entityType: "User",
-    entityId: user.id,
-    summary: `${actor.name} created ${user.name} as ${role}`
-  });
+  try {
+    await writeAudit({
+      actorId: actor.id,
+      action: "user.create",
+      entityType: "User",
+      entityId: user.id,
+      summary: `${actor.name} created ${user.name} as ${role}`
+    });
+  } catch (error) {
+    console.error("user.create audit failed", error);
+  }
   return NextResponse.json({ ok: true, id: user.id });
 }

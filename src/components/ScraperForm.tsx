@@ -27,6 +27,7 @@ export function ScraperForm({
   const router = useRouter();
   const [message, setMessage] = useState<string | null>(notice ?? null);
   const [kind, setKind] = useState<"info" | "error">("info");
+  const [running, setRunning] = useState(false);
 
   function show(result: JsonResult, success: string) {
     setKind(result.ok ? "info" : "error");
@@ -55,6 +56,10 @@ export function ScraperForm({
   }
 
   async function runNow() {
+    if (running) return;
+    setRunning(true);
+    setKind("info");
+    setMessage("Scraper running… this can take up to a minute.");
     const result = await requestJson<{
       createdCount?: number;
       updatedCount?: number;
@@ -65,6 +70,7 @@ export function ScraperForm({
     }>("/api/scraper/run", {
       method: "POST"
     });
+    setRunning(false);
     show(
       result,
       result.ok
@@ -115,9 +121,11 @@ export function ScraperForm({
           <span className="muted">Meetup search pages and any host not on the allowlist are dropped, not saved.</span>
         </label>
         <div className="row">
-          <button type="submit">Save settings</button>
-          <button className="secondary" type="button" onClick={runNow}>
-            Run now
+          <button type="submit" disabled={running}>
+            Save settings
+          </button>
+          <button className="secondary" type="button" onClick={runNow} disabled={running}>
+            {running ? "Running…" : "Run now"}
           </button>
         </div>
         <p className="muted">

@@ -28,9 +28,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   if (id === actor.id && !active) {
     return NextResponse.json({ error: "You cannot deactivate your own account." }, { status: 400 });
   }
-  if (password && (await passwordInUse(password, id))) {
+  const cellId = body.cellId ? String(body.cellId) : null;
+  if (role !== "admin" && !cellId) {
+    return NextResponse.json({ error: "Leaders and members need a cell." }, { status: 400 });
+  }
+  if (password && (await passwordInUse(password, cellNumber, id))) {
     return NextResponse.json(
-      { error: "That password is already used. Each person needs a unique password." },
+      {
+        error:
+          "That password is already used by someone with this cell number. Each person on the same cell number needs a unique password."
+      },
       { status: 400 }
     );
   }
@@ -46,7 +53,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     name: String(body.name ?? existing.name).trim(),
     cellNumber,
     role,
-    cellId: body.cellId ? String(body.cellId) : null,
+    cellId,
     active
   };
   if (password) {
@@ -71,7 +78,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     });
   }
   for (const entry of audits) {
-    await writeAudit({ actorId: actor.id, entityType: "User", entityId: id, ...entry });
+    try {
+      await writeAudit({ actorId: actor.id, entityType: "User", entityId: id, ...entry });
+    } catch (error) {
+      console.error("user.patch audit failed", error);
+    }
   }
   return NextResponse.json({ ok: true });
 }

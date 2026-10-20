@@ -14,6 +14,13 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-20 — Fix scraper / members / import after shared-cell login
+
+- Password uniqueness only among people who share the same cell number (faster create/import).
+- Origin check accepts Referer / same-origin when browsers omit Origin (manual scrape + member save).
+- Import: rich-text Excel cells, safer parse errors, audit failures no longer block create/import.
+- Scraper “Run now”, member Save, and import show clear busy / error states.
+
 ## 2026-10-19 — Shared cell number + unique password login
 
 - Several people may share one cell number; login picks the person by unique password (Guillaume B).

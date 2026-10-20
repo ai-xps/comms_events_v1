@@ -7,6 +7,7 @@ export function ImportForm() {
   const [message, setMessage] = useState<string | null>(null);
   const [kind, setKind] = useState<"info" | "error">("info");
   const [errors, setErrors] = useState<{ row: number; reason: string }[]>([]);
+  const [busy, setBusy] = useState(false);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,15 +20,23 @@ export function ImportForm() {
       setErrors([]);
       return;
     }
+    setBusy(true);
+    setMessage(null);
+    setErrors([]);
     let json: { ok?: boolean; created?: number; error?: string; errors?: { row: number; reason: string }[] };
     try {
       const response = await fetch("/api/import", { method: "POST", body: data });
       json = await response.json().catch(() => ({ ok: false, error: "Import failed." }));
+      if (!response.ok && !json.errors && !json.error) {
+        json = { ok: false, error: `Import failed (HTTP ${response.status}).` };
+      }
     } catch {
+      setBusy(false);
       setKind("error");
       setMessage("Could not reach Gather. Check your connection and try again.");
       return;
     }
+    setBusy(false);
     if (!json.ok) {
       setKind("error");
       setMessage("Nothing was imported. Fix the rows below and try again.");
@@ -44,7 +53,10 @@ export function ImportForm() {
     <main>
       <div className="page-head">
         <h1>Import people</h1>
-        <p className="lede">CSV, Excel, or JSON. If any row fails, nobody is created. Use this column order:</p>
+        <p className="lede">
+          CSV, Excel, or JSON. If any row fails, nobody is created. Cell numbers may be shared; passwords must be
+          unique for people who share a cell number. Use this column order:
+        </p>
       </div>
       <div className="table-wrap" style={{ marginBottom: "var(--space-5)" }}>
         <table className="data stack-sm">
@@ -70,15 +82,17 @@ export function ImportForm() {
       </div>
       <p className="muted" style={{ marginBottom: "var(--space-4)" }}>
         <a href="/api/import/template">Download CSV template</a>
-        . Permission is admin, cell leader, or member.
+        . Permission is admin, cell leader, or member. Spaces in cell numbers are removed automatically (T3 C1 → T3C1).
       </p>
       <form className="card stack" onSubmit={onSubmit}>
         <StatusBanner message={message} kind={kind} />
         <label>
           File
-          <input type="file" name="file" accept=".csv,.xlsx,.xls,.json" required />
+          <input type="file" name="file" accept=".csv,.xlsx,.xls,.json" required disabled={busy} />
         </label>
-        <button type="submit">Import</button>
+        <button type="submit" disabled={busy}>
+          {busy ? "Importing…" : "Import"}
+        </button>
       </form>
       {errors.length ? (
         <div className="table-wrap" style={{ marginTop: "var(--space-5)" }}>
