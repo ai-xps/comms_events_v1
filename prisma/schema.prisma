@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  // Shared login ID allowed; password must be unique so login can pick the person.
+  cellNumber   String
+  passwordHash String
+  role         String
+  cellId       String?
+  active       Boolean   @default(true)
+  sessionVersion Int     @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  cell         Cell?     @relation(fields: [cellId], references: [id])
+  bookings     Booking[] @relation("BookingUser")
+  bookedFor    Booking[] @relation("BookedBy")
+  stars        Star[]
+  createdEvents Event[]  @relation("EventCreatedBy")
+  reviewedEvents Event[] @relation("EventReviewedBy")
+  auditLogs    AuditLog[]
+
+  @@index([cellNumber])
+}
+
+model Cell {
+  id         String  @id @default(cuid())
+  name       String  @unique
+  region     String?
+  department String?
+  team       String?
+  users      User[]
+}
+
+model Organisation {
+  id      String  @id @default(cuid())
+  name    String
+  nameKey String  @unique
+  status  String
+  events  Event[]
+}
+
+model Event {
+  id               String    @id @default(cuid())
+  seriesId         String?
+  sourceKey        String?   @unique
+  title            String
+  organisationName String
+  organisationId   String?
+  category         String
+  startsAt         DateTime
+  endsAt           DateTime
+  online           Boolean   @default(false)
+  placeName        String?
+  lat              Float?
+  lng              Float?
+  externalUrl      String?
+  notes            String?
+  capacity         Int?
+  status           String
+  recurrence       String    @default("NONE")
+  createdById      String?
+  reviewedById     String?
+  humanEditedAt    DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  organisation     Organisation? @relation(fields: [organisationId], references: [id])
+  createdBy        User?     @relation("EventCreatedBy", fields: [createdById], references: [id])
+  reviewedBy       User?     @relation("EventReviewedBy", fields: [reviewedById], references: [id])
+  bookings         Booking[]
+  stars            Star[]
+}
+
+model Booking {
+  id           String   @id @default(cuid())
+  eventId      String
+  userId       String
+  bookedById   String
+  bookedAt     DateTime @default(now())
+  attendance   String   @default("UNCONFIRMED")
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user         User     @relation("BookingUser", fields: [userId], references: [id])
+  bookedBy     User     @relation("BookedBy", fields: [bookedById], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model Star {
+  id        String   @id @default(cuid())
+  userId    String
+  eventId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+}
+
+model Settings {
+  id                   String  @id
+  locationLabel        String  @default("Birmingham")
+  memberAttendeeView   String  @default("COUNT")
+  christianEnabled     Boolean @default(true)
+  networkingEnabled    Boolean @default(true)
+  professionalEnabled  Boolean @default(true)
+  studentEnabled       Boolean @default(true)
+  meetupEnabled        Boolean @default(true)
+  categoryColours      String
+  priorityUrls         String  @default("[]")
+}
+
+model ScraperRun {
+  id                  String    @id @default(cuid())
+  startedAt           DateTime  @default(now())
+  finishedAt          DateTime?
+  trigger             String
+  status              String
+  createdCount        Int       @default(0)
+  updatedCount        Int       @default(0)
+  discardedByRule     Int       @default(0)
+  leftPending         Int       @default(0)
+  publishedCount      Int       @default(0)
+  skippedHumanEdited  Int       @default(0)
+  errorText           String?
+  priorityUrlsSnapshot String   @default("[]")
+  sourceResults       String    @default("[]")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  at         DateTime @default(now())
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  summary    String
+  actor      User?    @relation(fields: [actorId], references: [id])
+}
+
+model LoginThrottle {
+  cellNumber   String    @id
+  failures     Int       @default(0)
+  windowStart  DateTime  @default(now())
+  lockedUntil  DateTime?
+}
+
+model ScrapeLock {
+  id        String   @id
+  heldUntil DateTime
+}

@@ -1,0 +1,15 @@
+---
+description: Guardrails when using Emil Kowalski UI/motion skills on Gather. Apply when animating, reviewing motion, mobile-native polish, prototyping UI variants, or picking UI libraries.
+alwaysApply: false
+---
+
+# Emil skills on Gather
+
+When an Emil Kowalski skill from `.cursor/skills/` is in use:
+
+1. Read [`docs/EMIL-SKILLS.md`](docs/EMIL-SKILLS.md) for which skill fits.
+2. Keep current product tokens in `src/app/globals.css` (cool paper, system-blue accent, SF-style stack). No teal §16 redesign unless the user asked for it.
+3. Prefer existing CSS / components before adding Motion, Sonner, or other libraries — ask first.
+4. Prefer **no animation** over the wrong animation (Karpathy + Emil gate).
+5. Do not change Attend, auth, booking, or privacy behaviour for visual polish alone.
+6. `animate-expo` and `write-swift` are usually the wrong tools — Gather is Next.js on the web.
