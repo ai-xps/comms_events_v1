@@ -18,6 +18,7 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 - Visual restyle from stakeholder podcast-app refs: frosted pill header, gradient CTAs, selected chips, soft shadows.
 - Tokens in `globals.css`; map/Insights accents follow. No behaviour changes.
+- Nav fits admin links: shorter labels, wrapping flex topbar, secondary Sign out.
 
 ## 2026-10-20 — Fix scraper / members / import after shared-cell login
 

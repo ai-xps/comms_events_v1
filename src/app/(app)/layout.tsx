@@ -19,7 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             {user.name} · {user.role}
           </span>
           <form action="/api/auth/logout" method="post">
-            <button className="ghost" type="submit">
+            <button className="secondary" type="submit">
               Sign out
             </button>
           </form>

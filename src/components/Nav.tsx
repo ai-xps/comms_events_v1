@@ -5,15 +5,15 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { Role } from "@/lib/constants";
 
-const ITEMS: { href: string; label: string; roles: Role[] }[] = [
+const ITEMS: { href: string; label: string; title?: string; roles: Role[] }[] = [
   { href: "/calendar", label: "Calendar", roles: ["admin", "cell leader", "member"] },
-  { href: "/bookings", label: "My bookings", roles: ["admin", "cell leader", "member"] },
-  { href: "/pending", label: "Pending review", roles: ["admin", "cell leader"] },
+  { href: "/bookings", label: "Bookings", title: "My bookings", roles: ["admin", "cell leader", "member"] },
+  { href: "/pending", label: "Pending", title: "Pending review", roles: ["admin", "cell leader"] },
   { href: "/members", label: "Members", roles: ["admin", "cell leader"] },
   { href: "/insights", label: "Insights", roles: ["admin", "cell leader"] },
   { href: "/reports", label: "Reports", roles: ["admin", "cell leader"] },
   { href: "/import", label: "Import", roles: ["admin"] },
-  { href: "/scraper", label: "Scraper settings", roles: ["admin"] },
+  { href: "/scraper", label: "Scraper", title: "Scraper settings", roles: ["admin"] },
   { href: "/audit", label: "Audit", roles: ["admin"] }
 ];
 
@@ -69,6 +69,7 @@ export function Nav({ role }: { role: Role }) {
             <Link
               key={item.href}
               href={item.href}
+              title={item.title ?? item.label}
               aria-current={pathname.startsWith(item.href) ? "page" : undefined}
               onClick={() => {
                 setOpen(false);
