@@ -2,7 +2,7 @@
 
 ## UI restyle (visual only)
 
-Open Apple/tech surface (19 Oct 2026): cool paper `#F5F5F7`, ink `#1D1D1F`, system-blue accent `#0071E3` (CSS still uses `--terracotta` as an alias so existing rules pick it up); SF-style system stack (`-apple-system`, `BlinkMacSystemFont`, `Segoe UI`). Nav = 2px accent underline (never a filled black pill). At ≤700px the header is wordmark | Menu | Sign out; Menu opens a slide-down panel of the same role-scoped links (Esc + outside click close; focus returns to Menu). Selected chips: white fill, 1.5px accent border. Spacing scale `--space-1`…`--space-6` = 4 / 8 / 12 / 16 / 24 / 32px; cards radius 16px, shadow `0 2px 12px rgba(0,0,0,0.06)`. Leaflet uses blue `circleMarker`s in a `.map-card` below the calendar with `isolation: isolate`. Light phone polish: 16px inputs, tap-highlight off, safe-area, `100dvh`. Attendance dialog keeps equal-width Attended / Didn’t attend. No booking, role, route, or API changes (login ID remains unique `cellNumber`).
+Soft glass / “Vibes” surface (20 Oct 2026, style only from stakeholder mock refs): cool paper `#F3F4F8` with a light purple–blue wash and soft dot grid; ink `#1A1A2E`; accent gradient `#7B2FF7` → `#2E6BFF` (solid alias `--terracotta` / `--accent` = `#6D5EFC` for borders and map pins). Pill nav + selected chips/buttons use the gradient; floating frosted topbar; cards radius ~22px with soft violet-tinted shadow. Spacing scale `--space-1`…`--space-6` unchanged. At ≤700px: wordmark | Menu | Sign out; Menu still opens the role-scoped panel. Leaflet markers match accent purple. No booking, role, route, or API changes.
 
 Where `context.md` and the discovery-document comments disagree, this build follows the values below. See `context.md` section 15 for the source threads.
 

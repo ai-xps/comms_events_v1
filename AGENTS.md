@@ -21,7 +21,7 @@ Branch for work: `experiment`. Ship notes: [`docs/CHANGELOG.md`](docs/CHANGELOG.
 ## Always
 
 - Follow [`.cursor/rules/teach-an.mdc`](.cursor/rules/teach-an.mdc) (plain teaching) and [`.cursor/rules/karpathy-guidelines.mdc`](.cursor/rules/karpathy-guidelines.mdc) (simple, surgical, verify).
-- Prefer existing patterns in `src/`; cool Apple/tech tokens in `src/app/globals.css` (`--paper`, `--accent` / `--terracotta` alias).
+- Prefer existing patterns in `src/`; soft glass / purple–blue tokens in `src/app/globals.css` (`--paper`, `--accent-gradient`, `--accent` / `--terracotta` alias).
 - After non-trivial code changes: `npm test` and `npm run typecheck`.
 - On **auth**, **export**, or **import** changes: run Cursor **`/review-security`** before calling the work done.
 - After a human correction: add one line to [`docs/agent-lessons.md`](docs/agent-lessons.md).

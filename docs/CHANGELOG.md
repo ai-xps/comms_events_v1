@@ -14,6 +14,11 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-20 — Soft glass / purple–blue UI (style only)
+
+- Visual restyle from stakeholder podcast-app refs: frosted pill header, gradient CTAs, selected chips, soft shadows.
+- Tokens in `globals.css`; map/Insights accents follow. No behaviour changes.
+
 ## 2026-10-20 — Fix scraper / members / import after shared-cell login
 
 - Password uniqueness only among people who share the same cell number (faster create/import).
