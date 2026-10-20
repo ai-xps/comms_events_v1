@@ -58,7 +58,7 @@ export default async function InsightsPage({
 
   return (
     <main className="stack">
-      <div className="page-head">
+      <div className="page-head insights-head">
         <h1>Insights</h1>
         <p className="lede">
           {scope.kind === "region" ? `${settings.locationLabel} region` : "Your cell"} · {formatDate(filters.from)} to{" "}

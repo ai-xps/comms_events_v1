@@ -199,25 +199,58 @@ export function KpiStrip(
     stars: number;
   }
 ) {
-  const items = [
-    ["Published events", String(kpis.eventsPublished)],
-    ["Attend clicks", String(kpis.attendClicks)],
-    ["Active members", String(kpis.activeMembers)],
-    ["Attendance", pctLabel(kpis.attendanceRate)],
-    ["Confirmed", pctLabel(kpis.confirmationRate)],
-    ["No-shows", pctLabel(kpis.noShowRate)],
-    ["Average fill", pctLabel(kpis.fillRate)],
-    ["Booked for others", pctLabel(kpis.delegateShare)],
-    ["Stars", String(kpis.stars)]
+  const groups: {
+    title: string;
+    hint: string;
+    items: [string, string][];
+  }[] = [
+    {
+      title: "Reach",
+      hint: "How wide Gather stretched in this period.",
+      items: [
+        ["Published events", String(kpis.eventsPublished)],
+        ["Attend clicks", String(kpis.attendClicks)],
+        ["Active members", String(kpis.activeMembers)],
+        ["Stars", String(kpis.stars)]
+      ]
+    },
+    {
+      title: "Showing up",
+      hint: "After people booked — did they go?",
+      items: [
+        ["Attendance", pctLabel(kpis.attendanceRate)],
+        ["Confirmed", pctLabel(kpis.confirmationRate)],
+        ["No-shows", pctLabel(kpis.noShowRate)]
+      ]
+    },
+    {
+      title: "Room & sharing",
+      hint: "How full events were, and booking for someone else.",
+      items: [
+        ["Average fill", pctLabel(kpis.fillRate)],
+        ["Booked for others", pctLabel(kpis.delegateShare)]
+      ]
+    }
   ];
+
   return (
-    <ul className="kpi-grid" aria-label="Insight totals">
-      {items.map(([label, value]) => (
-        <li key={label} className="card">
-          <p className="kpi-label">{label}</p>
-          <p className="kpi-value">{value}</p>
-        </li>
+    <div className="kpi-board" aria-label="Insight totals">
+      {groups.map((group) => (
+        <section key={group.title} className="kpi-group card">
+          <header className="kpi-group-head">
+            <h2>{group.title}</h2>
+            <p className="muted">{group.hint}</p>
+          </header>
+          <ul className="kpi-grid">
+            {group.items.map(([label, value]) => (
+              <li key={label} className="kpi-tile">
+                <p className="kpi-label">{label}</p>
+                <p className="kpi-value">{value}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
       ))}
-    </ul>
+    </div>
   );
 }

@@ -842,33 +842,72 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
 }
 .starred-strip .list a:hover { border-color: var(--terracotta); }
 
+.insights-head {
+  text-align: center;
+  max-width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+.insights-head .lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+.kpi-board {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 52rem;
+  margin: 0 auto var(--space-5);
+}
+.kpi-group {
+  padding: var(--space-4) var(--space-5);
+  margin: 0;
+}
+.kpi-group-head {
+  text-align: center;
+  margin-bottom: var(--space-4);
+}
+.kpi-group-head h2 {
+  margin: 0 0 var(--space-1);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+.kpi-group-head .muted {
+  margin: 0 auto;
+  max-width: 28rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  gap: var(--space-3);
   list-style: none;
   padding: 0;
-  margin: 0 0 var(--space-5);
+  margin: 0;
+  justify-items: stretch;
 }
-.kpi-grid .card {
+.kpi-tile {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  min-height: 7rem;
-  padding: var(--space-5) var(--space-4);
-  margin: 0;
   text-align: center;
-  border: 0;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: var(--shadow-soft);
+  gap: var(--space-2);
+  min-height: 5.5rem;
+  padding: var(--space-3) var(--space-2);
+  margin: 0;
+  background: color-mix(in srgb, var(--paper) 55%, white);
+  border: 1px solid color-mix(in srgb, var(--line) 70%, white);
+  border-radius: 18px;
+  box-shadow: none;
 }
 .kpi-label {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1.35;
   color: var(--ink-soft);
 }
@@ -886,7 +925,9 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
   flex-wrap: wrap;
   gap: var(--space-3);
   align-items: flex-end;
-  margin-bottom: var(--space-5);
+  justify-content: center;
+  max-width: 52rem;
+  margin: 0 auto var(--space-5);
   padding: var(--space-4);
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.95);
@@ -902,11 +943,10 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
   flex: 0 0 auto;
   min-height: 48px;
 }
-@media (max-width: 900px) {
-  .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 @media (max-width: 520px) {
-  .kpi-grid { grid-template-columns: 1fr; }
+  .kpi-board { max-width: none; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .insights-toolbar { max-width: none; }
   .insights-toolbar label { max-width: none; flex: 1 1 100%; }
   .insights-toolbar button { width: 100%; }
 }
