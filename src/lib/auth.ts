@@ -21,7 +21,7 @@ export async function requireUser(roles?: Role[]): Promise<SessionUser> {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (roles && !roles.includes(user.role)) {
-    redirect("/calendar");
+    redirect("/");
   }
   return user;
 }

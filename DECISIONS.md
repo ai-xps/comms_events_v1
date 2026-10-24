@@ -1,5 +1,9 @@
 # Gather — closed calls
 
+## Welcome entry (25 Oct 2026)
+
+Front door is `/` (welcome → kind question → list), not the month grid. Calendar stays at `/calendar` when chosen. Phone tabs: Home, Search, Calendar, Bookings; Menu holds leader/admin tools. Sign-in without `next=` returns to `/`. Composition follows `docs/design-mockups/`; colour stays the blush / berry lock below (sketch teal is not adopted).
+
 ## UI restyle (visual only)
 
 Soft blush / “Gelain” surface (20 Oct 2026, style only from stakeholder mock refs): paper `#FDF2F0` with gentle pink / sage / gold washes; warm ink `#3D2A2C`; accent berry `#A8434D` (gradient `#C45C66` → `#A8434D`; `--terracotta` / `--accent` alias). Soft secondary tokens `--sage` / `--gold`. Pill nav + selected chips/buttons use berry; frosted topbar; cards ~24px radius with rose-tinted shadow. Category defaults use sage / teal / berry / mauve / gold. Spacing scale unchanged. Leaflet markers match berry. No booking, role, route, or API changes.

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CATEGORIES } from "@/lib/constants";
 import { requestJson } from "@/lib/fetch-json";
+import { LIMITS } from "@/lib/security";
 import { StatusBanner } from "./StatusBanner";
 import { LocationPicker } from "./LocationPicker";
 import { useConfirm } from "./ConfirmDialog";
@@ -162,7 +163,7 @@ export function EventForm({
       <StatusBanner message={message} kind={kind} />
       <label>
         Title
-        <input name="title" required defaultValue={event?.title} />
+        <input name="title" required maxLength={LIMITS.titleLength} defaultValue={event?.title} />
       </label>
       <label>
         Organisation
@@ -195,7 +196,12 @@ export function EventForm({
       </div>
       <label>
         Place
-        <input name="placeName" value={placeName} onChange={(e) => setPlaceName(e.target.value)} />
+        <input
+          name="placeName"
+          maxLength={LIMITS.placeLength}
+          value={placeName}
+          onChange={(e) => setPlaceName(e.target.value)}
+        />
       </label>
       {!online ? (
         <div className="location-field">

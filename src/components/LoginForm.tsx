@@ -1,23 +1,48 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { StatusBanner } from "@/components/StatusBanner";
 import { safeNextPath } from "@/lib/security";
 
-export function LoginForm({ cellNumbers }: { cellNumbers: string[] }) {
+export function LoginForm({
+  cellNumbers,
+  embedded = false,
+  autoFocus = false
+}: {
+  cellNumbers: string[];
+  embedded?: boolean;
+  autoFocus?: boolean;
+}) {
   return (
-    <Suspense fallback={<main className="login-shell" aria-busy="true" />}>
-      <LoginFields cellNumbers={cellNumbers} />
+    <Suspense fallback={embedded ? <div aria-busy="true" /> : <main className="welcome-shell" aria-busy="true" />}>
+      <LoginFields cellNumbers={cellNumbers} embedded={embedded} autoFocus={autoFocus} />
     </Suspense>
   );
 }
 
-function LoginFields({ cellNumbers }: { cellNumbers: string[] }) {
+function LoginFields({
+  cellNumbers,
+  embedded,
+  autoFocus
+}: {
+  cellNumbers: string[];
+  embedded: boolean;
+  autoFocus: boolean;
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (!autoFocus || !embedded) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    document.getElementById("sign-in")?.scrollIntoView({
+      block: "start",
+      behavior: reduce ? "auto" : "smooth"
+    });
+  }, [autoFocus, embedded]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,39 +73,51 @@ function LoginFields({ cellNumbers }: { cellNumbers: string[] }) {
     router.refresh();
   }
 
-  return (
-    <main className="login-shell">
-      <div className="login-card card">
-        <p className="wordmark">Gather</p>
-        <h1>Birmingham community events</h1>
-        <p className="lede">
-          Sign in with the cell number and password your cell leader gave you. If several people share a
-          cell number, your password picks which person you are.
-        </p>
-        <StatusBanner message={error} kind="error" />
-        <form className="stack" onSubmit={onSubmit}>
-          <label>
-            Cell number
-            <select name="cellNumber" required defaultValue="" autoComplete="username">
-              <option value="" disabled>
-                Choose your cell number
+  const form = (
+    <>
+      <StatusBanner message={error} kind="error" />
+      <form className="stack" onSubmit={onSubmit}>
+        <label>
+          Cell number
+          <select
+            name="cellNumber"
+            required
+            defaultValue=""
+            autoComplete="username"
+            autoFocus={autoFocus}
+          >
+            <option value="" disabled>
+              Choose your cell number
+            </option>
+            {cellNumbers.map((n) => (
+              <option key={n} value={n}>
+                {n}
               </option>
-              {cellNumbers.map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Password
-            <input name="password" type="password" autoComplete="current-password" required />
-          </label>
-          <button type="submit" disabled={pending}>
-            {pending ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
-      </div>
+            ))}
+          </select>
+        </label>
+        <label>
+          Password
+          <input name="password" type="password" autoComplete="current-password" required />
+        </label>
+        <p className="muted login-hint">
+          Your cell leader gave you these. If several people share a cell number, your password
+          chooses which person you are.
+        </p>
+        <button type="submit" disabled={pending}>
+          {pending ? "Signing in…" : "Sign in"}
+        </button>
+      </form>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="login-fields">{form}</div>;
+  }
+
+  return (
+    <main className="welcome-shell">
+      <div className="welcome-card card login-card-solo">{form}</div>
     </main>
   );
 }

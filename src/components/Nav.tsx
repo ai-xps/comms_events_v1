@@ -4,10 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import type { Role } from "@/lib/constants";
+import { MEMBER_TABS } from "@/lib/nav-tabs";
 
-const ITEMS: { href: string; label: string; title?: string; roles: Role[] }[] = [
-  { href: "/calendar", label: "Calendar", roles: ["admin", "cell leader", "member"] },
-  { href: "/bookings", label: "Bookings", title: "My bookings", roles: ["admin", "cell leader", "member"] },
+const MENU_ITEMS: { href: string; label: string; title?: string; roles: Role[] }[] = [
   { href: "/pending", label: "Pending", title: "Pending review", roles: ["admin", "cell leader"] },
   { href: "/members", label: "Members", roles: ["admin", "cell leader"] },
   { href: "/insights", label: "Insights", roles: ["admin", "cell leader"] },
@@ -22,7 +21,7 @@ export function Nav({ role }: { role: Role }) {
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const links = ITEMS.filter((item) => item.roles.includes(role));
+  const menuLinks = MENU_ITEMS.filter((item) => item.roles.includes(role));
 
   useEffect(() => {
     setOpen(false);
@@ -40,47 +39,74 @@ export function Nav({ role }: { role: Role }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  function closeMenu() {
+    setOpen(false);
+    buttonRef.current?.focus();
+  }
+
   return (
-    <div className="nav-wrap">
-      <button
-        ref={buttonRef}
-        type="button"
-        className="menu-toggle"
-        aria-expanded={open}
-        aria-controls={menuId}
-        onClick={() => setOpen((v) => !v)}
-      >
-        Menu
-      </button>
-      <div className="nav-panel" data-open={open ? "true" : "false"}>
-        {open ? (
-          <button
-            type="button"
-            className="nav-backdrop"
-            aria-label="Close menu"
-            onClick={() => {
-              setOpen(false);
-              buttonRef.current?.focus();
-            }}
-          />
-        ) : null}
-        <nav id={menuId} className="nav" aria-label="Main">
-          {links.map((item) => (
+    <>
+      <div className="nav-wrap nav-wrap-desktop">
+        <nav className="nav" aria-label="Main">
+          {MEMBER_TABS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={item.match(pathname) ? "page" : undefined}
+            >
+              {item.label}
+            </Link>
+          ))}
+          {menuLinks.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               title={item.title ?? item.label}
               aria-current={pathname.startsWith(item.href) ? "page" : undefined}
-              onClick={() => {
-                setOpen(false);
-                buttonRef.current?.focus();
-              }}
             >
               {item.label}
             </Link>
           ))}
         </nav>
       </div>
-    </div>
+
+      {menuLinks.length > 0 ? (
+        <div className="nav-wrap nav-wrap-menu">
+          <button
+            ref={buttonRef}
+            type="button"
+            className="menu-toggle"
+            aria-expanded={open}
+            aria-controls={menuId}
+            onClick={() => setOpen((v) => !v)}
+          >
+            Menu
+          </button>
+          <div className="nav-panel" data-open={open ? "true" : "false"}>
+            {open ? (
+              <button
+                type="button"
+                className="nav-backdrop"
+                aria-label="Close menu"
+                onClick={closeMenu}
+              />
+            ) : null}
+            <nav id={menuId} className="nav nav-menu-only" aria-label="Leader and admin">
+              {menuLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  title={item.title ?? item.label}
+                  aria-current={pathname.startsWith(item.href) ? "page" : undefined}
+                  onClick={closeMenu}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

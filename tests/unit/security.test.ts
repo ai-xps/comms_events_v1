@@ -1,20 +1,42 @@
 import { describe, expect, it } from "vitest";
-import { eventInputProblem, isHexColour, isHttpUrl, safeNextPath } from "@/lib/security";
+import {
+  eventInputProblem,
+  isHexColour,
+  isHttpUrl,
+  pathAndSearch,
+  safeNextPath
+} from "@/lib/security";
 
 describe("safeNextPath — regression: login next= could send a member off-site", () => {
   it.each([
-    [null, "/calendar"],
-    ["", "/calendar"],
+    [null, "/"],
+    ["", "/"],
     ["/pending", "/pending"],
     ["/events/abc", "/events/abc"],
-    ["https://lookalike.example", "/calendar"],
-    ["//evil.example", "/calendar"],
-    ["/\\evil", "/calendar"],
-    ["\\login", "/calendar"],
-    ["/login", "/calendar"],
-    ["/login?next=/calendar", "/calendar"]
+    ["/search?types=Christian", "/search?types=Christian"],
+    ["/search?types=Christian&format=online", "/search?types=Christian&format=online"],
+    ["https://lookalike.example", "/"],
+    ["//evil.example", "/"],
+    ["/\\evil", "/"],
+    ["\\login", "/"],
+    ["/login", "/"],
+    ["/login?next=/calendar", "/"]
   ])("maps %j to %s", (input, expected) => {
     expect(safeNextPath(input)).toBe(expected);
+  });
+});
+
+describe("pathAndSearch — middleware bounce keeps the query", () => {
+  it("joins pathname and search", () => {
+    expect(pathAndSearch("/search", "")).toBe("/search");
+    expect(pathAndSearch("/search", "?")).toBe("/search");
+    expect(pathAndSearch("/search", "?types=Christian")).toBe("/search?types=Christian");
+    expect(pathAndSearch("/search", "types=Christian")).toBe("/search?types=Christian");
+  });
+
+  it("stays safe when passed through safeNextPath", () => {
+    const next = pathAndSearch("/search", "?types=Christian&format=online");
+    expect(safeNextPath(next)).toBe("/search?types=Christian&format=online");
   });
 });
 
@@ -61,5 +83,9 @@ describe("eventInputProblem", () => {
 
   it("rejects a negative capacity", () => {
     expect(eventInputProblem({ ...ok, capacity: -1 })).toMatch(/Capacity/);
+  });
+
+  it("rejects a place name that is too long", () => {
+    expect(eventInputProblem({ ...ok, placeName: "x".repeat(201) })).toMatch(/Place/);
   });
 });

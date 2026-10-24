@@ -33,13 +33,23 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const title = String(body.title ?? event.title).trim();
   const notes = body.notes !== undefined ? String(body.notes).trim() || null : event.notes;
   const externalUrl = body.externalUrl !== undefined ? String(body.externalUrl).trim() || null : event.externalUrl;
+  const placeName =
+    body.placeName !== undefined ? String(body.placeName).trim() || null : event.placeName;
   const startsAt = body.startsAt ? fromDatetimeLocalValue(String(body.startsAt)) : event.startsAt;
   const endsAt = body.endsAt ? fromDatetimeLocalValue(String(body.endsAt)) : event.endsAt;
   const lat = body.lat !== undefined && String(body.lat) ? Number(body.lat) : event.lat;
   const lng = body.lng !== undefined && String(body.lng) ? Number(body.lng) : event.lng;
   const problem =
     (title ? null : "Title is required.") ??
-    eventInputProblem({ title, notes: notes ?? "", externalUrl: externalUrl ?? "", capacity, startsAt, endsAt });
+    eventInputProblem({
+      title,
+      notes: notes ?? "",
+      externalUrl: externalUrl ?? "",
+      capacity,
+      startsAt,
+      endsAt,
+      placeName
+    });
   if (problem) return NextResponse.json({ error: problem }, { status: 400 });
   const updated = await prisma.event.update({
     where: { id },
@@ -50,7 +60,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       startsAt,
       endsAt,
       online: body.online === true || body.online === "on" || (body.online === undefined && event.online),
-      placeName: body.placeName !== undefined ? String(body.placeName) || null : event.placeName,
+      placeName,
       lat: Number.isFinite(lat) ? lat : event.lat,
       lng: Number.isFinite(lng) ? lng : event.lng,
       externalUrl,

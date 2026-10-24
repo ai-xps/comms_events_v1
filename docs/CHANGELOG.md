@@ -14,6 +14,15 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-25 — Welcome hallway (entry UX)
+
+- `/` is a welcome (mark, “Find. Book. Gather.”, one berry button, five event kinds), not a redirect to the month grid.
+- `/search` asks the kind, then lists upcoming events (`types=` / `format=`); calendar stays a chosen destination.
+- Phone bottom tabs: Home, Search, Calendar, Bookings. Menu keeps leader/admin links only.
+- Sign-in with no `next=` returns to `/`. Sketch order from `docs/design-mockups/`; blush/berry tokens unchanged.
+- Hardening: middleware keeps `?types=` in `next=`; signed-in `/login?next=` honours it; list rows clamp long titles; place names capped at 200; empty / kind-off / 50-cap copy; blush `themeColor`.
+- RSI / touch: hover styles only on fine pointers; `:active` press feedback; ~44px targets on coarse pointers (nav, day cells, calendar event chips, back/Edit links, tab bar).
+
 ## 2026-10-20 — Soft blush / berry UI (style only)
 
 - Visual restyle from Gelain-style refs: blush paper, berry CTAs, sage/gold gentle accents.

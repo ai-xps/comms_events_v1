@@ -14,13 +14,15 @@ function parseEvent(body: Record<string, unknown>) {
   const startsAt = fromDatetimeLocalValue(String(body.startsAt));
   const endsAt = fromDatetimeLocalValue(String(body.endsAt));
   const capacityRaw = String(body.capacity ?? "").trim();
+  const placeName = String(body.placeName ?? "").trim() || null;
   const problem = eventInputProblem({
     title: String(body.title ?? ""),
     notes: String(body.notes ?? ""),
     externalUrl: String(body.externalUrl ?? "").trim(),
     capacity: capacityRaw === "" ? null : Number(capacityRaw),
     startsAt,
-    endsAt
+    endsAt,
+    placeName
   });
   if (problem) throw new Error(problem);
   return {
@@ -30,7 +32,7 @@ function parseEvent(body: Record<string, unknown>) {
     startsAt,
     endsAt,
     online: body.online === true || body.online === "on",
-    placeName: String(body.placeName ?? "").trim() || null,
+    placeName,
     lat: String(body.lat ?? "") ? Number(body.lat) : null,
     lng: String(body.lng ?? "") ? Number(body.lng) : null,
     externalUrl: String(body.externalUrl ?? "").trim() || null,

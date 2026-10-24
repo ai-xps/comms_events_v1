@@ -3,11 +3,17 @@
  * protocol-relative "//host", backslash tricks) falls back, so a crafted login link cannot
  * send a member to a lookalike site straight after they sign in.
  */
-export function safeNextPath(value: string | null | undefined, fallback = "/calendar"): string {
+export function safeNextPath(value: string | null | undefined, fallback = "/"): string {
   if (!value || !value.startsWith("/") || value.startsWith("//")) return fallback;
   if (value.includes("\\") || /[\u0000-\u001f]/.test(value)) return fallback;
   if (value.startsWith("/login")) return fallback;
   return value;
+}
+
+/** Path plus query for bounce-to-login. Still run through safeNextPath before navigating. */
+export function pathAndSearch(pathname: string, search = ""): string {
+  if (!search || search === "?") return pathname;
+  return pathname + (search.startsWith("?") ? search : `?${search}`);
 }
 
 export function isHttpUrl(value: string): boolean {
@@ -31,9 +37,13 @@ export function eventInputProblem(input: {
   capacity: number | null;
   startsAt: Date;
   endsAt: Date;
+  placeName?: string | null;
 }): string | null {
   if (input.title.length > LIMITS.titleLength) return `Title must be ${LIMITS.titleLength} characters or fewer.`;
   if (input.notes.length > LIMITS.textLength) return `Notes must be ${LIMITS.textLength} characters or fewer.`;
+  if (input.placeName != null && input.placeName.length > LIMITS.placeLength) {
+    return `Place must be ${LIMITS.placeLength} characters or fewer.`;
+  }
   if (input.externalUrl && !isHttpUrl(input.externalUrl)) return "Event Link must start with http:// or https://.";
   if (input.capacity !== null && (!Number.isInteger(input.capacity) || input.capacity < 0)) {
     return "Capacity must be a whole number, 0 or more.";
@@ -47,6 +57,7 @@ export const LIMITS = {
   importBytes: 2 * 1024 * 1024,
   importRows: 2000,
   titleLength: 200,
+  placeLength: 200,
   textLength: 5000,
   passwordMax: 128
 } as const;
