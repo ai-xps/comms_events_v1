@@ -19,8 +19,13 @@ export async function attendEvent(opts: {
 }) {
   const result = await prisma
     .$transaction(async (tx) => {
-      // Lock the event row so two people cannot both take the last place.
-      await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${opts.eventId} FOR UPDATE`;
+      // SQLite has no FOR UPDATE. No-op write takes a write lock before we read capacity (R7).
+      const locked = await tx.$executeRaw`
+        UPDATE "Event" SET "title" = "title" WHERE id = ${opts.eventId}
+      `;
+      if (locked === 0) {
+        throw new BookingError("That event is not on the calendar.");
+      }
       const event = await tx.event.findUnique({ where: { id: opts.eventId } });
       if (!event || event.status !== "PUBLISHED") {
         throw new BookingError("That event is not on the calendar.");

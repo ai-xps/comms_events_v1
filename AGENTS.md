@@ -1,6 +1,6 @@
 # Gather — agent briefing
 
-Closed calendar for one Birmingham community (demo, not NHS production). Cream parish UI on Railway.
+Closed calendar for one Birmingham community (demo, not NHS production). Soft blush / berry UI. Live demo on Railway until Ubuntu+SQLite cutover gate is green ([`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md)).
 
 **Source of truth for agents.** Thin adapters (`CLAUDE.md`, Cursor rules) point here. Do not duplicate this file elsewhere.
 
@@ -12,10 +12,11 @@ npm test              # unit (integration needs TEST_DATABASE_URL)
 npm run typecheck
 npm run test:coverage
 npm run build
-npm run dev           # local; needs Postgres DATABASE_URL
+npm run dev           # local; needs SQLite DATABASE_URL=file:./data/gather.db
 ```
 
-Live demo: https://commseventsv1-production.up.railway.app  
+Live demo (until Ubuntu gate): https://commseventsv1-production.up.railway.app  
+Ubuntu / Oracle cutover: [`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md). **Do not push SQLite to Railway while it still has a Postgres URL** (pause redeploy first). `scripts/start.sh` refuses Postgres URLs.  
 Branch for work: `experiment`. Ship notes: [`docs/CHANGELOG.md`](docs/CHANGELOG.md). Smoke checklist: [`docs/REVIEW.md`](docs/REVIEW.md). Product calls: [`DECISIONS.md`](DECISIONS.md). What it does / sign-off: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md).
 
 ## Always

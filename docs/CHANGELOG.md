@@ -23,6 +23,14 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 - Hardening: middleware keeps `?types=` in `next=`; signed-in `/login?next=` honours it; list rows clamp long titles; place names capped at 200; empty / kind-off / 50-cap copy; blush `themeColor`.
 - RSI / touch: hover styles only on fine pointers; `:active` press feedback; ~44px targets on coarse pointers (nav, day cells, calendar event chips, back/Edit links, tab bar).
 
+## 2026-10-24 — Ubuntu + SQLite Phase 1 (Oracle Tier 1 hardened; do not push to Railway yet)
+
+- Prisma provider **sqlite**; `.env.example` `file:./data/gather.db`; CI uses SQLite (no Postgres service).
+- SQLite-safe Attend lock + scrape lock; WAL + busy_timeout; `/api/health`.
+- `scripts/start.sh`: no per-boot `db push` (use `BOOTSTRAP=1`); refuses Postgres URLs.
+- [`deploy-ubuntu.md`](deploy-ubuntu.md), [`incident-card.md`](incident-card.md), `scripts/install-ubuntu.sh`, dual backup + disk alert, Caddy/systemd templates.
+- **Ops:** pause Railway redeploy before this commit lands on a Railway-connected branch — Postgres URL + SQLite schema will not start.
+
 ## 2026-10-20 — Soft blush / berry UI (style only)
 
 - Visual restyle from Gelain-style refs: blush paper, berry CTAs, sage/gold gentle accents.

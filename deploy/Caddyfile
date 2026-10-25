@@ -1,0 +1,7 @@
+# Replace gather.example.org with the real DNS hostname (must match APP_ORIGIN).
+# Stock Caddy: TLS + reverse proxy. Login brute-force: fail2ban / external WAF.
+# Optional: build Caddy with github.com/mholt/caddy-ratelimit if you want edge rate limits.
+gather.example.org {
+	encode gzip
+	reverse_proxy 127.0.0.1:3000
+}

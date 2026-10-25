@@ -5,11 +5,14 @@ node_modules
 .env.*.local
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
 prisma/dev.db
 prisma/dev.db-journal
+prisma/data/
+data/
 .DS_Store
 tsconfig.tsbuildinfo
 coverage
-.tmp-emil-skills/
 .tmp-emil-skills/
 .tmp-vid/

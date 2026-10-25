@@ -4,7 +4,9 @@
 
 A closed calendar for one community in Birmingham. An admin creates accounts from a file. Members sign in with a **cell number** (letters and digits; several people may share one) and a **password** (any length, must not be blank, **unique** per person so login can tell them apart), browse events, click Attend, and later confirm they went. Cell leaders review scraped events and look after their own cell.
 
-**Live demo (Railway for speed now; hosting can move later):** https://commseventsv1-production.up.railway.app
+**Live demo (Railway — keep until Ubuntu gate is green):** https://commseventsv1-production.up.railway.app
+
+**Target hosting:** Oracle Always Free Ubuntu + Caddy + SQLite. Full gate checklist and install: [`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md). Do **not** turn Railway off or tell testers a new URL until that gate is all ticked.
 
 This deployment is Birmingham only. Another region would be a separate copy with its own database, admin, and calendar.
 
@@ -24,7 +26,7 @@ Member tester guide (separate): [`docs/presentation/Gather-tester-guide.pptx`](d
 - Node.js 20 or later
 - npm
 
-Postgres is required (local Docker/Postgres or Railway). SQLite is no longer used.
+Database is **SQLite** (one file on disk). No Postgres required for local or Ubuntu.
 
 ## Environment
 
@@ -32,10 +34,10 @@ Copy `.env.example` to `.env`.
 
 | Variable | Purpose |
 | --- | --- |
-| `DATABASE_URL` | Postgres URL, e.g. `postgresql://USER:PASSWORD@HOST:5432/gather?schema=public`. |
+| `DATABASE_URL` | SQLite path relative to `prisma/`, e.g. `file:./data/gather.db` → `prisma/data/gather.db`. |
 | `SESSION_SECRET` | Signs the httpOnly session cookie. Use a long random string. |
 | `CRON_SECRET` | Guards `POST /api/cron/scrape`. |
-| `APP_ORIGIN` | Exact origin for mutation checks, e.g. `http://localhost:3000` or your Railway HTTPS URL (no trailing slash). |
+| `APP_ORIGIN` | Exact origin for mutation checks, e.g. `http://localhost:3000` or your public HTTPS URL (no trailing slash). |
 | `SCRAPE_LIVE` | Set to `0` to skip fetching Priority URLs. Fixtures still run unless `SCRAPE_FIXTURES=0`. |
 | `SCRAPE_FIXTURES` | Set to `0` to skip the demo harvest. Default is on. |
 
@@ -43,6 +45,7 @@ Copy `.env.example` to `.env`.
 
 ```bash
 npm install
+mkdir -p prisma/data
 npx prisma db push
 npm run db:seed
 npm run dev
@@ -58,9 +61,9 @@ npm run test:coverage
 npm run typecheck
 ```
 
-CI (`.github/workflows/ci.yml`) on push to `experiment` or `main`: typecheck, tests against Postgres 16, then `next build`.
+CI (`.github/workflows/ci.yml`) on push to `experiment` or `main`: typecheck, tests against SQLite, then `next build`.
 
-What the app does, with who agreed it: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Weak points and the live smoke list: [`docs/REVIEW.md`](docs/REVIEW.md). What each demo build shipped: [`docs/CHANGELOG.md`](docs/CHANGELOG.md). Agent briefing (commands, always/ask/never): [`AGENTS.md`](AGENTS.md). Emil Kowalski UI/motion skills (how to invoke): [`docs/EMIL-SKILLS.md`](docs/EMIL-SKILLS.md).
+What the app does, with who agreed it: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Weak points and the live smoke list: [`docs/REVIEW.md`](docs/REVIEW.md). What each demo build shipped: [`docs/CHANGELOG.md`](docs/CHANGELOG.md). Agent briefing (commands, always/ask/never): [`AGENTS.md`](AGENTS.md). Emil Kowalski UI/motion skills (how to invoke): [`docs/EMIL-SKILLS.md`](docs/EMIL-SKILLS.md). Ubuntu cutover: [`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md). Incident card: [`docs/incident-card.md`](docs/incident-card.md).
 
 To start again:
 
@@ -71,21 +74,26 @@ npm run db:reset
 ## Migrations
 
 ```bash
+mkdir -p prisma/data
 npx prisma db push
 ```
 
-That keeps Postgres in line with `prisma/schema.prisma`.
+That keeps the SQLite file in line with `prisma/schema.prisma`.
 
-## Railway
+## Railway (legacy live demo)
 
-Deploy the `experiment` branch. Attach Postgres and set `DATABASE_URL` (variable reference), `APP_ORIGIN`, `SESSION_SECRET`, `CRON_SECRET`, and `NODE_ENV=production`. `npm start` runs `prisma db push`, seed (if empty), then Next.js.
+The **current** live site still runs the last Postgres deploy on Railway. Do **not** push a SQLite-only `experiment` build to Railway until Ubuntu is ready (or redeploys are paused) — a Postgres `DATABASE_URL` with a SQLite schema will fail start (`scripts/start.sh` refuses Postgres URLs). See [`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md).
+
+## Ubuntu / Oracle
+
+Follow [`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md): Node 22, SQLite file, systemd, Caddy/TLS, cron scrape, dual backup of `gather.db`. Prefer `./scripts/install-ubuntu.sh`.
 
 ## Daily scraper (05:00 Europe/London)
 
 Do not start a scheduler inside `next dev`. Use cron on the host:
 
 ```cron
-0 5 * * * cd /path/to/app && /usr/bin/env CRON_SECRET=your-cron-secret npm run scrape
+0 5 * * * /path/to/app/scripts/scrape-cron.sh
 ```
 
 `npm run scrape` and `POST /api/cron/scrape` with `Authorization: Bearer <CRON_SECRET>` both run the scraper with trigger `SCHEDULED`. The admin **Run now** button uses trigger `MANUAL` and an admin session.

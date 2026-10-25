@@ -7,7 +7,7 @@ export function scrapeLockUntil(now = Date.now()): Date {
   return new Date(now + SCRAPE_LOCK_MS);
 }
 
-/** True when INSERT … ON CONFLICT RETURNING produced a row (the claim succeeded). */
+/** True when a claim attempt acquired the lock (kept for unit tests). */
 export function scrapeLockAcquired(returned: { id: string }[] | null | undefined): boolean {
   return Array.isArray(returned) && returned.length > 0;
 }
@@ -18,21 +18,32 @@ async function db(client?: PrismaClient): Promise<PrismaClient> {
 
 /**
  * One atomic claim. Expired locks are reused. A held lock throws 409 so the caller
- * must not release someone else's run.
+ * must not release someone else's run. SQLite-safe (no Postgres ON CONFLICT RETURNING).
  */
 export async function claimScrapeLock(client?: PrismaClient): Promise<void> {
   const prisma = await db(client);
   const now = new Date();
   const heldUntil = scrapeLockUntil(now.getTime());
-  const rows = await prisma.$queryRaw<{ id: string }[]>`
-    INSERT INTO "ScrapeLock" (id, "heldUntil")
-    VALUES (${SCRAPE_LOCK_ID}, ${heldUntil})
-    ON CONFLICT (id) DO UPDATE
-    SET "heldUntil" = EXCLUDED."heldUntil"
-    WHERE "ScrapeLock"."heldUntil" <= ${now}
-    RETURNING id
-  `;
-  if (!scrapeLockAcquired(rows)) {
+
+  const acquired = await prisma.$transaction(async (tx) => {
+    const existing = await tx.scrapeLock.findUnique({ where: { id: SCRAPE_LOCK_ID } });
+    if (!existing) {
+      await tx.scrapeLock.create({
+        data: { id: SCRAPE_LOCK_ID, heldUntil }
+      });
+      return true;
+    }
+    if (existing.heldUntil > now) {
+      return false;
+    }
+    await tx.scrapeLock.update({
+      where: { id: SCRAPE_LOCK_ID },
+      data: { heldUntil }
+    });
+    return true;
+  });
+
+  if (!acquired) {
     const error = new Error("A scraper run is already in progress.");
     (error as Error & { status?: number }).status = 409;
     throw error;

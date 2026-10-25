@@ -1,5 +1,9 @@
 # Gather — closed calls
 
+## Hosting (24 Oct 2026)
+
+**Target:** Oracle Always Free Ubuntu + Caddy + SQLite (Guillaume owns tenancy). **Live until chaos gate green:** Railway + last Postgres commit. Cutover: [`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md). Default data = fresh seed/import (no automatic Railway dump). Dual off-box backup (OCI + Pi). Trade-off: SQLite is enough for ~200 infrequent users on one box; weaker than Postgres for heavy concurrent writes; Oracle may reclaim idle free VMs.
+
 ## Welcome entry (25 Oct 2026)
 
 Front door is `/` (welcome → kind question → list), not the month grid. Calendar stays at `/calendar` when chosen. Phone tabs: Home, Search, Calendar, Bookings; Menu holds leader/admin tools. Sign-in without `next=` returns to `/`. Composition follows `docs/design-mockups/`; colour stays the blush / berry lock below (sketch teal is not adopted).
