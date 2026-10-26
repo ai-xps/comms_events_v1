@@ -22,8 +22,7 @@ export function Welcome({
         </p>
 
         {cellNumbers ? (
-          <section id="sign-in" className="welcome-signin">
-            <h2 className="welcome-signin-title">Sign in</h2>
+          <section id="sign-in" className="welcome-signin" aria-label="Sign in">
             {cellNumbers.length === 0 ? (
               <p className="muted login-hint">
                 No accounts yet. Ask your cell leader to create yours.

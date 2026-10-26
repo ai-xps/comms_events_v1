@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE } from "./lib/constants";
 import { pathAndSearch } from "./lib/security";
 
-const PUBLIC_PATHS = ["/", "/login", "/api/auth/login", "/api/cron/scrape", "/api/health"];
+const PUBLIC_PATHS = ["/", "/login", "/api/auth/login", "/api/auth/logout", "/api/cron/scrape", "/api/health"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

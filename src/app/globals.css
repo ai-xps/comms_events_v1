@@ -820,16 +820,11 @@ textarea { min-height: 96px; }
   pointer-events: none;
 }
 .welcome-signin {
-  margin: var(--space-5) 0 0;
-  padding-top: var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-4);
   border-top: 1px solid var(--line);
   text-align: left;
   scroll-margin-top: var(--space-5);
-}
-.welcome-signin-title {
-  margin: 0 0 var(--space-3);
-  font-size: 1.25rem;
-  text-align: center;
 }
 .login-hint {
   margin: 0;
