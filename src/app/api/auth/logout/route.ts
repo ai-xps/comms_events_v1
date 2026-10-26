@@ -13,5 +13,7 @@ export async function POST(request: NextRequest) {
       .catch((error) => console.error("Could not revoke session on logout", error));
   }
   await clearSession();
-  return NextResponse.redirect(new URL("/login", request.url), 303);
+  // Prefer APP_ORIGIN so redirects stay on the public host (not 0.0.0.0 behind Caddy).
+  const origin = process.env.APP_ORIGIN ?? new URL(request.url).origin;
+  return NextResponse.redirect(new URL("/login", origin), 303);
 }
