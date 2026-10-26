@@ -20,9 +20,6 @@ export function Welcome({
         <p className="welcome-sentence welcome-fade">
           The heart of Birmingham&apos;s events, in your pocket.
         </p>
-        <a className="button welcome-cta" href="#sign-in">
-          Sign in
-        </a>
 
         {cellNumbers ? (
           <section id="sign-in" className="welcome-signin">

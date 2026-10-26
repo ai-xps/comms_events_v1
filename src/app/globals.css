@@ -820,7 +820,7 @@ textarea { min-height: 96px; }
   pointer-events: none;
 }
 .welcome-signin {
-  margin: var(--space-5) 0 var(--space-6);
+  margin: var(--space-5) 0 0;
   padding-top: var(--space-5);
   border-top: 1px solid var(--line);
   text-align: left;
