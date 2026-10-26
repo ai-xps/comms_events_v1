@@ -1,13 +1,10 @@
 import { GatherMark } from "@/components/GatherMark";
-import { KindChooser } from "@/components/KindChooser";
 import { LoginForm } from "@/components/LoginForm";
 
 export function Welcome({
-  signedIn,
   cellNumbers,
   focusSignIn = false
 }: {
-  signedIn: boolean;
   cellNumbers?: string[];
   /** When true (e.g. bounced from /?types=…), bring the sign-in fields into view. */
   focusSignIn?: boolean;
@@ -23,13 +20,11 @@ export function Welcome({
         <p className="welcome-sentence welcome-fade">
           The heart of Birmingham&apos;s events, in your pocket.
         </p>
-        {!signedIn ? (
-          <a className="button welcome-cta" href="#sign-in">
-            Sign in
-          </a>
-        ) : null}
+        <a className="button welcome-cta" href="#sign-in">
+          Sign in
+        </a>
 
-        {!signedIn && cellNumbers ? (
+        {cellNumbers ? (
           <section id="sign-in" className="welcome-signin">
             <h2 className="welcome-signin-title">Sign in</h2>
             {cellNumbers.length === 0 ? (
@@ -41,14 +36,6 @@ export function Welcome({
             )}
           </section>
         ) : null}
-
-        <section id="kinds" className="kind-section" aria-labelledby="kind-question">
-          <h2 id="kind-question" className="kind-question">
-            What kind of event are you looking for?
-          </h2>
-          <p className="muted welcome-kinds-hint">Pick a kind — you&apos;ll sign in if you need to.</p>
-          <KindChooser signedIn={signedIn} />
-        </section>
       </div>
     </main>
   );

@@ -29,5 +29,5 @@ export default async function Home({
     orderBy: { cellNumber: "asc" }
   });
   const cellNumbers = [...new Set(users.map((u) => u.cellNumber))];
-  return <Welcome signedIn={false} cellNumbers={cellNumbers} />;
+  return <Welcome cellNumbers={cellNumbers} />;
 }

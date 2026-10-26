@@ -23,6 +23,6 @@ export default async function LoginPage({
   });
   const cellNumbers = [...new Set(users.map((u) => u.cellNumber))];
   return (
-    <Welcome signedIn={false} cellNumbers={cellNumbers} focusSignIn={Boolean(params.next)} />
+    <Welcome cellNumbers={cellNumbers} focusSignIn={Boolean(params.next)} />
   );
 }

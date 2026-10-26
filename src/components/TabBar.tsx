@@ -18,6 +18,11 @@ export function TabBar() {
           {item.label}
         </Link>
       ))}
+      <form action="/api/auth/logout" method="post" className="tab-bar-signout">
+        <button type="submit" className="tab-bar-link">
+          Sign out
+        </button>
+      </form>
     </nav>
   );
 }
