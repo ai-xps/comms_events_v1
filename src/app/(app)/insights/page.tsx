@@ -126,6 +126,7 @@ export default async function InsightsPage({
 
       <KpiStrip {...data.kpis} />
 
+      <h2 className="insights-section-title">Activity</h2>
       <ChartCard
         title="Attend clicks each week"
         summary="Solid line is this period. Dashed line is the same length of time before it."
@@ -142,6 +143,7 @@ export default async function InsightsPage({
         <Stacked weeks={data.weeks} />
       </ChartCard>
 
+      <h2 className="insights-section-title">Who and where</h2>
       <ChartCard
         title="By event type"
         summary="Attend clicks in this period, coloured as on the calendar."
@@ -176,6 +178,7 @@ export default async function InsightsPage({
         <Heatmap cells={data.heatmap} />
       </ChartCard>
 
+      <h2 className="insights-section-title">Pipeline and capacity</h2>
       <ChartCard
         title="Review pipeline"
         summary="Scraped events created in this period, and where they ended up. Failed feeds on a run are listed below."
@@ -205,6 +208,7 @@ export default async function InsightsPage({
 
       <section className="card">
         <h2>Busiest events</h2>
+        <p className="muted">Fill is bookings ÷ capacity for that event (— if no cap).</p>
         {data.topEvents.length === 0 ? (
           <p className="muted">No published events in this period.</p>
         ) : (

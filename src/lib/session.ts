@@ -68,13 +68,19 @@ export async function readSession(): Promise<SessionClaims | null> {
   return decodeSession(raw);
 }
 
+/** Secure cookies only when APP_ORIGIN is https (so HTTP IP demos can stay signed in). */
+function cookieSecure(): boolean {
+  const origin = process.env.APP_ORIGIN;
+  if (origin) return origin.startsWith("https://");
+  return process.env.NODE_ENV === "production";
+}
+
 export async function writeSession(claims: SessionClaims) {
   const jar = await cookies();
-  const secure = process.env.NODE_ENV === "production";
   jar.set(SESSION_COOKIE, encodeSession(claims), {
     httpOnly: true,
     sameSite: "lax",
-    secure,
+    secure: cookieSecure(),
     path: "/",
     maxAge: SESSION_HOURS * 60 * 60
   });

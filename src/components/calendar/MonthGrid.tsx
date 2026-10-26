@@ -12,7 +12,8 @@ export function MonthGrid({
   today,
   events,
   colours,
-  canAdd
+  canAdd,
+  starredIds
 }: {
   state: CalendarState;
   days: DayKey[];
@@ -20,6 +21,7 @@ export function MonthGrid({
   events: GridEvent[];
   colours: Record<string, string>;
   canAdd?: boolean;
+  starredIds?: Set<string>;
 }) {
   const weeks = Array.from({ length: days.length / 7 }, (_, i) => days.slice(i * 7, i * 7 + 7));
   return (
@@ -57,18 +59,24 @@ export function MonthGrid({
                     ) : null}
                   </div>
                   {dayEvents.map((event) => {
+                    const starred = starredIds?.has(event.id);
                     const labelText = `${formatTime(event.startsAt)} ${event.title}`;
                     return (
                       <Link
                         key={event.id}
                         className="event-link"
                         href={`/events/${event.id}`}
-                        title={`${event.category}: ${labelText}`}
+                        title={`${event.category}: ${labelText}${starred ? " (starred)" : ""}`}
                         style={categoryAccentStyle(colours[event.category])}
                       >
                         <CategoryThumb category={event.category} size="sm" />
                         <span className="sr-only">{event.category}: </span>
                         <span className="event-link-text">{labelText}</span>
+                        {starred ? (
+                          <span className="event-link-star" aria-label="Starred">
+                            ★
+                          </span>
+                        ) : null}
                       </Link>
                     );
                   })}

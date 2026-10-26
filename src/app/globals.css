@@ -669,8 +669,18 @@ textarea { min-height: 96px; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.event-link-star {
+  flex: 0 0 auto;
+  color: var(--gold);
+  font-size: 0.85rem;
+  line-height: 1;
+}
 .event-link:active {
   background: var(--cat-mid, var(--paper-2));
+}
+.event-card-meta .event-row-star {
+  margin-left: 0.25rem;
+  font-size: 0.95rem;
 }
 .event-hero {
   display: flex;
@@ -741,7 +751,7 @@ textarea { min-height: 96px; }
 .welcome-cta {
   width: 100%;
   max-width: 18rem;
-  margin: 0 auto var(--space-6);
+  margin: 0 auto var(--space-5);
 }
 .kind-section {
   text-align: center;
@@ -750,10 +760,14 @@ textarea { min-height: 96px; }
   border-top: 1px solid var(--line);
 }
 .kind-question {
-  margin: var(--space-4) 0 var(--space-4);
+  margin: var(--space-4) 0 var(--space-2);
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--ink);
+}
+.welcome-kinds-hint {
+  margin: 0 0 var(--space-4);
+  font-size: 0.9rem;
 }
 .kind-row {
   list-style: none;
@@ -796,7 +810,7 @@ textarea { min-height: 96px; }
   pointer-events: none;
 }
 .welcome-signin {
-  margin-top: var(--space-6);
+  margin: var(--space-5) 0 var(--space-6);
   padding-top: var(--space-5);
   border-top: 1px solid var(--line);
   text-align: left;
@@ -1168,8 +1182,13 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
 }
 .starred-strip {
   margin-bottom: var(--space-5);
+  border-left: 3px solid var(--gold);
 }
 .starred-strip h2 { margin-top: 0; }
+.starred-strip-lede {
+  margin: 0 0 var(--space-3);
+  font-size: 0.9rem;
+}
 .starred-strip .list {
   display: flex;
   flex-wrap: wrap;
@@ -1190,6 +1209,26 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
 }
 .starred-strip .list a:active { border-color: var(--terracotta); }
 
+.bookings-section {
+  margin-top: var(--space-5);
+}
+.bookings-section-title {
+  margin: 0 0 var(--space-3);
+  font-size: 1.1rem;
+}
+.kpi-tile-hint {
+  margin: var(--space-1) 0 0;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+.insights-section-title {
+  margin: var(--space-6) 0 var(--space-3);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
 .insights-head {
   text-align: center;
   max-width: 40rem;

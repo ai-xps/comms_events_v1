@@ -37,7 +37,10 @@ export function ReportsExport({ defaultFrom, defaultTo }: { defaultFrom: string;
   return (
     <form className="card stack reports-range" onSubmit={(e) => download(e, "csv")}>
       <h2>Events in a date range</h2>
-      <p className="muted">One file of event details. Attendee lists for a single event are in the table below.</p>
+      <p className="muted">
+        Download event/attendee files here. Charts and insight datasets live under Insights.
+        Attendee lists for a single event are in the table below.
+      </p>
       <StatusBanner message={message} kind="error" />
       <div className="row">
         <label>

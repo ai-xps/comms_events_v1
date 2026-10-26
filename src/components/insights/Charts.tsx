@@ -7,6 +7,13 @@ import type { HeatCell, NamedCount, WeekPoint } from "@/lib/insights/types";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const HOURS = ["00–03", "04–07", "08–11", "12–15", "16–19", "20–23"];
 
+/** Short readable week label from ISO date YYYY-MM-DD (e.g. 12 Mar). */
+function weekBarLabel(weekStart: string): string {
+  const d = new Date(`${weekStart}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return weekStart.slice(5);
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+}
+
 export function ChartCard({
   title,
   summary,
@@ -75,7 +82,7 @@ export function Stacked({ weeks }: { weeks: WeekPoint[] }) {
               <span className="seg absent" style={{ height: h(w.absent) }} />
               <span className="seg unconfirmed" style={{ height: h(w.unconfirmed) }} />
             </div>
-            <span className="bar-label">{w.weekStart.slice(8)}</span>
+            <span className="bar-label">{weekBarLabel(w.weekStart)}</span>
             <span className="sr-only">{total} confirmed or waiting</span>
           </div>
         );
@@ -225,7 +232,7 @@ export function KpiStrip(
     },
     {
       title: "Room & sharing",
-      hint: "How full events were, and booking for someone else.",
+      hint: "How full capped events were, and booking for someone else.",
       items: [
         ["Average fill", pctLabel(kpis.fillRate)],
         ["Booked for others", pctLabel(kpis.delegateShare)]
@@ -246,6 +253,11 @@ export function KpiStrip(
               <li key={label} className="kpi-tile">
                 <p className="kpi-label">{label}</p>
                 <p className="kpi-value">{value}</p>
+                {label === "Average fill" ? (
+                  <p className="muted kpi-tile-hint">
+                    Bookings ÷ capacity, averaged over events with a cap.
+                  </p>
+                ) : null}
               </li>
             ))}
           </ul>

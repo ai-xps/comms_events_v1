@@ -9,7 +9,7 @@ export function Welcome({
 }: {
   signedIn: boolean;
   cellNumbers?: string[];
-  /** When true (e.g. bounced from /search?types=…), bring the sign-in fields into view. */
+  /** When true (e.g. bounced from /?types=…), bring the sign-in fields into view. */
   focusSignIn?: boolean;
 }) {
   return (
@@ -23,16 +23,11 @@ export function Welcome({
         <p className="welcome-sentence welcome-fade">
           The heart of Birmingham&apos;s events, in your pocket.
         </p>
-        <a className="button welcome-cta" href={signedIn ? "#kinds" : "#sign-in"}>
-          {signedIn ? "Show me what’s on" : "Sign in"}
-        </a>
-
-        <section id="kinds" className="kind-section" aria-labelledby="kind-question">
-          <h2 id="kind-question" className="kind-question">
-            What kind of event are you looking for?
-          </h2>
-          <KindChooser signedIn={signedIn} />
-        </section>
+        {!signedIn ? (
+          <a className="button welcome-cta" href="#sign-in">
+            Sign in
+          </a>
+        ) : null}
 
         {!signedIn && cellNumbers ? (
           <section id="sign-in" className="welcome-signin">
@@ -46,6 +41,14 @@ export function Welcome({
             )}
           </section>
         ) : null}
+
+        <section id="kinds" className="kind-section" aria-labelledby="kind-question">
+          <h2 id="kind-question" className="kind-question">
+            What kind of event are you looking for?
+          </h2>
+          <p className="muted welcome-kinds-hint">Pick a kind — you&apos;ll sign in if you need to.</p>
+          <KindChooser signedIn={signedIn} />
+        </section>
       </div>
     </main>
   );

@@ -20,7 +20,8 @@ export function DatedList({
   events,
   colours,
   view,
-  canAdd
+  canAdd,
+  starredIds
 }: {
   days: DayKey[];
   today: DayKey;
@@ -28,8 +29,12 @@ export function DatedList({
   colours: Record<string, string>;
   view: CalendarView;
   canAdd?: boolean;
+  starredIds?: Set<string>;
 }) {
   const hasAny = events.length > 0;
+  const daysWithEvents = days.filter((day) => events.some((e) => sameDayKey(dayKeyOf(e.startsAt), day)));
+  const showDays = hasAny ? daysWithEvents : [];
+
   return (
     <div className="dated-list">
       {!hasAny ? (
@@ -39,7 +44,7 @@ export function DatedList({
             : "No events on this day. Try All types."}
         </p>
       ) : null}
-      {days.map((day) => {
+      {showDays.map((day) => {
         const dayEvents = events.filter((e) => sameDayKey(dayKeyOf(e.startsAt), day));
         return (
           <section key={formatDayKey(day)} className="dated-group" aria-current={sameDayKey(day, today) ? "date" : undefined}>
@@ -52,33 +57,34 @@ export function DatedList({
                 </Link>
               ) : null}
             </h3>
-            {dayEvents.length === 0 ? (
-              <p className="muted">No events.</p>
-            ) : (
-              <div className="list">
-                {dayEvents.map((event) => (
-                  <Link
-                    key={event.id}
-                    className="card event-card"
-                    href={`/events/${event.id}`}
-                    style={categoryAccentStyle(colours[event.category])}
-                  >
-                    <CategoryThumb category={event.category} size="md" />
-                    <span className="event-card-body">
-                      <span className="event-card-meta">
-                        <span className="swatch" style={{ background: colours[event.category] }} />
-                        {event.category}
-                      </span>
-                      <span className="event-title">{event.title}</span>
-                      <span className="muted">
-                        {formatTime(event.startsAt)} · {event.online ? "Online" : event.placeName}
-                        {event.sourceKey ? " · From scrape" : ""}
-                      </span>
+            <div className="list">
+              {dayEvents.map((event) => (
+                <Link
+                  key={event.id}
+                  className="card event-card"
+                  href={`/events/${event.id}`}
+                  style={categoryAccentStyle(colours[event.category])}
+                >
+                  <CategoryThumb category={event.category} size="md" />
+                  <span className="event-card-body">
+                    <span className="event-card-meta">
+                      <span className="swatch" style={{ background: colours[event.category] }} />
+                      {event.category}
+                      {starredIds?.has(event.id) ? (
+                        <span className="event-row-star" title="Starred" aria-label="Starred">
+                          ★
+                        </span>
+                      ) : null}
                     </span>
-                  </Link>
-                ))}
-              </div>
-            )}
+                    <span className="event-title">{event.title}</span>
+                    <span className="muted">
+                      {formatTime(event.startsAt)} · {event.online ? "Online" : event.placeName}
+                      {event.sourceKey ? " · From scrape" : ""}
+                    </span>
+                  </span>
+                </Link>
+              ))}
+            </div>
           </section>
         );
       })}

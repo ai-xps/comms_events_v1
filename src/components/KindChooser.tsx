@@ -12,8 +12,8 @@ export function KindChooser({
   return (
     <ul className="kind-row">
       {CATEGORIES.map((category) => {
-        const search = `/search?types=${encodeURIComponent(category)}`;
-        const href = signedIn ? search : `/login?next=${encodeURIComponent(search)}`;
+        const browse = `/?types=${encodeURIComponent(category)}`;
+        const href = signedIn ? browse : `/login?next=${encodeURIComponent(browse)}`;
         const on = selected === category;
         return (
           <li key={category}>

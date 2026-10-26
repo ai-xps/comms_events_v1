@@ -33,6 +33,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     where: { userId: user.id, event: { status: "PUBLISHED", startsAt: { gte: new Date() } } },
     include: { event: true }
   });
+  const starredIds = new Set(stars.map((s) => s.eventId));
 
   const pins = events
     .filter((e): e is typeof e & { lat: number; lng: number } => !e.online && e.lat != null && e.lng != null)
@@ -55,8 +56,9 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       </div>
 
       {stars.length ? (
-        <section className="card starred-strip">
-          <h2>Starred</h2>
+        <section className="card starred-strip" aria-label="Saved events">
+          <h2>Saved ★</h2>
+          <p className="muted starred-strip-lede">Events you starred — open one to Attend.</p>
           <div className="list">
             {stars.map((star) => (
               <Link key={star.id} href={`/events/${star.event.id}`}>
@@ -78,6 +80,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           events={events}
           colours={settings.colours}
           canAdd={canReview(user)}
+          starredIds={starredIds}
         />
       ) : (
         <DatedList
@@ -85,6 +88,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           today={today}
           view={state.view}
           canAdd={canReview(user)}
+          starredIds={starredIds}
           events={events.map((e) => ({
             id: e.id,
             title: e.title,

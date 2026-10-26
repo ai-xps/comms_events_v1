@@ -14,6 +14,14 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-26 — UX redesign (Home browse, mark, calendar stars)
+
+- Signed-in Home absorbs Search: kinds + upcoming list on `/?types=` / `format=`; `/search` redirects there. Phone tabs: Home, Calendar, Bookings.
+- Welcome (signed-out) is brand door then sign-in, then kinds. GatherMark refined (soft pin fill, clearer people).
+- Calendar: ★ on week/month rows; Saved strip; week/day list skips empty days.
+- Bookings: Upcoming / Past; spots left when capacity is set; ★ when starred.
+- Insights: Average fill explained; section headings; readable week bar labels. Reports: files vs Insights; Fill column on recent events.
+
 ## 2026-10-25 — Welcome hallway (entry UX)
 
 - `/` is a welcome (mark, “Find. Book. Gather.”, one berry button, five event kinds), not a redirect to the month grid.

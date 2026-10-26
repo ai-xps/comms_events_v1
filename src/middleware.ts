@@ -28,7 +28,7 @@ export function middleware(request: NextRequest) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Please sign in." }, { status: 401 });
     }
-    // Keep the query (e.g. /search?types=Christian) in next= so sign-in returns to the same list.
+    // Keep the query (e.g. /?types=Christian) in next= so sign-in returns to the same list.
     // Drop other params from the login URL — cloning the request would leave types= on /login.
     const url = request.nextUrl.clone();
     url.pathname = "/login";

@@ -18,6 +18,8 @@ DATABASE_URL="file:./data/gather.db"
 
 ## Phase 0 — Oracle box (Guillaume)
 
+**Full click-path + troubleshooting:** [`oracle-phase0-playbook.md`](oracle-phase0-playbook.md).
+
 Checklist for Always Free A1. An gets a second SSH key (bus factor).
 
 1. [ ] Always Free tenancy in home region; billing alert if the account can leave free  
@@ -25,8 +27,8 @@ Checklist for Always Free A1. An gets a second SSH key (bus factor).
 3. [ ] VM: `VM.Standard.A1.Flex`, **2 OCPU / 12 GB**, Ubuntu  
 4. [ ] Capacity fail → other AD → wait → retry. If blocked **>48h** → Phase 0b Pi as primary  
 5. [ ] Public IP + **DNS A record** hostname (needed for Caddy TLS before gate)  
-6. [ ] SSH **keys only** (disable password auth); keys for **Guillaume + An**  
-7. [ ] `unattended-upgrades` + fail2ban on sshd  
+6. [ ] SSH **keys only**; keys for **Guillaume + An**  
+7. [ ] `unattended-upgrades` + fail2ban on sshd (**do not use `ufw`** on OCI Ubuntu — can break boot; use iptables if needed)  
 8. [ ] Private ops note (not in git): key inventory, OCI console break-glass  
 
 ### Capacity playbook
