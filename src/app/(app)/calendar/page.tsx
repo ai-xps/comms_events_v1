@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GatherMark } from "@/components/GatherMark";
 import { requireUser, canReview } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
@@ -40,19 +41,24 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
     .map((e) => ({ id: e.id, title: e.title, lat: e.lat, lng: e.lng }));
 
   return (
-    <main>
-      <div className="page-head">
-        <h1>Calendar</h1>
-        <p className="lede">
-          Upcoming {settings.locationLabel} events. Filter by type, then open an event to click Attend.
-        </p>
-        {canReview(user) ? (
-          <p>
-            <Link className="button secondary" href="/events/new">
+    <main className="calendar-page">
+      <div className="page-head calendar-head">
+        <div className="calendar-head-row">
+          <div className="calendar-head-brand">
+            <GatherMark size="md" />
+            <div>
+              <h1>Calendar</h1>
+              <p className="lede">
+                Upcoming {settings.locationLabel} events — filter, then open one to Attend.
+              </p>
+            </div>
+          </div>
+          {canReview(user) ? (
+            <Link className="button calendar-add" href="/events/new">
               Add event
             </Link>
-          </p>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       {stars.length ? (
@@ -69,37 +75,39 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
         </section>
       ) : null}
 
-      <FilterBar state={state} categories={enabledCategories} colours={settings.colours} />
-      <RangeNav state={state} today={today} />
+      <section className="card calendar-stage">
+        <FilterBar state={state} categories={enabledCategories} colours={settings.colours} />
+        <RangeNav state={state} today={today} />
 
-      {state.view === "month" ? (
-        <MonthGrid
-          state={state}
-          days={range.days}
-          today={today}
-          events={events}
-          colours={settings.colours}
-          canAdd={canReview(user)}
-          starredIds={starredIds}
-        />
-      ) : (
-        <WeekTimeGrid
-          days={range.days}
-          today={today}
-          canAdd={canReview(user)}
-          starredIds={starredIds}
-          colours={settings.colours}
-          events={events.map((e) => ({
-            id: e.id,
-            title: e.title,
-            startsAt: e.startsAt,
-            endsAt: e.endsAt,
-            category: e.category,
-            placeName: e.placeName,
-            online: e.online
-          }))}
-        />
-      )}
+        {state.view === "month" ? (
+          <MonthGrid
+            state={state}
+            days={range.days}
+            today={today}
+            events={events}
+            colours={settings.colours}
+            canAdd={canReview(user)}
+            starredIds={starredIds}
+          />
+        ) : (
+          <WeekTimeGrid
+            days={range.days}
+            today={today}
+            canAdd={canReview(user)}
+            starredIds={starredIds}
+            colours={settings.colours}
+            events={events.map((e) => ({
+              id: e.id,
+              title: e.title,
+              startsAt: e.startsAt,
+              endsAt: e.endsAt,
+              category: e.category,
+              placeName: e.placeName,
+              online: e.online
+            }))}
+          />
+        )}
+      </section>
 
       <section className="card map-card">
         <h2 className="map-heading">Map</h2>

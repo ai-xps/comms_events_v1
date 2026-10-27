@@ -14,8 +14,7 @@ export function FilterBar({
 }) {
   const none = state.categories.length === 0;
   return (
-    <>
-      <p className="filter-hint muted">You can pick more than one type.</p>
+    <div className="calendar-filters">
       <div className="filters" role="group" aria-label="Event type">
         <Chip href={calendarHref(state, { categories: [] })} current={none} pressed={none}>
           All types
@@ -47,7 +46,7 @@ export function FilterBar({
           Online
         </Chip>
       </div>
-    </>
+    </div>
   );
 }
 

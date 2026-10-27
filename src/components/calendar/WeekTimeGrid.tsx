@@ -9,10 +9,11 @@ import {
 } from "@/lib/calendar";
 import { formatTime, londonParts } from "@/lib/time";
 
-const HOUR_START = 6;
-const HOUR_END = 22;
+const HOUR_START = 7;
+const HOUR_END = 21;
 const HOURS = Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i);
-const PX_PER_HOUR = 52;
+/** Dense Apple-like rows — readable blocks without towering empty hours. */
+const PX_PER_HOUR = 40;
 const GRID_HEIGHT = HOURS.length * PX_PER_HOUR;
 
 type GridEvent = {
@@ -165,8 +166,8 @@ export function WeekTimeGrid({
                         height: event.height,
                         left: `calc(${leftPct}% + 2px)`,
                         width: `calc(${widthPct}% - 4px)`,
-                        background: "var(--cat-soft)",
-                        borderLeftColor: "var(--cat-edge)"
+                        background: "var(--cat-mid)",
+                        borderLeftColor: "var(--cat)"
                       }}
                     >
                       <span className="week-time-event-title">

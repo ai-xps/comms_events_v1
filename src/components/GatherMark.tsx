@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-const MARK_PX = { sm: 32, md: 48, lg: 88 } as const;
+const MARK_PX = { sm: 36, md: 52, lg: 88 } as const;
 
 /** Official Gather brand mark (pin + people + G). Pair with a text wordmark. */
 export function GatherMark({ size = "md" }: { size?: "sm" | "md" | "lg" }) {

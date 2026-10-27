@@ -319,6 +319,79 @@ h3 { font-size: 1.15rem; margin: 0 0 var(--space-2); }
   font-size: 1.02rem;
 }
 .page-head { margin-bottom: var(--space-5); }
+.calendar-page { display: grid; gap: var(--space-4); }
+.calendar-head { margin-bottom: 0; }
+.calendar-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.calendar-head-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.calendar-head-brand h1 {
+  margin: 0 0 0.15rem;
+  font-size: 1.75rem;
+  letter-spacing: -0.03em;
+}
+.calendar-head-brand .lede {
+  margin: 0;
+  font-size: 0.95rem;
+  max-width: 28rem;
+}
+.calendar-add {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 1.25rem;
+  box-shadow: 0 8px 20px var(--accent-glow);
+}
+.calendar-stage {
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-4);
+}
+.calendar-filters {
+  display: grid;
+  gap: var(--space-2);
+}
+.calendar-stage .calendar-nav {
+  margin-bottom: 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line);
+}
+.calendar-stage .view-tabs {
+  margin: 0;
+}
+.calendar-stage .range-heading {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.calendar-stage .filters {
+  gap: var(--space-2);
+}
+.calendar-stage .chip {
+  min-height: 40px;
+  font-size: 0.84rem;
+  padding: 0.35rem 0.85rem;
+}
+.calendar-stage .week-time-grid,
+.calendar-stage .calendar {
+  margin-bottom: 0;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius) - 4px);
+  box-shadow: none;
+  overflow: hidden;
+}
+.calendar-stage .calendar {
+  width: 100%;
+}
 
 .card {
   background: rgba(255, 255, 255, 0.92);
@@ -573,12 +646,12 @@ textarea { min-height: 96px; }
 .week-time-head,
 .week-time-body {
   display: grid;
-  grid-template-columns: 3.25rem repeat(var(--week-cols, 7), minmax(4.5rem, 1fr));
-  min-width: calc(3.25rem + var(--week-cols, 7) * 4.5rem);
+  grid-template-columns: 3rem repeat(var(--week-cols, 7), minmax(5rem, 1fr));
+  min-width: calc(3rem + var(--week-cols, 7) * 5rem);
 }
 .week-time-scroll {
   overflow: auto;
-  max-height: min(70vh, 36rem);
+  max-height: min(62vh, 32rem);
   -webkit-overflow-scrolling: touch;
 }
 .week-time-gutter {
@@ -592,8 +665,8 @@ textarea { min-height: 96px; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.15rem;
-  padding: var(--space-3) var(--space-2);
+  gap: 0.2rem;
+  padding: var(--space-2) var(--space-1) var(--space-3);
   border-bottom: 1px solid var(--line);
   border-left: 1px solid var(--line);
   background: var(--paper-2);
@@ -601,34 +674,39 @@ textarea { min-height: 96px; }
   position: relative;
 }
 .week-time-dayhead[data-today="true"] {
-  background: color-mix(in srgb, var(--accent) 10%, white);
+  background: color-mix(in srgb, var(--accent) 12%, white);
+  box-shadow: inset 0 -2px 0 var(--accent);
 }
 .week-time-weekday {
-  font-size: 0.72rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   color: var(--ink-soft);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 .week-time-daynum {
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   color: var(--ink);
   line-height: 1;
+  letter-spacing: -0.02em;
 }
 .week-time-dayhead[data-today="true"] .week-time-daynum {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.85rem;
+  height: 1.85rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
   background: var(--accent-gradient);
   color: var(--white);
+  box-shadow: 0 4px 12px var(--accent-glow);
 }
 .week-time-add {
-  font-size: 0.68rem;
-  margin-top: 0.15rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-top: 0.1rem;
+  color: var(--accent);
 }
 .week-time-hour {
   position: relative;
@@ -659,21 +737,23 @@ textarea { min-height: 96px; }
   z-index: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
-  padding: 0.25rem 0.4rem;
-  border-radius: 8px;
-  border-left: 3px solid var(--cat-edge, var(--accent));
+  justify-content: flex-start;
+  gap: 0.08rem;
+  padding: 0.28rem 0.45rem;
+  border-radius: 10px;
+  border-left: 3px solid var(--cat, var(--accent));
   text-decoration: none;
   color: var(--ink);
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(90, 40, 48, 0.06);
+  box-shadow: 0 2px 8px rgba(90, 40, 48, 0.1);
   touch-action: manipulation;
 }
 .week-time-event:active {
-  filter: brightness(0.98);
+  filter: brightness(0.97);
+  transform: scale(0.99);
 }
 .week-time-event-title {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   line-height: 1.2;
   overflow: hidden;
@@ -682,7 +762,8 @@ textarea { min-height: 96px; }
   -webkit-box-orient: vertical;
 }
 .week-time-event-time {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
+  font-weight: 600;
   color: var(--ink-soft);
   white-space: nowrap;
   overflow: hidden;
