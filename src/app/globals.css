@@ -105,11 +105,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   padding: var(--space-2) var(--space-3);
   margin-bottom: var(--space-5);
   position: relative;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.95);
+  z-index: 20;
+  /* Opaque header so page content never shows through the chrome. */
+  background: var(--white);
+  border: 1px solid var(--line);
   border-radius: 28px;
   box-shadow: var(--shadow-soft);
-  backdrop-filter: blur(12px);
 }
 .topbar .wordmark {
   flex: 0 0 auto;
@@ -237,14 +238,14 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     top: calc(100% + 8px);
     left: 0;
     right: 0;
-    z-index: 40;
-    background: rgba(255, 255, 255, 0.96);
+    z-index: 50;
+    /* Solid sheet — no glass/blur, so Members table text cannot bleed through. */
+    background: var(--white);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: var(--space-2);
     gap: var(--space-1);
-    backdrop-filter: blur(12px);
   }
   .nav-panel[data-open="true"] .nav a {
     justify-content: flex-start;
@@ -252,15 +253,19 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     border-radius: 14px;
     font-size: 0.95rem;
     min-height: 44px;
+    background: var(--white);
   }
   .nav-panel[data-open="true"] .nav a[aria-current="page"] {
     box-shadow: none;
+    background: var(--accent-gradient);
+    color: var(--white);
   }
   .nav-backdrop {
     position: fixed;
     inset: 0;
-    z-index: 30;
-    background: transparent;
+    z-index: 45;
+    /* Soft dim so the open menu reads as on top of the page, not mixed into it. */
+    background: color-mix(in srgb, var(--ink) 28%, transparent);
     border: 0;
     padding: 0;
     margin: 0;
@@ -278,10 +283,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     z-index: 35;
     gap: 2px;
     padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
-    background: rgba(255, 255, 255, 0.96);
+    background: var(--white);
     border-top: 1px solid var(--line);
     box-shadow: 0 -4px 18px rgba(90, 40, 48, 0.06);
-    backdrop-filter: blur(12px);
   }
   .tab-bar-link {
     flex: 1 1 0;
