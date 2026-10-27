@@ -15,7 +15,8 @@ esac
 
 if [ "${BOOTSTRAP:-0}" = "1" ]; then
   npx prisma db push
-  npx tsx prisma/seed.ts
+  # Demo seed refuses NODE_ENV=production unless ALLOW_DEMO_SEED=1.
+  ALLOW_DEMO_SEED="${ALLOW_DEMO_SEED:-0}" npx tsx prisma/seed.ts
 fi
 
 exec npx next start --hostname 0.0.0.0 --port "${PORT:-3000}"

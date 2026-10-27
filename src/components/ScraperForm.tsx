@@ -28,6 +28,9 @@ export function ScraperForm({
   const [message, setMessage] = useState<string | null>(notice ?? null);
   const [kind, setKind] = useState<"info" | "error">("info");
   const [running, setRunning] = useState(false);
+  const [orgFilter, setOrgFilter] = useState<"ALL" | "WHITELIST" | "STANDARD" | "BLACKLIST">("ALL");
+  const visibleOrgs =
+    orgFilter === "ALL" ? organisations : organisations.filter((o) => o.status === orgFilter);
 
   function show(result: JsonResult, success: string) {
     setKind(result.ok ? "info" : "error");
@@ -134,6 +137,28 @@ export function ScraperForm({
       </form>
       <section className="card">
         <h2>Organisations</h2>
+        <p className="muted">Colour chips mark the rule. Filter to focus the list.</p>
+        <div className="org-filter-row" role="group" aria-label="Filter organisations by rule">
+          {(
+            [
+              ["ALL", "All"],
+              ["WHITELIST", "Whitelist"],
+              ["STANDARD", "Standard"],
+              ["BLACKLIST", "Blacklist"]
+            ] as const
+          ).map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={`chip org-chip org-${id.toLowerCase()}`}
+              aria-pressed={orgFilter === id}
+              data-on={orgFilter === id ? "true" : undefined}
+              onClick={() => setOrgFilter(id)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="table-wrap" style={{ border: 0, boxShadow: "none", borderRadius: 0 }}>
           <table className="data stack-sm">
             <thead>
@@ -143,9 +168,12 @@ export function ScraperForm({
               </tr>
             </thead>
             <tbody>
-              {organisations.map((org) => (
+              {visibleOrgs.map((org) => (
                 <tr key={org.id}>
-                  <td data-label="Name">{org.name}</td>
+                  <td data-label="Name">
+                    <span className={`org-status-dot org-${org.status.toLowerCase()}`} aria-hidden="true" />
+                    {org.name}
+                  </td>
                   <td data-label="Rule">
                     <select
                       aria-label={`Organisation rule for ${org.name}`}
@@ -162,6 +190,7 @@ export function ScraperForm({
             </tbody>
           </table>
         </div>
+        {visibleOrgs.length === 0 ? <p className="muted">No organisations in this filter.</p> : null}
       </section>
     </div>
   );

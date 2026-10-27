@@ -10,6 +10,7 @@ import { FilterBar } from "@/components/calendar/FilterBar";
 import { RangeNav } from "@/components/calendar/RangeNav";
 import { MonthGrid } from "@/components/calendar/MonthGrid";
 import { WeekTimeGrid } from "@/components/calendar/WeekTimeGrid";
+import { DatedList } from "@/components/calendar/DatedList";
 
 export default async function CalendarPage({ searchParams }: { searchParams: Promise<CalendarParams> }) {
   const user = await requireUser();
@@ -39,6 +40,17 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
   const pins = events
     .filter((e): e is typeof e & { lat: number; lng: number } => !e.online && e.lat != null && e.lng != null)
     .map((e) => ({ id: e.id, title: e.title, lat: e.lat, lng: e.lng }));
+
+  const gridEvents = events.map((e) => ({
+    id: e.id,
+    title: e.title,
+    startsAt: e.startsAt,
+    endsAt: e.endsAt,
+    category: e.category,
+    placeName: e.placeName,
+    online: e.online,
+    sourceKey: e.sourceKey
+  }));
 
   return (
     <main className="calendar-page">
@@ -89,6 +101,16 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             canAdd={canReview(user)}
             starredIds={starredIds}
           />
+        ) : state.view === "list" ? (
+          <DatedList
+            days={range.days}
+            today={today}
+            events={gridEvents}
+            colours={settings.colours}
+            view="list"
+            canAdd={canReview(user)}
+            starredIds={starredIds}
+          />
         ) : (
           <WeekTimeGrid
             days={range.days}
@@ -96,15 +118,7 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
             canAdd={canReview(user)}
             starredIds={starredIds}
             colours={settings.colours}
-            events={events.map((e) => ({
-              id: e.id,
-              title: e.title,
-              startsAt: e.startsAt,
-              endsAt: e.endsAt,
-              category: e.category,
-              placeName: e.placeName,
-              online: e.online
-            }))}
+            events={gridEvents}
           />
         )}
       </section>

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CategoryThumb } from "@/components/CategoryThumb";
+import { PendingTileActions } from "@/components/PendingTileActions";
 import { requireUser } from "@/lib/auth";
 import { categoryAccentStyle } from "@/lib/category-art";
 import { dayKeyOf, formatDayKey } from "@/lib/calendar";
@@ -45,32 +46,35 @@ export default async function PendingPage() {
             {group.events.map((event) => {
               const updated = isUpdatedScrapedRow(event.createdAt, event.updatedAt);
               return (
-                <Link
+                <article
                   key={event.id}
                   className="card pending-tile"
-                  href={`/events/${event.id}/edit`}
                   style={categoryAccentStyle(settings.colours[event.category as keyof typeof settings.colours])}
+                  data-testid="pending-tile"
                 >
-                  <div className="pending-tile-top">
-                    <p className="pending-kicker muted">{updated ? "Updated" : "New"}</p>
-                    <CategoryThumb category={event.category} size="md" />
-                  </div>
-                  <h3>{event.title}</h3>
-                  <p className="pending-meta muted">
-                    <span>
-                      {event.organisationName} · {event.category}
-                    </span>
-                    <time dateTime={event.startsAt.toISOString()}>{formatDateTime(event.startsAt)}</time>
-                  </p>
-                  {event.externalUrl ? (
-                    <p className="pending-ext" title={event.externalUrl}>
-                      <span className="pending-ext-label">Event Link</span>
-                      <span className="pending-ext-url">{displayEventLink(event.externalUrl)}</span>
+                  <Link className="pending-tile-link" href={`/events/${event.id}/edit`}>
+                    <div className="pending-tile-top">
+                      <p className="pending-kicker muted">{updated ? "Updated" : "New"}</p>
+                      <CategoryThumb category={event.category} size="md" />
+                    </div>
+                    <h3>{event.title}</h3>
+                    <p className="pending-meta muted">
+                      <span>
+                        {event.organisationName} · {event.category}
+                      </span>
+                      <time dateTime={event.startsAt.toISOString()}>{formatDateTime(event.startsAt)}</time>
                     </p>
-                  ) : (
-                    <p className="pending-ext pending-ext-empty" aria-hidden="true" />
-                  )}
-                </Link>
+                    {event.externalUrl ? (
+                      <p className="pending-ext" title={event.externalUrl}>
+                        <span className="pending-ext-label">Event Link</span>
+                        <span className="pending-ext-url">{displayEventLink(event.externalUrl)}</span>
+                      </p>
+                    ) : (
+                      <p className="pending-ext pending-ext-empty" aria-hidden="true" />
+                    )}
+                  </Link>
+                  <PendingTileActions eventId={event.id} title={event.title} />
+                </article>
               );
             })}
           </div>

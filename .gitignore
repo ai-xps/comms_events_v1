@@ -14,5 +14,7 @@ data/
 .DS_Store
 tsconfig.tsbuildinfo
 coverage
+test-results/
+playwright-report/
 .tmp-emil-skills/
 .tmp-vid/

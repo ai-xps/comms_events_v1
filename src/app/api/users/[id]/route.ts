@@ -92,3 +92,40 @@ function parseActive(value: unknown, current: boolean): boolean {
   if (value === undefined || value === null) return current;
   return value === true || value === "on" || value === "true";
 }
+
+/** Permanent delete — admin only. Cascades bookings/stars; nulls audit actor; blocks self-delete. */
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  if (!originAllowed(request)) return rejectOrigin();
+  const actor = await getCurrentUser();
+  if (!actor || actor.role !== "admin") {
+    return NextResponse.json({ error: "Only an admin can delete accounts." }, { status: 403 });
+  }
+  const { id } = await params;
+  if (id === actor.id) {
+    return NextResponse.json({ error: "You cannot delete your own account." }, { status: 400 });
+  }
+  const existing = await prisma.user.findUnique({ where: { id } });
+  if (!existing) return NextResponse.json({ error: "Person not found." }, { status: 404 });
+
+  await prisma.$transaction(async (tx) => {
+    await tx.booking.deleteMany({ where: { OR: [{ userId: id }, { bookedById: id }] } });
+    await tx.star.deleteMany({ where: { userId: id } });
+    await tx.event.updateMany({ where: { createdById: id }, data: { createdById: null } });
+    await tx.event.updateMany({ where: { reviewedById: id }, data: { reviewedById: null } });
+    await tx.auditLog.updateMany({ where: { actorId: id }, data: { actorId: null } });
+    await tx.user.delete({ where: { id } });
+  });
+
+  try {
+    await writeAudit({
+      actorId: actor.id,
+      action: "user.delete",
+      entityType: "User",
+      entityId: id,
+      summary: `${actor.name} permanently deleted ${existing.name}`
+    });
+  } catch (error) {
+    console.error("user.delete audit failed", error);
+  }
+  return NextResponse.json({ ok: true });
+}

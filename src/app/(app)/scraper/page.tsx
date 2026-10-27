@@ -30,6 +30,12 @@ export default async function ScraperPage() {
           Daily run at 05:00 Europe/London via cron. Use Run now after you change these settings. Demo events run
           unless SCRAPE_FIXTURES=0. Priority URLs are fetched only if they are https ICS or JSON-LD on the allowlist.
         </p>
+        {cleaned.urls.length === 0 ? (
+          <p className="muted" data-testid="priority-empty">
+            No Priority URLs saved — the harvest uses the built-in demo fixtures only. Add allowlisted https ICS or
+            JSON-LD feeds above when ops are ready (ask before expanding the host allowlist).
+          </p>
+        ) : null}
       </div>
       <ScraperForm settings={settings} organisations={orgs} notice={droppedNotice} />
       <section>

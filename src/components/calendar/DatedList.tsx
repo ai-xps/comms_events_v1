@@ -39,9 +39,9 @@ export function DatedList({
     <div className="dated-list">
       {!hasAny ? (
         <p className="muted">
-          {view === "week"
-            ? "No events in this week. Try All types."
-            : "No events on this day. Try All types."}
+          {view === "day"
+            ? "No events on this day. Try All types."
+            : "No events in this week. Try All types."}
         </p>
       ) : null}
       {showDays.map((day) => {

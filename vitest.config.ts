@@ -8,6 +8,14 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/**/*.test.ts"],
+    globalSetup: ["tests/globalSetup.ts"],
+    env: {
+      // Integration suites must never skip locally — match CI’s always-on DB.
+      TEST_DATABASE_URL: process.env.TEST_DATABASE_URL || "file:./data/test.db",
+      DATABASE_URL: process.env.DATABASE_URL || process.env.TEST_DATABASE_URL || "file:./data/test.db",
+      SESSION_SECRET: process.env.SESSION_SECRET || "vitest-session-secret-not-for-production-012345",
+      APP_ORIGIN: process.env.APP_ORIGIN || "http://localhost:3000"
+    },
     // Integration tests share one database; run files one at a time.
     fileParallelism: false,
     coverage: {

@@ -37,10 +37,16 @@ describe("events export table", () => {
         online: false,
         placeName: "Hall",
         externalUrl: "https://example.com",
-        bookings: 2
+        bookings: 2,
+        attended: 1,
+        absent: 0,
+        unconfirmed: 1
       }
     ]);
     expect(table.columns).toContain("event link");
+    expect(table.columns).toEqual(
+      expect.arrayContaining(["booked", "attended", "absent", "unconfirmed"])
+    );
     expect(table.rows[0][0]).toBe("=HYPERLINK()");
   });
 });

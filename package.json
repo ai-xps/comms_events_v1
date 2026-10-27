@@ -15,6 +15,8 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install chromium",
     "deck": "node docs/presentation/build-deck.mjs",
     "deck:stakeholder": "node docs/presentation/build-stakeholder-deck.mjs"
   },
@@ -31,6 +33,7 @@
     "tsx": "^4.20.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.51.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/leaflet": "^1.9.20",
     "@types/node": "^24.6.2",

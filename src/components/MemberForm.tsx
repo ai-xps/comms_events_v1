@@ -106,7 +106,7 @@ export function MemberForm({
       </label>
       {member ? (
         <label>
-          <input type="checkbox" name="active" defaultChecked={member.active} /> Active
+          <input type="checkbox" name="active" defaultChecked={member.active} /> Active (soft — prefer Delete to remove)
         </label>
       ) : null}
       <div className="row">
@@ -116,6 +116,38 @@ export function MemberForm({
         <button className="ghost" type="button" onClick={() => router.push("/members")}>
           Return
         </button>
+        {member ? (
+          <button
+            className="secondary"
+            type="button"
+            data-testid="member-delete"
+            disabled={busy}
+            onClick={async () => {
+              const typed = window.prompt(
+                `Type DELETE to permanently remove ${member.name}. Bookings and stars go with them.`
+              );
+              if (typed !== "DELETE") return;
+              const ok = await confirm({
+                title: `Delete ${member.name} forever?`,
+                body: "This cannot be undone. Their Attend bookings and stars are removed. Audit rows stay but no longer name them as actor.",
+                confirmLabel: "Delete permanently",
+                destructive: true
+              });
+              if (!ok) return;
+              setBusy(true);
+              const result = await requestJson(`/api/users/${member.id}`, { method: "DELETE" });
+              setBusy(false);
+              if (!result.ok) {
+                setMessage(result.error);
+                return;
+              }
+              router.push("/members");
+              router.refresh();
+            }}
+          >
+            Delete
+          </button>
+        ) : null}
       </div>
       {dialog}
     </form>

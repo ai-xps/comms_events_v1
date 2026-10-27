@@ -4,21 +4,34 @@ import { calendarHref, rangeLabel, stepAnchor, type CalendarState, type DayKey }
 const VIEWS = [
   { id: "week", label: "Week" },
   { id: "day", label: "Day" },
-  { id: "month", label: "Month" }
+  { id: "month", label: "Month" },
+  { id: "list", label: "List" }
 ] as const;
 
 export function RangeNav({ state, today }: { state: CalendarState; today: DayKey }) {
+  const prev = stepAnchor(state.view, state.anchor, -1);
+  const next = stepAnchor(state.view, state.anchor, 1);
   return (
     <div className="calendar-nav">
       <div className="row calendar-nav-step">
         <Link className="button ghost" href={calendarHref(state, { anchor: today })} scroll={false}>
           Today
         </Link>
-        <Link className="button ghost" href={calendarHref(state, { anchor: stepAnchor(state.view, state.anchor, -1) })} scroll={false}>
-          Prev
+        <Link
+          className="button ghost calendar-nav-chevron"
+          href={calendarHref(state, { anchor: prev })}
+          scroll={false}
+          aria-label="Previous"
+        >
+          ←
         </Link>
-        <Link className="button ghost" href={calendarHref(state, { anchor: stepAnchor(state.view, state.anchor, 1) })} scroll={false}>
-          Next
+        <Link
+          className="button ghost calendar-nav-chevron"
+          href={calendarHref(state, { anchor: next })}
+          scroll={false}
+          aria-label="Next"
+        >
+          →
         </Link>
       </div>
       <h2 className="range-heading" aria-live="polite">

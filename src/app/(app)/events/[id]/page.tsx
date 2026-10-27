@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CategoryThumb } from "@/components/CategoryThumb";
-import { EventActions } from "@/components/EventActions";
+import { EventActions, RemoveAttendeeButton } from "@/components/EventActions";
 import { EventMap } from "@/components/EventMap";
 import { requireUser, canReview } from "@/lib/auth";
 import { categoryAccentStyle } from "@/lib/category-art";
@@ -9,6 +9,12 @@ import { prisma } from "@/lib/db";
 import { initialsFromName } from "@/lib/initials";
 import { getSettings } from "@/lib/settings";
 import { formatDateTime } from "@/lib/time";
+
+function attendanceLabel(value: string): string {
+  if (value === "ATTENDED") return "Attended";
+  if (value === "ABSENT") return "Didn’t";
+  return "Unconfirmed";
+}
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -21,6 +27,8 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
   if (!event) notFound();
   if (event.status !== "PUBLISHED" && !canReview(user)) notFound();
 
+  const now = new Date();
+  const past = event.startsAt <= now;
   const myBooking = event.bookings.find((b) => b.userId === user.id);
   const count = event.bookings.length;
   const full = event.capacity !== null && count >= event.capacity;
@@ -41,6 +49,10 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
       : user.role === "cell leader"
         ? event.bookings.filter((b) => b.user.cellId === user.cellId)
         : [];
+
+  const canRemoveAttendees = user.role === "admin" || user.role === "cell leader";
+  const canCancel = !!myBooking; // policy: own cancel anytime
+  const canConfirmOwn = !!myBooking && past && myBooking.attendance === "UNCONFIRMED";
 
   return (
     <main className="stack">
@@ -108,10 +120,15 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
           booked={!!myBooking}
           full={full && !myBooking}
           starred={starred}
-          canCancel={!!myBooking && event.startsAt > new Date()}
+          canCancel={canCancel}
           members={cellMembers.map((m) => ({ id: m.id, name: m.name }))}
+          bookedMemberIds={event.bookings.map((b) => b.userId)}
           canDelegate={user.role === "cell leader"}
           canEdit={canReview(user)}
+          myAttendance={myBooking?.attendance}
+          myBookingId={myBooking?.id}
+          canConfirmOwn={canConfirmOwn}
+          past={past}
         />
       </section>
       {event.lat != null && event.lng != null ? (
@@ -133,6 +150,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                   <th>Cell number</th>
                   <th>Cell</th>
                   <th>Attendance</th>
+                  {canRemoveAttendees ? <th>Actions</th> : null}
                 </tr>
               </thead>
               <tbody>
@@ -141,7 +159,16 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                     <td data-label="Name">{b.user.name}</td>
                     <td data-label="Cell number">{b.user.cellNumber}</td>
                     <td data-label="Cell">{b.user.cell?.name}</td>
-                    <td data-label="Attendance">{b.attendance.toLowerCase()}</td>
+                    <td data-label="Attendance">
+                      <span className={`attendance-chip attendance-${b.attendance.toLowerCase()}`}>
+                        {attendanceLabel(b.attendance)}
+                      </span>
+                    </td>
+                    {canRemoveAttendees ? (
+                      <td data-label="Actions">
+                        <RemoveAttendeeButton eventId={event.id} userId={b.userId} name={b.user.name} />
+                      </td>
+                    ) : null}
                   </tr>
                 ))}
               </tbody>

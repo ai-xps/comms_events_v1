@@ -13,7 +13,10 @@ const COLUMNS = [
   "online",
   "place",
   "event link",
-  "booked"
+  "booked",
+  "attended",
+  "absent",
+  "unconfirmed"
 ];
 
 export function eventsTable(rows: {
@@ -26,6 +29,9 @@ export function eventsTable(rows: {
   placeName: string | null;
   externalUrl: string | null;
   bookings: number;
+  attended: number;
+  absent: number;
+  unconfirmed: number;
 }[]): Table {
   return {
     name: "Events",
@@ -39,7 +45,10 @@ export function eventsTable(rows: {
       r.online ? "online" : "in person",
       r.placeName,
       r.externalUrl,
-      r.bookings
+      r.bookings,
+      r.attended,
+      r.absent,
+      r.unconfirmed
     ])
   };
 }
@@ -57,20 +66,28 @@ export async function eventsForRange(actor: SessionUser, from: Date, to: Date) {
   }
   const events = await prisma.event.findMany({
     where: { status: "PUBLISHED", startsAt: { gte: from, lt: to } },
-    include: { _count: { select: { bookings: true } } },
+    include: { bookings: { select: { attendance: true } } },
     orderBy: { startsAt: "asc" }
   });
-  return events.map((e) => ({
-    title: e.title,
-    organisationName: e.organisationName,
-    category: e.category,
-    startsAt: e.startsAt,
-    endsAt: e.endsAt,
-    online: e.online,
-    placeName: e.placeName,
-    externalUrl: e.externalUrl,
-    bookings: e._count.bookings
-  }));
+  return events.map((e) => {
+    const attended = e.bookings.filter((b) => b.attendance === "ATTENDED").length;
+    const absent = e.bookings.filter((b) => b.attendance === "ABSENT").length;
+    const unconfirmed = e.bookings.filter((b) => b.attendance === "UNCONFIRMED").length;
+    return {
+      title: e.title,
+      organisationName: e.organisationName,
+      category: e.category,
+      startsAt: e.startsAt,
+      endsAt: e.endsAt,
+      online: e.online,
+      placeName: e.placeName,
+      externalUrl: e.externalUrl,
+      bookings: e.bookings.length,
+      attended,
+      absent,
+      unconfirmed
+    };
+  });
 }
 
 export function eventsToCsv(rows: Awaited<ReturnType<typeof eventsForRange>>): string {
@@ -84,8 +101,8 @@ export async function eventsToExcel(rows: Awaited<ReturnType<typeof eventsForRan
 export async function logEventsExport(actor: SessionUser, format: string, from: Date, to: Date, count: number) {
   await writeAudit({
     actorId: actor.id,
-    action: "events.export",
+    action: "export.events",
     entityType: "Event",
-    summary: `${actor.name} exported ${count} events as ${format} from ${from.toISOString()} to ${to.toISOString()}`
+    summary: `${actor.name} exported ${count} events (${format}) ${from.toISOString()}–${to.toISOString()}`
   });
 }

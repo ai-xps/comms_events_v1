@@ -50,6 +50,10 @@ describe("parseCalendarParams", () => {
     expect(state.format).toBe("");
   });
 
+  it("accepts list view", () => {
+    expect(parseCalendarParams({ view: "list" }, today).view).toBe("list");
+  });
+
   it("keeps old y/m links working: current month anchors on today, other months on the 1st", () => {
     expect(parseCalendarParams({ y: "2026", m: "10" }, today).anchor).toEqual(today);
     expect(parseCalendarParams({ y: "2026", m: "11" }, today).anchor).toEqual({ year: 2026, month: 11, day: 1 });
@@ -64,10 +68,12 @@ describe("rangeFor — regression: day and week views were pinned to the 1st of 
     expect(range.to.toISOString()).toBe("2026-10-17T23:00:00.000Z");
   });
 
-  it("week view is Monday to Sunday around the anchor", () => {
-    const range = rangeFor("week", today);
-    expect(range.days[0]).toEqual({ year: 2026, month: 10, day: 12 });
-    expect(range.days[6]).toEqual({ year: 2026, month: 10, day: 18 });
+  it("week and list views are Monday to Sunday around the anchor", () => {
+    const week = rangeFor("week", today);
+    const list = rangeFor("list", today);
+    expect(week.days[0]).toEqual({ year: 2026, month: 10, day: 12 });
+    expect(week.days[6]).toEqual({ year: 2026, month: 10, day: 18 });
+    expect(list.days).toEqual(week.days);
   });
 
   it("handles the clocks going back on Sunday 25 October 2026", () => {
@@ -87,9 +93,10 @@ describe("rangeFor — regression: day and week views were pinned to the 1st of 
 });
 
 describe("stepAnchor", () => {
-  it("steps by a day, a week, or a month", () => {
+  it("steps by a day, a week, a list-week, or a month", () => {
     expect(stepAnchor("day", today, 1)).toEqual({ year: 2026, month: 10, day: 18 });
     expect(stepAnchor("week", today, -1)).toEqual({ year: 2026, month: 10, day: 10 });
+    expect(stepAnchor("list", today, 1)).toEqual({ year: 2026, month: 10, day: 24 });
     expect(stepAnchor("month", today, 1)).toEqual({ year: 2026, month: 11, day: 17 });
   });
 
@@ -154,6 +161,7 @@ describe("helpers", () => {
   it("labels ranges", () => {
     expect(rangeLabel("day", today)).toBe("Saturday 17 October 2026");
     expect(rangeLabel("week", today)).toBe("12 to 18 October 2026");
+    expect(rangeLabel("list", today)).toBe("12 to 18 October 2026");
     expect(rangeLabel("week", { year: 2026, month: 10, day: 28 })).toBe("26 October 2026 to 1 November 2026");
     expect(rangeLabel("month", today)).toBe("October 2026");
   });

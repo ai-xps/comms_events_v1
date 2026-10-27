@@ -265,7 +265,7 @@ export function EventForm({
           Repeat
           <select name="recurrence" defaultValue="NONE">
             <option value="NONE">One-off</option>
-            <option value="WEEKLY">Weekly (12 occurrences)</option>
+            <option value="WEEKLY">Weekly (24 occurrences)</option>
           </select>
         </label>
       ) : null}
@@ -283,7 +283,11 @@ export function EventForm({
               Back to pending
             </Link>
           </>
-        ) : null}
+        ) : (
+          <Link className="button ghost" href="/calendar">
+            Back to calendar
+          </Link>
+        )}
         {event ? (
           <>
             <button className="ghost" type="button" onClick={() => remove("this")}>

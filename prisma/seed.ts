@@ -12,6 +12,14 @@ function at(daysFromToday: number, hour: number, minute = 0) {
 }
 
 async function main() {
+  // Live boxes: refuse demo seed unless ALLOW_DEMO_SEED=1 (BOOTSTRAP alone is not enough).
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEMO_SEED !== "1") {
+    console.error(
+      "Refusing demo seed in production. Set ALLOW_DEMO_SEED=1 for a deliberate one-shot demo bootstrap, or create accounts in the Members UI."
+    );
+    process.exit(1);
+  }
+
   const already = await prisma.user.findFirst({ where: { cellNumber: "07000000001" } });
   if (already) {
     console.log("Seed skipped: demo users already present.");

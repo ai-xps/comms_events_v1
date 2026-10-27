@@ -33,8 +33,8 @@ describe("canBookFor", () => {
 });
 
 describe("canCancelBooking", () => {
-  it("stops a member cancelling after the start", () => {
-    expect(canCancelBooking(member, { userId: member.id, userCellId: "c1" }, true).ok).toBe(false);
+  it("lets a member cancel their own place even after the start", () => {
+    expect(canCancelBooking(member, { userId: member.id, userCellId: "c1" }, true).ok).toBe(true);
     expect(canCancelBooking(member, { userId: member.id, userCellId: "c1" }, false).ok).toBe(true);
   });
 

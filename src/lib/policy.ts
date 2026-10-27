@@ -20,16 +20,15 @@ export function canBookFor(actor: Actor, target: { id: string; cellId: string | 
   return allow;
 }
 
-/** Members cancel their own place before the start; leaders cancel within their cell at any time. */
+/** Anyone may cancel their own place at any time; leaders cancel within their cell at any time. */
 export function canCancelBooking(
   actor: Actor,
   booking: { userId: string; userCellId: string | null },
-  eventStarted: boolean
+  _eventStarted: boolean
 ): Decision {
   if (actor.role === "admin") return allow;
   if (actor.role === "member") {
     if (actor.id !== booking.userId) return deny("You can only cancel your own booking.");
-    if (eventStarted) return deny("This event has already started.");
     return allow;
   }
   if (!actor.cellId || booking.userCellId !== actor.cellId) {

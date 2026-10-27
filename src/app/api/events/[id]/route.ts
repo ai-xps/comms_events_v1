@@ -18,8 +18,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   const event = await prisma.event.findUnique({ where: { id }, include: { _count: { select: { bookings: true } } } });
   if (!event) return NextResponse.json({ error: "Event not found." }, { status: 404 });
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
-  const capacityRaw = String(body.capacity ?? "").trim();
-  const capacity = capacityRaw === "" ? null : Number(capacityRaw);
+  // Status-only patches (pending Approve/Discard) must not wipe capacity.
+  const capacity =
+    body.capacity === undefined
+      ? event.capacity
+      : String(body.capacity).trim() === ""
+        ? null
+        : Number(body.capacity);
   if (capacity !== null && capacity < event._count.bookings) {
     return NextResponse.json({ error: "Capacity cannot be below the current booking count." }, { status: 400 });
   }

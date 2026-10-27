@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { KindChooser } from "@/components/KindChooser";
+import { HomeDashboard } from "@/components/HomeDashboard";
 import { parseTypesParam, type CalendarFormat } from "@/lib/calendar";
 import { CATEGORIES, type Category } from "@/lib/constants";
 import { prisma } from "@/lib/db";
@@ -41,17 +41,7 @@ export async function HomeBrowse({
   const selected = categories.length === 1 ? categories[0] : null;
 
   if (!categories.length) {
-    return (
-      <main className="search-page">
-        <div className="page-head">
-          <h1>Home</h1>
-          <p className="lede kind-question" id="kind-question">
-            What kind of event are you looking for?
-          </p>
-        </div>
-        <KindChooser signedIn selected={null} />
-      </main>
-    );
+    return <HomeDashboard userId={userId} />;
   }
 
   const settings = await getSettings();

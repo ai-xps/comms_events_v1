@@ -23,7 +23,7 @@ export async function createWeeklySeries(input: {
 }) {
   const seriesId = crypto.randomUUID();
   const duration = input.endsAt.getTime() - input.startsAt.getTime();
-  const rows = Array.from({ length: 12 }, (_, i) => {
+  const rows = Array.from({ length: 24 }, (_, i) => {
     const startsAt = addDays(input.startsAt, i * 7);
     return {
       seriesId,

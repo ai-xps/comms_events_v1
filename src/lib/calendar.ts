@@ -1,7 +1,7 @@
 import { CATEGORIES, type Category } from "./constants";
 import { londonDate, londonParts } from "./time";
 
-export type CalendarView = "month" | "week" | "day";
+export type CalendarView = "month" | "week" | "day" | "list";
 export type CalendarFormat = "" | "online" | "inperson";
 
 /** A calendar date with no time or zone attached. Month is 1–12. */
@@ -106,7 +106,9 @@ export function toggleCategory(selected: Category[], category: Category): Catego
 
 export function parseCalendarParams(params: CalendarParams, today: DayKey): CalendarState {
   const view: CalendarView =
-    params.view === "month" || params.view === "day" || params.view === "week" ? params.view : "week";
+    params.view === "month" || params.view === "day" || params.view === "week" || params.view === "list"
+      ? params.view
+      : "week";
   let categories = parseTypesParam(params.types);
   if (!categories.length && CATEGORIES.includes(params.category as Category)) {
     categories = [params.category as Category];
@@ -134,7 +136,7 @@ export function rangeFor(view: CalendarView, anchor: DayKey): CalendarRange {
   if (view === "day") {
     first = anchor;
     count = 1;
-  } else if (view === "week") {
+  } else if (view === "week" || view === "list") {
     first = mondayOf(anchor);
     count = 7;
   } else {
@@ -152,7 +154,7 @@ export function rangeFor(view: CalendarView, anchor: DayKey): CalendarRange {
 
 export function stepAnchor(view: CalendarView, anchor: DayKey, direction: 1 | -1): DayKey {
   if (view === "day") return addDaysKey(anchor, direction);
-  if (view === "week") return addDaysKey(anchor, 7 * direction);
+  if (view === "week" || view === "list") return addDaysKey(anchor, 7 * direction);
   const index = anchor.year * 12 + (anchor.month - 1) + direction;
   const year = Math.floor(index / 12);
   const month = (index % 12) + 1;
@@ -184,6 +186,7 @@ export function formatDayLabel(key: DayKey): string {
 export function rangeLabel(view: CalendarView, anchor: DayKey): string {
   if (view === "day") return formatDayLabel(anchor);
   if (view === "month") return monthYear.format(utcNoon(anchor));
+  // week and list share a Monday–Sunday window
   const start = mondayOf(anchor);
   const end = addDaysKey(start, 6);
   if (start.year === end.year && start.month === end.month) {

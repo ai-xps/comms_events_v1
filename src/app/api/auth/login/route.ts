@@ -46,6 +46,13 @@ export async function POST(request: NextRequest) {
   }
 
   await prisma.loginThrottle.deleteMany({ where: { cellNumber } });
+  await prisma.user.update({
+    where: { id: matched.id },
+    data: {
+      previousLoginAt: matched.lastLoginAt,
+      lastLoginAt: new Date()
+    }
+  });
   await writeSession({
     id: matched.id,
     name: matched.name,

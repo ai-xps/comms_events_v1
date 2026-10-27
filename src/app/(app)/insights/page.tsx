@@ -129,7 +129,7 @@ export default async function InsightsPage({
       <h2 className="insights-section-title">Activity</h2>
       <ChartCard
         title="Attend clicks each week"
-        summary="Solid line is this period. Dashed line is the same length of time before it."
+        summary="Attend clicks (people tapping Attend). Solid berry = this period; dashed grey = the same length before it."
         table={<WeekTable weeks={data.weeks} />}
       >
         <LineBars weeks={data.weeks} previous={data.previousWeeks} />
@@ -137,7 +137,7 @@ export default async function InsightsPage({
 
       <ChartCard
         title="Attendance outcomes"
-        summary="Attended, didn't attend, and still unconfirmed, by the week the event started."
+        summary="People counted once per booking: Attended, Didn’t, or still Unconfirmed — by the week the event started."
         table={<WeekTable weeks={data.weeks} outcomes />}
       >
         <Stacked weeks={data.weeks} />

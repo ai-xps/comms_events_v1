@@ -17,6 +17,10 @@ model User {
   cellId       String?
   active       Boolean   @default(true)
   sessionVersion Int     @default(0)
+  /** Start of the current (most recent) login session. */
+  lastLoginAt  DateTime?
+  /** Prior login time — used for “new on the calendar since you were last here”. */
+  previousLoginAt DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   cell         Cell?     @relation(fields: [cellId], references: [id])

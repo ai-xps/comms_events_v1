@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { categoryAccentStyle } from "@/lib/category-art";
 import {
   dayKeyOf,
@@ -13,8 +16,9 @@ const HOUR_START = 7;
 const HOUR_END = 21;
 const HOURS = Array.from({ length: HOUR_END - HOUR_START }, (_, i) => HOUR_START + i);
 /** Dense Apple-like rows — readable blocks without towering empty hours. */
-const PX_PER_HOUR = 40;
+const PX_PER_HOUR = 48;
 const GRID_HEIGHT = HOURS.length * PX_PER_HOUR;
+const MIN_EVENT_HEIGHT = 28;
 
 type GridEvent = {
   id: string;
@@ -48,7 +52,7 @@ function layoutDay(events: (GridEvent & { starred: boolean })[]): LaidOut[] {
       const endRaw = minutesFromMidnight(event.endsAt);
       const endMin = Math.min(windowEnd, Math.max(startMin + 30, endRaw > startMin ? endRaw : startMin + 60));
       const top = ((startMin - windowStart) / 60) * PX_PER_HOUR;
-      const height = Math.max(22, ((endMin - startMin) / 60) * PX_PER_HOUR);
+      const height = Math.max(MIN_EVENT_HEIGHT, ((endMin - startMin) / 60) * PX_PER_HOUR);
       return { event, startMin, endMin, top, height };
     })
     .sort((a, b) => a.startMin - b.startMin || b.endMin - a.endMin);
@@ -79,6 +83,11 @@ function hourLabel(hour: number): string {
   return `${String(hour).padStart(2, "0")}:00`;
 }
 
+function slotHref(day: DayKey, hour: number): string {
+  const t = `${String(hour).padStart(2, "0")}:00`;
+  return `/events/new?d=${formatDayKey(day)}&t=${encodeURIComponent(t)}`;
+}
+
 export function WeekTimeGrid({
   days,
   today,
@@ -94,13 +103,14 @@ export function WeekTimeGrid({
   canAdd?: boolean;
   starredIds?: Set<string>;
 }) {
+  const router = useRouter();
   const weekdayShort = new Intl.DateTimeFormat("en-GB", {
     weekday: "short",
     timeZone: "Europe/London"
   });
 
   return (
-    <div className="week-time-grid card" role="grid" aria-label="Week timetable">
+    <div className="week-time-grid card" role="grid" aria-label="Week timetable" data-testid="week-time-grid">
       <div className="week-time-head" style={{ ["--week-cols" as string]: days.length }}>
         <div className="week-time-gutter" aria-hidden="true" />
         {days.map((day) => {
@@ -148,18 +158,34 @@ export function WeekTimeGrid({
                 data-today={isToday ? "true" : undefined}
               >
                 {HOURS.map((hour) => (
-                  <div key={hour} className="week-time-slot" style={{ height: PX_PER_HOUR }} />
+                  <div
+                    key={hour}
+                    className="week-time-slot"
+                    style={{ height: PX_PER_HOUR }}
+                    data-testid={canAdd ? `week-slot-${formatDayKey(day)}-${hour}` : undefined}
+                    onDoubleClick={
+                      canAdd
+                        ? () => {
+                            router.push(slotHref(day, hour));
+                          }
+                        : undefined
+                    }
+                    title={canAdd ? "Double-click to add an event" : undefined}
+                  />
                 ))}
                 {laid.map((event) => {
                   const colour = colours[event.category];
                   const widthPct = 100 / event.colCount;
                   const leftPct = event.col * widthPct;
+                  const showRange = event.height >= 36;
+                  const startLabel = formatTime(event.startsAt);
+                  const endLabel = formatTime(event.endsAt);
                   return (
                     <Link
                       key={event.id}
                       href={`/events/${event.id}`}
                       className="week-time-event"
-                      title={`${formatTime(event.startsAt)}–${formatTime(event.endsAt)} ${event.title}`}
+                      title={`${startLabel}–${endLabel} ${event.title}`}
                       style={{
                         ...categoryAccentStyle(colour),
                         top: event.top,
@@ -174,10 +200,12 @@ export function WeekTimeGrid({
                         {event.starred ? "★ " : ""}
                         {event.title}
                       </span>
-                      <span className="week-time-event-time">
-                        {formatTime(event.startsAt)}
-                        {event.online ? " · Online" : event.placeName ? ` · ${event.placeName}` : ""}
-                      </span>
+                      {showRange ? (
+                        <span className="week-time-event-time">
+                          {startLabel}–{endLabel}
+                          {event.online ? " · Online" : event.placeName ? ` · ${event.placeName}` : ""}
+                        </span>
+                      ) : null}
                     </Link>
                   );
                 })}
