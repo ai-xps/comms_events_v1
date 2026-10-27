@@ -18,6 +18,7 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 - Calendar defaults to **Week**; week/day use a Google-style time grid (hours × days, event blocks). Month view unchanged.
 - Official Gather mark on welcome/topbar/favicon; login door is mark + Gather wordmark.
+- Responsive shell: fluid type/spacing; compact chrome through iPad portrait (≤900px); tablet/desktop week-grid proportions; Apple web-app meta.
 
 ## 2026-10-26 — UX redesign (Home browse, mark, calendar stars)
 

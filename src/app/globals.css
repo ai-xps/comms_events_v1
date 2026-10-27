@@ -29,18 +29,16 @@
   --space-4: 16px;
   --space-5: 24px;
   --space-6: 32px;
-  --motion: color 160ms ease, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease, box-shadow 160ms ease, transform 160ms ease;
-  --sans: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
-  --serif: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
   /* Fluid type — phone → tablet → desktop */
   --text-body: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+  --text-lede: clamp(0.95rem, 0.9rem + 0.35vw, 1.1rem);
   --text-h1: clamp(1.45rem, 1.2rem + 1.2vw, 2rem);
-  --text-h2: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
-  --shell-pad-x: clamp(0.75rem, 2.5vw, 1.5rem);
+  --shell-pad-x: clamp(0.75rem, 2.5vw, 1.75rem);
   --shell-pad-y: clamp(0.75rem, 1.5vw, 1.5rem);
-  --week-col-min: 5rem;
-  --week-gutter: 3rem;
-  --week-hour-px: 40px;
+  --welcome-max: clamp(20rem, 92vw, 28rem);
+  --motion: color 160ms ease, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  --sans: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --serif: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 * { box-sizing: border-box; }
@@ -63,9 +61,6 @@ body {
   padding-left: env(safe-area-inset-left, 0px);
   padding-right: env(safe-area-inset-right, 0px);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  overflow-x: clip;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
 }
 a { color: var(--accent); transition: var(--motion); }
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
@@ -96,7 +91,6 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   max-width: min(1280px, 100%);
   margin: 0 auto;
   padding: var(--shell-pad-y) var(--shell-pad-x) var(--space-6);
-  width: 100%;
 }
 .shell-with-tabs {
   padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
@@ -208,7 +202,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   display: none;
 }
 
-/* Phone + most iPads in portrait: app chrome with bottom tabs */
+/* Compact chrome: iPhone + iPad portrait (and small windows) */
 @media (max-width: 900px) {
   .topbar {
     flex-wrap: nowrap;
@@ -216,7 +210,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     border-radius: var(--radius);
     padding: var(--space-3);
   }
-  .topbar .wordmark { flex: 1 1 auto; }
+  .topbar .wordmark { flex: 1 1 auto; font-size: 1.35rem; }
   .nav-wrap-desktop {
     display: none;
   }
@@ -283,7 +277,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     bottom: 0;
     z-index: 35;
     gap: 2px;
-    padding: var(--space-2) max(var(--space-3), env(safe-area-inset-left, 0px)) calc(var(--space-2) + env(safe-area-inset-bottom, 0px)) max(var(--space-3), env(safe-area-inset-right, 0px));
+    padding: var(--space-2) var(--space-3) calc(var(--space-2) + env(safe-area-inset-bottom, 0px));
     background: rgba(255, 255, 255, 0.96);
     border-top: 1px solid var(--line);
     box-shadow: 0 -4px 18px rgba(90, 40, 48, 0.06);
@@ -295,12 +289,12 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    padding: 0.35rem 0.35rem;
+    padding: 0.35rem 0.4rem;
     border-radius: var(--radius-pill);
     color: var(--ink-soft);
     text-decoration: none;
     font: inherit;
-    font-size: clamp(0.7rem, 2.4vw, 0.82rem);
+    font-size: 0.78rem;
     font-weight: 600;
     text-align: center;
     transition: var(--motion);
@@ -325,13 +319,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 
 h1, h2, h3 { font-family: var(--sans); font-weight: 700; letter-spacing: -0.02em; }
 h1 { font-size: var(--text-h1); margin: 0 0 var(--space-2); }
-h2 { font-size: var(--text-h2); margin: var(--space-5) 0 var(--space-3); }
-h3 { font-size: clamp(1.05rem, 1rem + 0.3vw, 1.15rem); margin: 0 0 var(--space-2); }
+h2 { font-size: clamp(1.15rem, 1.05rem + 0.4vw, 1.35rem); margin: var(--space-5) 0 var(--space-3); }
+h3 { font-size: 1.15rem; margin: 0 0 var(--space-2); }
 .lede {
   color: var(--ink-soft);
   margin: 0 0 var(--space-5);
   max-width: 42rem;
-  font-size: 1.02rem;
+  font-size: var(--text-lede);
 }
 .page-head { margin-bottom: var(--space-5); }
 .calendar-page { display: grid; gap: var(--space-4); }
@@ -661,15 +655,13 @@ textarea { min-height: 96px; }
 .week-time-head,
 .week-time-body {
   display: grid;
-  grid-template-columns: var(--week-gutter) repeat(var(--week-cols, 7), minmax(var(--week-col-min), 1fr));
-  min-width: calc(var(--week-gutter) + var(--week-cols, 7) * var(--week-col-min));
+  grid-template-columns: 3rem repeat(var(--week-cols, 7), minmax(5rem, 1fr));
+  min-width: calc(3rem + var(--week-cols, 7) * 5rem);
 }
 .week-time-scroll {
   overflow: auto;
-  max-height: min(62dvh, 34rem);
+  max-height: min(62vh, 32rem);
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  touch-action: pan-x pan-y;
 }
 .week-time-gutter {
   position: sticky;
@@ -960,20 +952,20 @@ textarea { min-height: 96px; }
 .status[data-kind="error"] { background: #ffe8ee; color: var(--danger); }
 
 .welcome-shell {
-  min-height: 100svh;
+  min-height: 100dvh;
   display: grid;
   place-items: start center;
-  padding: max(var(--space-5), env(safe-area-inset-top, 0px)) var(--shell-pad-x) max(var(--space-6), env(safe-area-inset-bottom, 0px));
+  padding: max(var(--space-5), env(safe-area-inset-top, 0px)) var(--shell-pad-x) var(--space-6);
 }
 .shell .welcome-shell {
   min-height: 0;
   padding: 0;
 }
 .welcome-card {
-  max-width: min(26rem, 100%);
+  max-width: var(--welcome-max);
   width: 100%;
   margin: 0 auto;
-  padding: clamp(1.25rem, 4vw, 2rem) clamp(1rem, 3.5vw, 1.5rem);
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 1.5rem);
   border-radius: clamp(20px, 3vw, 28px);
   text-align: center;
 }
@@ -1629,11 +1621,18 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
   border: 0;
 }
 
-/* Narrow phones */
-@media (max-width: 480px) {
-  :root {
-    --week-col-min: 3.6rem;
-    --week-gutter: 2.5rem;
+/* Phone (narrow) */
+@media (max-width: 700px) {
+  .shell { padding: var(--space-3) var(--space-3) var(--space-6); }
+  .calendar { font-size: 0.75rem; }
+  .calendar th, .calendar td { padding: var(--space-1); height: 5rem; }
+  .calendar th { font-size: 0.65rem; }
+  .event-link { font-size: 0.68rem; }
+  .dialog-actions { grid-template-columns: 1fr; }
+
+  .calendar-head-row {
+    flex-direction: column;
+    align-items: stretch;
   }
   .calendar-head-brand {
     gap: var(--space-3);
@@ -1646,46 +1645,44 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
     width: 100%;
     justify-content: center;
   }
-  .calendar-head-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .topbar .wordmark {
-    font-size: 1.25rem;
-  }
-  .welcome-brand .gather-mark {
-    width: 72px !important;
-    height: 72px !important;
-  }
-}
-
-/* Phones + iPad portrait: denser calendar, stacked tables */
-@media (max-width: 900px) {
-  .calendar { font-size: 0.75rem; }
-  .calendar th, .calendar td { padding: var(--space-1); height: 5rem; }
-  .calendar th { font-size: 0.65rem; }
-  .event-link { font-size: 0.68rem; }
-  .dialog-actions { grid-template-columns: 1fr; }
   .calendar-stage {
     padding: var(--space-3);
-    border-radius: 20px;
+    gap: var(--space-3);
+    border-radius: var(--radius);
   }
   .calendar-stage .chip {
     min-height: 44px;
   }
+  .calendar-nav {
+    gap: var(--space-2);
+  }
+  .calendar-nav-step {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .calendar-nav .view-tabs {
+    width: 100%;
+    max-width: none;
+    justify-content: space-between;
+  }
+  .calendar-nav .view-tab {
+    flex: 1 1 0;
+    justify-content: center;
+    padding: 0 var(--space-2);
+    font-size: 0.88rem;
+  }
+  .week-time-head,
+  .week-time-body {
+    grid-template-columns: 2.6rem repeat(var(--week-cols, 7), minmax(4.25rem, 1fr));
+    min-width: calc(2.6rem + var(--week-cols, 7) * 4.25rem);
+  }
   .week-time-scroll {
-    max-height: min(58dvh, 30rem);
+    max-height: min(58dvh, 28rem);
   }
-  .week-time-dayhead {
-    padding: var(--space-2) 0.15rem var(--space-2);
-  }
-  .week-time-add {
-    display: none;
-  }
-  .named-bars li {
-    grid-template-columns: 1fr;
-    gap: var(--space-1);
-  }
+  .week-time-event-title { font-size: 0.68rem; }
+  .week-time-add { display: none; }
+  .welcome-brand .wordmark { font-size: 1.75rem; }
+  .welcome-promise { font-size: 1.05rem; }
 
   table.data.stack-sm thead { display: none; }
   table.data.stack-sm, table.data.stack-sm tbody, table.data.stack-sm tr, table.data.stack-sm td {
@@ -1711,64 +1708,54 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
   }
 }
 
-/* iPad / small laptop landscape — roomier week columns, still touch-friendly */
+/* iPad / tablet sweet spot */
 @media (min-width: 701px) and (max-width: 1100px) {
-  :root {
-    --week-col-min: 5.5rem;
-    --shell-pad-x: clamp(1rem, 3vw, 1.75rem);
+  .shell {
+    max-width: 100%;
+  }
+  .calendar-stage {
+    padding: var(--space-5);
+  }
+  .week-time-head,
+  .week-time-body {
+    grid-template-columns: 3.25rem repeat(var(--week-cols, 7), minmax(5.5rem, 1fr));
+    min-width: 0;
+  }
+  .week-time-scroll {
+    max-height: min(64dvh, 36rem);
   }
   .welcome-card {
-    max-width: min(28rem, 92vw);
+    max-width: min(32rem, 92vw);
   }
   .calendar-head-brand h1 {
-    font-size: clamp(1.55rem, 2vw, 1.85rem);
+    font-size: clamp(1.6rem, 2.5vw, 1.9rem);
   }
 }
 
 /* Wide desktop */
 @media (min-width: 1101px) {
-  :root {
-    --week-col-min: 6rem;
-    --week-gutter: 3.25rem;
-  }
-  .shell {
-    max-width: 1320px;
+  .week-time-head,
+  .week-time-body {
+    min-width: 0;
+    grid-template-columns: 3.5rem repeat(var(--week-cols, 7), minmax(0, 1fr));
   }
   .week-time-scroll {
-    max-height: min(68dvh, 40rem);
+    max-height: min(68vh, 40rem);
   }
 }
 
-/* Short landscape phones / foldables */
-@media (max-height: 480px) and (orientation: landscape) {
+/* Landscape phones: keep chrome compact, give the grid height */
+@media (max-height: 500px) and (orientation: landscape) {
+  .week-time-scroll {
+    max-height: min(70dvh, 18rem);
+  }
   .welcome-shell {
     min-height: auto;
     padding-top: var(--space-3);
-    padding-bottom: var(--space-3);
-  }
-  .welcome-card {
-    padding: var(--space-4);
-  }
-  .welcome-brand .gather-mark {
-    width: 56px !important;
-    height: 56px !important;
-  }
-  .week-time-scroll {
-    max-height: min(70dvh, 22rem);
   }
   .tab-bar-link {
     min-height: 40px;
-    font-size: 0.7rem;
-  }
-}
-
-/* Ultra-narrow / dual-pane (e.g. Duo-style halves ~540px) */
-@media (max-width: 600px) and (min-width: 481px) {
-  :root {
-    --week-col-min: 4.25rem;
-  }
-  .calendar-head-brand {
-    flex: 1 1 auto;
+    font-size: 0.72rem;
   }
 }
 
