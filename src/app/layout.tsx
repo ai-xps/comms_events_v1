@@ -15,7 +15,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#fdf2f0"
+  themeColor: "#fdf2f0",
+  /** Let iOS/iPadOS size the layout for notches, Dynamic Island, and home indicator. */
+  interactiveWidget: "resizes-content"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
