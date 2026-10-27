@@ -77,6 +77,10 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .gather-mark {
   display: block;
   flex: 0 0 auto;
+  object-fit: contain;
+}
+.gather-mark-lockup {
+  margin: 0 auto;
 }
 .shell {
   max-width: 1280px;
@@ -741,9 +745,8 @@ textarea { min-height: 96px; }
   gap: var(--space-2);
   margin-bottom: var(--space-4);
 }
-.welcome-brand .wordmark {
-  margin: 0;
-  font-size: 2rem;
+.welcome-brand .gather-mark-lockup {
+  margin-bottom: var(--space-2);
 }
 .welcome-promise {
   margin: 0;

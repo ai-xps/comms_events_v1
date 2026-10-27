@@ -13,8 +13,7 @@ export function Welcome({
     <main className="welcome-shell">
       <div className="welcome-card card">
         <div className="welcome-brand welcome-settle">
-          <GatherMark size="lg" />
-          <p className="wordmark">Gather</p>
+          <GatherMark size="lg" lockup />
           <p className="welcome-promise">Find. Book. Gather.</p>
         </div>
         <p className="welcome-sentence welcome-fade">

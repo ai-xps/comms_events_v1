@@ -4,7 +4,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Gather — Birmingham Community Events",
-  description: "A closed calendar for Birmingham community events."
+  description: "A closed calendar for Birmingham community events.",
+  icons: {
+    icon: [{ url: "/brand/gather-mark.png", type: "image/png" }],
+    apple: [{ url: "/brand/gather-mark.png", type: "image/png" }]
+  }
 };
 
 export const viewport: Viewport = {
