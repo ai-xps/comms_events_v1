@@ -19,8 +19,8 @@ import {
 const today = { year: 2026, month: 10, day: 17 };
 
 describe("parseCalendarParams", () => {
-  it("defaults to month view on today", () => {
-    expect(parseCalendarParams({}, today)).toEqual({ view: "month", categories: [], format: "", anchor: today });
+  it("defaults to week view on today", () => {
+    expect(parseCalendarParams({}, today)).toEqual({ view: "week", categories: [], format: "", anchor: today });
   });
 
   it("accepts a valid anchor date and filters", () => {
@@ -45,7 +45,7 @@ describe("parseCalendarParams", () => {
 
   it("ignores unknown view, category and format", () => {
     const state = parseCalendarParams({ view: "year", category: "Party", format: "hybrid" }, today);
-    expect(state.view).toBe("month");
+    expect(state.view).toBe("week");
     expect(state.categories).toEqual([]);
     expect(state.format).toBe("");
   });

@@ -8,7 +8,7 @@ import { EventsMap } from "@/components/EventsMap";
 import { FilterBar } from "@/components/calendar/FilterBar";
 import { RangeNav } from "@/components/calendar/RangeNav";
 import { MonthGrid } from "@/components/calendar/MonthGrid";
-import { DatedList } from "@/components/calendar/DatedList";
+import { WeekTimeGrid } from "@/components/calendar/WeekTimeGrid";
 
 export default async function CalendarPage({ searchParams }: { searchParams: Promise<CalendarParams> }) {
   const user = await requireUser();
@@ -83,22 +83,21 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           starredIds={starredIds}
         />
       ) : (
-        <DatedList
+        <WeekTimeGrid
           days={range.days}
           today={today}
-          view={state.view}
           canAdd={canReview(user)}
           starredIds={starredIds}
+          colours={settings.colours}
           events={events.map((e) => ({
             id: e.id,
             title: e.title,
             startsAt: e.startsAt,
+            endsAt: e.endsAt,
             category: e.category,
             placeName: e.placeName,
-            online: e.online,
-            sourceKey: e.sourceKey
+            online: e.online
           }))}
-          colours={settings.colours}
         />
       )}
 

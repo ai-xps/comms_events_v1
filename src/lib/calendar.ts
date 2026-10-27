@@ -105,7 +105,8 @@ export function toggleCategory(selected: Category[], category: Category): Catego
 }
 
 export function parseCalendarParams(params: CalendarParams, today: DayKey): CalendarState {
-  const view: CalendarView = params.view === "week" || params.view === "day" ? params.view : "month";
+  const view: CalendarView =
+    params.view === "month" || params.view === "day" || params.view === "week" ? params.view : "week";
   let categories = parseTypesParam(params.types);
   if (!categories.length && CATEGORIES.includes(params.category as Category)) {
     categories = [params.category as Category];

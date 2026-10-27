@@ -14,6 +14,11 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-27 — Week timetable calendar + brand mark
+
+- Calendar defaults to **Week**; week/day use a Google-style time grid (hours × days, event blocks). Month view unchanged.
+- Official Gather mark on welcome/topbar/favicon; login door is mark + Gather wordmark.
+
 ## 2026-10-26 — UX redesign (Home browse, mark, calendar stars)
 
 - Signed-in Home absorbs Search: kinds + upcoming list on `/?types=` / `format=`; `/search` redirects there. Phone tabs: Home, Calendar, Bookings.
