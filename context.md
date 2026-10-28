@@ -2,7 +2,9 @@
 
 Context for the build. Distilled 15 October 2026 from the project group chat (14–15 October 2026), the two requirements documents linked in that chat, and the process and architecture sketches shared there. Updated 16 October 2026 with mobile-first UI mockups (section 16). Updated 17 October 2026 with Guillaume’s 16 October demo feedback (section 17), tester calendar notes (section 18), and Insights (section 19). Updated 28 October 2026 with the closed build record (section 20).
 
-This file is a reference for implementation. It is not a signed specification. An, Becca and Guillaume have not signed `docs/FUNCTIONAL.md`. The discovery document calls itself finalised, and the chat on 15 October still had comments outstanding. Both sides of an old argument stay in sections 4, 11 and 15. **Section 20 wins** when an earlier section still looks open. Do not implement the older side.
+This file is a reference for implementation. It is not a signed specification. An, Becca and Guillaume have not signed `docs/FUNCTIONAL.md`.
+
+**If you are changing the app, read section 20 and stop.** Sections 1–19 are the archive of the October conversations. They keep both sides of old arguments on purpose. They are not a second product. When they disagree with section 20, section 20 is the rule.
 
 ## 1. Purpose
 
@@ -340,7 +342,7 @@ From the 15 October 2026 export of [Requirements](https://docs.google.com/docume
 | Thread | On | Comment | Reply | Outcome in this document |
 | --- | --- | --- | --- | --- |
 | [a] | High-touch cell-leader oversight | Later add — a named invite list is enough. Cells add ops you don’t need yet. | None | Unadopted. Cells stay in scope. |
-| [b] [c] | Admin can see plain-text passwords | Don’t. Admin can reset without seeing secrets. | It’s ok we can set pwd ourselves since it’s not a critical app. We only use basic info for registering to events. And it means we can load to existing structure. It prevents members setting their profile to the wrong cell and we can set them up as they exist in other systems. | Document keeps D03 (plain text). The build hashes passwords; an admin still sets and replaces them. |
+| [b] [c] | Admin can see plain-text passwords | Don’t. Admin can reset without seeing secrets. | It’s ok we can set pwd ourselves since it’s not a critical app. We only use basic info for registering to events. And it means we can load to existing structure. It prevents members setting their profile to the wrong cell and we can set them up as they exist in other systems. | The discovery reply kept plain text. The build stores a bcrypt hash. Section 20. |
 | [d] [e] | User booking | Overlap — book-on + attendance badge already in yours. Keep it count + initials, not a full register. | The other document is better to understand this requirement. | Follow the written privacy toggle (name/cell vs total count), not initials-only. |
 | [f] [g] | No public self-registration | Already in yours — invite-only, admin-created names. | No invite, we set all accounts up and distribute pwd to CL. | No invite. Admin creates accounts; passwords go to the cell leader. |
 | [h] [i] | Excel columns | Is this the complete list of things you need? | Name, Cell, Password, Permission | Those four columns are complete. |
@@ -349,9 +351,9 @@ From the 15 October 2026 export of [Requirements](https://docs.google.com/docume
 | [n] [o] | Filter primarily by event type | Give examples please, and I think others can be used for it too. | Christian, Networking, Professional, Student, Meetup | Those five types. No further filter dimensions in the reply. |
 | [p] [q] | One-click booking | This is good and ok, but we can do better by adding starred events for the members. | Once they find an event they want to attend they click Attend. Later on they need to confirm they actually attended. That’s what this requirement is about (not about starred events). | Attend records intent. Confirmation is later. Stars are a separate bookmark (section 20), not part of this requirement. |
 
-## 16. Mobile boards (16 October) — flow reference
+## 16. Mobile boards (16 October) — archive
 
-Added from the Gather redesign mockups (logo through calendar). These boards are a flow reference. Section 20 is the shipped colour, navigation, and copy. Do not restyle the app to the teal AFTER frames.
+Archive only. Do not copy a colour, a button, or a navigation pattern from this section into the app. The look and the phone tabs are section 20.6. The boards below are the October sketches, kept so a later reader can see what was proposed.
 
 Mockup boards (repo copies):
 
@@ -363,7 +365,7 @@ Mockup boards (repo copies):
 | 7–8 Details + Bookings | [`docs/design-mockups/04-details-bookings.png`](docs/design-mockups/04-details-bookings.png) |
 | 9–10 Calendar | [`docs/design-mockups/05-calendar.png`](docs/design-mockups/05-calendar.png) |
 
-### How to use these for implementation
+### What the boards showed (do not build from this section)
 
 - **Phone:** Follow the flow in section 20 (welcome, kinds on Home, list, details, bookings, calendar). Do not copy teal buttons, Forgot password, or Notify Me off the boards.
 - **Browser:** Keep the logo, the catchphrase, category colours, list cards, and the calendar-as-day-filter pattern. Expand the layout (calendar and list can sit side by side; desktop nav alongside the phone tabs). Colour is the blush / berry lock in section 20. The teal buttons on the boards were not adopted.
@@ -591,6 +593,12 @@ A weekly series creates 24 occurrences, seven UTC days apart, sharing one `serie
 - Cancel: a member may cancel their own place. A cell leader may cancel a place in their own cell. An admin may cancel any place. The row is removed. The audit log keeps the fact that it was cancelled.
 - Overlapping events are both kept. The app does not warn.
 - A cell leader does not book or cancel someone in another cell. An admin may book anyone.
+- Only a `PUBLISHED` event can be attended, and only a `PUBLISHED` event appears on the calendar. Pending and discarded stay off that calendar.
+- A person with `active` false cannot sign in and cannot be booked.
+- An admin may permanently delete another account. An admin cannot delete their own. That delete removes the person’s bookings and stars. Their old audit rows stay, with the actor name cleared.
+- Deleting an event removes its bookings. The audit row for the delete stays.
+- Saving fields on an event stamps `humanEditedAt`. Publish or discard alone does not. A field save that does not change status is not its own audit row.
+- Stars are not written to the audit log. They drop after the event end, including on the next scrape.
 
 ### 20.4 Scraper and the 05:00 job
 
@@ -612,14 +620,14 @@ Demo fixtures run unless `SCRAPE_FIXTURES=0`. Live fetch is admin Priority URLs 
 - An import file is read for that request. Only the hash is stored. If any row fails, nobody from that file is created. Cap: 2 MB and 2,000 rows.
 - Spreadsheet cells that look like formulas are prefixed.
 - Event Link is `http://` or `https://` only. A Zoom link counts when it is one of those. Category colours are `#rrggbb` only.
-- Audit log: admin only, newest 200 rows on the page. There is no edit and no delete of a log row in the app. Deleting a member clears the actor on their old rows; the rows stay.
+- Audit log: admin only. The page shows the newest 200 rows. There is no export of the log and no screen to edit or delete a row. The rows that the app writes are: `user.create`, `user.permission`, `user.password_reset`, `user.delete`, `users.import`, `booking.create`, `booking.cancel`, `booking.export`, `attendance.mark`, `event.create`, `event.publish`, `event.discard`, `event.delete`, `event.series.create`, `organisation.rule`, `scraper.run`, `export.events`, `insights.export`, `insights.share`, `settings.memberAttendeeView`, `settings.priorityUrls.dropped`. Someone who can open the SQLite file on the server can change those rows outside the app. The app does not.
 - Member view default `COUNT`. `COUNT_AND_NAME_CELL` shows every signed-in member the name and cell number of everyone booked. That is a deliberate admin choice. Exports ignore the switch: admin sees everyone, cell leader sees their own cell, members get 403.
 - Insights share text has totals and a link. It has no names and no cell numbers. Cells with fewer than three people show as “fewer than 3”.
 - No public registration. No write to any wider Birmingham department system.
 
 ### 20.6 Look and access
 
-Shipped colour, in `src/app/globals.css`: blush paper `#FDF2F0`, warm ink `#3D2A2C`, berry `#A8434D` (button gradient `#C45C66` → `#A8434D`). Warm ink on blush paper is about 12:1. White on solid berry is about 5:1. White on the lighter gradient end `#C45C66` is about 4:1, so small white text does not sit on that colour alone. Buttons use the gradient at a heavy weight and at least 48px tall. The focus ring is a 3px berry outline, 2px outside the control, on links, buttons, and fields. On a coarse pointer (a finger), nav, chips, and day cells are at least 44px tall. Hover styles apply to a fine pointer (a mouse). A press uses `:active`. If the person has asked the device to reduce motion, the press does not scale. The current page and the selected chip expose `aria-current` or `aria-pressed`. A category is a word as well as a colour. The week grid shows event titles in the blocks. The month grid uses the day list so titles are not only coloured dots.
+Shipped colour, in `src/app/globals.css`: blush paper `#FDF2F0`, warm ink `#3D2A2C`, muted ink `#7A6266`, berry `#A8434D`, button gradient `#B14E58` → `#A8434D`. Measured contrast: ink on paper about 12:1, muted ink on paper about 5.1:1, berry links on paper about 5.4:1, white on `#B14E58` about 5.1:1, white on `#A8434D` about 5.9:1. New text uses one of those pairs. The focus ring is a 3px berry outline, 2px outside the control, on links, buttons, and fields (berry on paper is about 5.4:1). On a coarse pointer (a finger), nav, chips, and day cells are at least 44px tall. Buttons are at least 48px tall. Hover styles apply to a fine pointer (a mouse). A press uses `:active`. If the person has asked the device to reduce motion, the press does not scale. The current page and the selected chip expose `aria-current` or `aria-pressed`. A category is a word as well as a colour. The week grid shows event titles in the blocks. The month grid uses the day list so titles are not only coloured dots.
 
 Phone tabs for a member: Home, Calendar, Bookings. Leader and admin tools live in Menu. Signed-out `/` is the welcome door, then sign-in. A sign-in with no `next=` returns to `/`. Copy says cell leader, not GSN.
 
@@ -647,7 +655,8 @@ Run `npm test` and `npm run typecheck`. Then walk three people:
 | --- | --- |
 | Member | Signs in from the cell-number list. Week calendar shows events. All types clears a type filter. Attend once, then Attend again, still one booking. Confirm attendance. Star an event. No Import, Scraper, Audit, or Insights in the nav. |
 | Cell leader | Pending tiles by day. Discard returns to `/pending`. Can book a member of their own cell and cannot book another cell. Export is their cell only. `/import` is a sentence, not the form. Insights is their cell only. |
-| Admin | Creates or imports Name, Cell number, Cell, Password, Permission. Replacing a password does not reveal the old one. Member view defaults to count only. Run now does not duplicate a fixture already stored. Audit shows the run. Insights can cover the region. |
+| Admin | Creates or imports Name, Cell number, Cell, Password, Permission. Replacing a password does not reveal the old one. Member view defaults to count only. Run now does not duplicate a fixture already stored. Audit shows the run. Insights can cover the region. A weekly series creates 24 occurrences; deleting “this and future” leaves the earlier ones. |
+| Oracle host | After a fast-forward update (section 20.10), `curl -sS http://127.0.0.1:3000/api/health` returns `{"ok":true}`. The public HTTPS name in `docs/GATE-STATUS.md` returns the same. Railway is still the announced demo. |
 
 Browser coverage for discard copy, a CSV download, and an empty far-future month is `npm run test:e2e`. The live smoke list is `docs/REVIEW.md`. A green test run is an engineering check. It is not the signature on `docs/FUNCTIONAL.md`.
 
@@ -663,4 +672,23 @@ Browser coverage for discard copy, a CSV download, and an empty far-future month
 | Members see names | Admin attendee view is not on count only. |
 | Disk or host loss | `docs/deploy-ubuntu.md` backup and restore, and `docs/incident-card.md`. |
 
-Operator docs: `README.md` (local), `docs/deploy-ubuntu.md` (host, cron, backups), `docs/incident-card.md` (what to do when it is down), `DECISIONS.md` (why a call was made), `docs/CHANGELOG.md` (what each build shipped). Comments added to the Google demo doc after 16 October are not a second spec. A change counts when it is in section 20 or `DECISIONS.md`.
+Operator docs: `README.md` (local), `docs/deploy-ubuntu.md` (host, cron, backups), `docs/GATE-STATUS.md` (what is already ticked on Oracle), `docs/incident-card.md` (what to do when it is down), `DECISIONS.md` (why a call was made), `docs/CHANGELOG.md` (what each build shipped). Comments added to the Google demo doc after 16 October are not a second spec. A change counts when it is in section 20 or `DECISIONS.md`.
+
+### 20.10 Update the Oracle box
+
+Oracle is the Ubuntu host in `docs/GATE-STATUS.md`. Railway stays the announced demo until that gate is fully ticked. Do not stop Railway from this update.
+
+On the box, in `/var/www/gather`, as the user that already runs Gather:
+
+```bash
+git pull --ff-only
+npm ci
+npx prisma generate
+npm run build
+sudo systemctl restart gather
+curl -sS http://127.0.0.1:3000/api/health
+```
+
+`git pull --ff-only` stops if the box has local commits, so a hand edit on the server is not thrown away. Do not set `BOOTSTRAP=1`. That command reseeds and can replace the people already on the box. Do not start a second `next start` against the same `gather.db`. One `gather` service is the only writer.
+
+Then check the public HTTPS URL from `docs/GATE-STATUS.md` at `/api/health`. A good answer is `{"ok":true}`. If the pull is not fast-forward, stop and look. Do not reset the server copy to make the pull fit.

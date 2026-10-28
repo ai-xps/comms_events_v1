@@ -3,9 +3,9 @@
   --paper: #fdf2f0;
   --paper-2: #f3e0e2;
   --ink: #3d2a2c;
-  --ink-soft: #8a6f72;
+  --ink-soft: #7a6266;
   --line: #efd6d9;
-  --accent-from: #c45c66;
+  --accent-from: #b14e58;
   --accent-to: #a8434d;
   --accent-gradient: linear-gradient(135deg, var(--accent-from) 0%, var(--accent-to) 100%);
   /* --terracotta kept as solid accent alias for borders / underlines */

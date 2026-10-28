@@ -10,7 +10,7 @@ Front door is `/` (welcome → kind question → list), not the month grid. Cale
 
 ## UI restyle (visual only)
 
-Soft blush / “Gelain” surface (20 Oct 2026, style only from stakeholder mock refs): paper `#FDF2F0` with gentle pink / sage / gold washes; warm ink `#3D2A2C`; accent berry `#A8434D` (gradient `#C45C66` → `#A8434D`; `--terracotta` / `--accent` alias). Soft secondary tokens `--sage` / `--gold`. Pill nav + selected chips/buttons use berry; frosted topbar; cards ~24px radius with rose-tinted shadow. Category defaults use sage / teal / berry / mauve / gold. Spacing scale unchanged. Leaflet markers match berry. No booking, role, route, or API changes.
+Soft blush / “Gelain” surface (20 Oct 2026, style only from stakeholder mock refs): paper `#FDF2F0` with gentle pink / sage / gold washes; warm ink `#3D2A2C`; accent berry `#A8434D` (gradient `#B14E58` → `#A8434D`; `--terracotta` / `--accent` alias). The lighter stop was `#C45C66` until 28 October 2026; white on that stop was about 4.1:1, under the 4.5:1 text bar, so the stop moved to `#B14E58` (about 5.1:1). Muted ink moved from `#8A6F72` to `#7A6266` for the same bar. Trade-off: buttons and hints are a little deeper, still the same blush / berry family. Soft secondary tokens `--sage` / `--gold`. Pill nav + selected chips/buttons use berry; frosted topbar; cards ~24px radius with rose-tinted shadow. Category defaults use sage / teal / berry / mauve / gold. Spacing scale unchanged. Leaflet markers match berry. No booking, role, route, or API changes.
 
 Where `context.md` and the discovery-document comments disagree, this build follows the values below. See `context.md` section 15 for the source threads.
 

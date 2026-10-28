@@ -14,6 +14,11 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-28 — Contrast on blush / berry
+
+- Button gradient light stop `#B14E58` and muted ink `#7A6266`, so white labels and hints clear 4.5:1.
+- `context.md` section 20 is the closed build record, including the Oracle update steps.
+
 ## 2026-10-28 — Bookings chips + Discard≠blacklist tests
 
 - My bookings uses the same coloured attendance chip as the event page.
