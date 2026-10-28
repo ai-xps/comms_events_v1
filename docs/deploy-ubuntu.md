@@ -54,24 +54,28 @@ Oracle may reclaim Always Free A1 if CPU, network, **and** memory stay under 20%
 
 ### Hardened smoke
 
-1. [ ] SQLite Phase 1 on `experiment`, CI green  
-2. [ ] App running on Ubuntu via systemd  
-3. [ ] Public **HTTPS** URL loads Gather login; admin sign-in works  
-4. [ ] Seed or import loaded; member **Attend** works once  
-5. [ ] `APP_ORIGIN` matches that exact URL (no trailing slash)  
-6. [ ] Becca/Guillaume know the **new URL** (and that Railway will stop)  
-7. [ ] TLS works; dual backup cron exists; backup age &lt;26h  
+Checked 28 Oct 2026 against Oracle unless noted.
+
+1. [ ] SQLite Phase 1 on `experiment`, CI green — unit tests and the build passed on the 13:31 run. Playwright then failed: GitHub `ubuntu-latest` is 26.04, and Playwright 1.51 has no Chromium for it. The workflow is pinned to `ubuntu-24.04`. Tick this only after that run is green.
+2. [x] App running on Ubuntu via systemd — `gather` and `caddy` active. Node 22.23.4.
+3. [ ] Public **HTTPS** URL loads Gather login; admin sign-in works — `https://132.145.68.166.sslip.io/` returned 200 and the sign-in door. Admin sign-in was not repeated: the seed accounts are gone, and this check has no password for the imported admins.
+4. [ ] Seed or import loaded; member **Attend** works once — 102 people and 29 published events are loaded. Bookings are 0, so Attend on HTTPS has not been shown.
+5. [x] `APP_ORIGIN` matches that exact URL (no trailing slash) — `https://132.145.68.166.sslip.io`
+6. [ ] Becca/Guillaume know the **new URL** (and that Railway will stop) — a person has to tell them. Do not stop Railway first.
+7. [ ] TLS works; dual backup cron exists; backup age &lt;26h — TLS works. A local backup was written at 03:15 on 28 Oct. No Pi and no OCI upload, so the copy is only on the same disk.
 
 ### Chaos extras (must pass once)
 
-8. [ ] `systemctl stop gather` → uptime alert fires  
-9. [ ] Restore drill: side-path restore, login once, revert prod file  
-10. [ ] From outside: `curl` to `PUBLIC_IP:3000` **fails**  
-11. [ ] Disk alert script non-zero in test mode  
-12. [ ] Concurrent Attend test (CI/unit) does not overbook capacity  
-13. [ ] Announce text includes: demo host; Oracle may reclaim; Pi backup exists  
-14. [ ] Incident card filled; Guillaume primary on-call, An backup  
-15. [ ] After import: stock seed admin rotated or disabled if still present  
+8. [ ] `systemctl stop gather` → uptime alert fires — no Uptime or Telegram account is filled in.
+9. [ ] Restore drill: side-path restore, login once, revert prod file — an earlier side-copy showed tables. Login against that copy was not done.
+10. [x] From outside: `curl` to `PUBLIC_IP:3000` **fails** — connection to port 3000 timed out.
+11. [x] Disk alert script non-zero in test mode — `DISK_ALERT_TEST=1` exited 1 on 28 Oct.
+12. [x] Concurrent Attend test (CI/unit) does not overbook capacity — `tests/integration/booking.test.ts` ran inside `npm run test:coverage`, which passed on the 13:31 CI job.
+13. [ ] Announce text includes: demo host; Oracle may reclaim; Pi backup exists — wording is drafted in `incident-card.md`, and it claims a Pi backup that is not connected. Do not send it until that sentence is true or rewritten.
+14. [x] Incident card filled; Guillaume primary on-call, An backup — the card names both, and has the Oracle URL and the SSH line.
+15. [x] After import: stock seed admin rotated or disabled if still present — zero users with cell numbers `0700000000*`.
+
+**Blockers before Railway can stop:** 1 (CI green), 3 (admin sign-in), 4 (one Attend), 6 (tell Becca and Guillaume), 7 (off-box backup), 8 (Telegram), 9 (restore login), 13 (honest announce text).
 
 **Then** update README / Canva / checklist to the Ubuntu URL, and **only then** stop Railway.
 

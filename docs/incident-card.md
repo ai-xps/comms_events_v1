@@ -2,7 +2,9 @@
 
 **On-call:** Guillaume primary · An backup  
 **Live until cutover:** Railway https://commseventsv1-production.up.railway.app  
-**Health:** `GET https://APP_ORIGIN/api/health`
+**Oracle (not announced):** https://132.145.68.166.sslip.io  
+**Health:** `GET https://132.145.68.166.sslip.io/api/health`  
+**SSH:** `ssh -i ~/.ssh/gather_oracle_ed25519 ubuntu@132.145.68.166` then `cd /var/www/gather`
 
 ## Quick path
 

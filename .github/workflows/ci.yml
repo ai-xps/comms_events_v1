@@ -11,7 +11,8 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    # ubuntu-latest moved to 26.04; Playwright 1.51 cannot install Chromium there.
+    runs-on: ubuntu-24.04
     env:
       DATABASE_URL: file:./data/ci.db
       TEST_DATABASE_URL: file:./data/ci.db

@@ -17,6 +17,12 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-28 — Cutover gate checked; CI pinned to Ubuntu 24.04
+
+- Oracle gate: systemd, HTTPS door, `APP_ORIGIN`, closed port 3000, disk-alert test, last-place booking test, and no leftover seed cell numbers are ticked in [`deploy-ubuntu.md`](deploy-ubuntu.md) and [`GATE-STATUS.md`](GATE-STATUS.md).
+- Still blocking a Railway stop: green CI, one Attend, off-box backup, Telegram, telling Becca and Guillaume.
+- GitHub Actions runs on `ubuntu-24.04` so Playwright can install Chromium. `ubuntu-latest` is 26.04, which Playwright 1.51 does not support.
+
 ## 2026-10-28 — Missing pages return 404, and the bare IP goes to the named site (`26c2525`)
 
 - A missing event, or one a member cannot see, answers 404 with “Not found”, not a success status.
