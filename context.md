@@ -1,8 +1,8 @@
 # Gather — Birmingham Community Events
 
-Context for the build. Distilled 15 October 2026 from the project group chat (14–15 October 2026), the two requirements documents linked in that chat, and the process and architecture sketches shared there. Updated 16 October 2026 with mobile-first UI mockups (logo through calendar): phone layouts are canonical; browser should be inspired by them (see section 16). Updated 17 October 2026 with Guillaume’s 16 October demo feedback (see section 17) and tester calendar notes (see section 18). Insights for admins and cell leaders is described in section 19.
+Context for the build. Distilled 15 October 2026 from the project group chat (14–15 October 2026), the two requirements documents linked in that chat, and the process and architecture sketches shared there. Updated 16 October 2026 with mobile-first UI mockups (section 16). Updated 17 October 2026 with Guillaume’s 16 October demo feedback (section 17), tester calendar notes (section 18), and Insights (section 19). Updated 28 October 2026 with the closed build record (section 20).
 
-This file is a reference for implementation. It is not a signed specification. The discovery document calls itself finalised, and the chat on 15 October still had comments outstanding. Where sources disagree, both positions are recorded and the item is marked unresolved.
+This file is a reference for implementation. It is not a signed specification. An, Becca and Guillaume have not signed `docs/FUNCTIONAL.md`. The discovery document calls itself finalised, and the chat on 15 October still had comments outstanding. Both sides of an old argument stay in sections 4, 11 and 15. **Section 20 wins** when an earlier section still looks open. Do not implement the older side.
 
 ## 1. Purpose
 
@@ -59,7 +59,7 @@ Working name on the architecture sketch: **Gather — Birmingham Community Event
 - A live link to the wider Birmingham department system. Security rules that out for now. Structure arrives as an import file.
 - Publishing every scraped event.
 - Stopping someone booking two events that overlap.
-- One shared calendar covering several cities. Other locations are separate systems. See open questions.
+- One shared calendar covering several cities. Other locations are separate systems. Section 20.
 
 ### Not answered
 
@@ -69,13 +69,13 @@ An asked what the deliverables are besides the app. The only output named in the
 
 ## 4. Decisions
 
-These are written down in the discovery document or stated in the chat. Contested items are in the next section, not treated as settled here.
+These rows are what the discovery document or the chat said. Where a row was later contested, section 5 names the call and section 20 is the rule to build.
 
 | ID | Decision | Why it was given |
 | --- | --- | --- |
 | D01 | No email address on the account. Cell number is the identifier. | Less friction at booking. |
 | D02 | No SMS in this phase. | Not required. |
-| D03 | Admin sets passwords. There is no reset flow. The discovery document says the admin can see passwords in plain text, so they can support members and load people as they already exist. | See the security note in section 11. The later architecture sketch shows password hashes instead. |
+| D03 | Admin sets passwords. There is no member reset flow. The discovery document says the admin can see passwords in plain text. | Discovery log only. The build stores a bcrypt hash. Section 20. |
 | D04 | Overlapping bookings are allowed. The system does not warn or block. | Stated as permitted. |
 | D05 | Accounts are created by an admin and credentials are given to cell leaders. Members do not register themselves and do not pick their own cell. | Stops a member landing in the wrong cell, and matches the structure already held elsewhere. |
 | D06 | User import is a file (Excel or JSON). Permission or duty is a column so the import sets access. Permissions can be changed later. | A small restructure can also be edited by hand. |
@@ -88,48 +88,25 @@ These are written down in the discovery document or stated in the chat. Conteste
 
 Requirements were described as a starting point, and comments were still open on 15 October. They are modifiable.
 
-## 5. Unresolved
+## 5. What was open, and the call now
 
-Do not implement these by picking a side silently.
+These points were unresolved on 15–16 October. The old wording stays in sections 4, 11 and 15. The build follows the last column. Detail is in section 20. Do not reopen a row by building the older side.
 
-**Who can see who is going.** Three positions exist:
-
-- Rebecca: show how many people in the region plan to attend. Do not show who they are.
-- An, in chat: that count was already in the spec being prepared.
-- The readable requirements document: show name and cell number to everyone by default. An admin can switch non-admins to a total count only.
-- A comment on the discovery document: keep a count and initials, not a full register. The same comment says book-on and an attendance badge already exist in An’s app.
-- Guillaume, after trying the demo on 16 October: add a third choice, “Count and Name + Cell”, next to “Count only” and “Count and initials” (section 17).
-
-The admin toggle is the only mechanism written as a requirement. Since 16 October it has three choices: count only, count and initials, count and name + cell. The build defaults to count only (`DECISIONS.md`). Which choice this deployment should run with is still not agreed; it is an admin setting, not a code change.
-
-**Passwords.** The discovery document and its decision log say plain text, visible to admin. A comment on that document says the admin should reset a password without seeing it. The architecture sketches say a password hash and, on one sketch, Supabase Auth. Guillaume offered the hashed architecture as an example that could work, after the plain-text decision. The written decision and the later sketch disagree.
-
-**Login identifier.** “Cell number” is used in two senses:
-
-- Booking copy and decision D01: cell number is the basic detail stored on the person, and the thing they log in with, in place of email.
-- Import columns and cell assignment: Cell is the group they belong to. The database sketch stores both a cell number and a cell id.
-
-A cell id cannot be the login, because many people share one cell. Confirm whether cell number means a phone number, a member number, or something else, and what the unique login is.
-
-**Problem 1 and problem 2.** Unanswered. See section 3.
-
-**Other outputs.** Unanswered beyond CSV and Excel.
-
-**Review workload.** Any cell leader may review the queue. Nothing was agreed about how quickly pending events, including whitelisted ones if they still pass through the queue, get published. A comment asked whether a named GYJN resource and a frequency are needed. Only the permission answer was given.
-
-**Daily run time.** A comment asked for a refresh at 05:00 so the queue is ready for people later in the day, and noted that a manual “run now” can take a while. The requirements text says daily plus manual. The clock time is a comment, not the requirements table.
-
-**Event-type filter examples.** A comment asked for examples and said other filters should be possible. No list was added.
-
-**Starred events.** In An’s current user portal, a member can star an event. Starred events stay easy to reach, are not remembered after the event is over, and can feed other stats. A comment asked for this on top of one-click booking. It is not in Guillaume’s requirements table.
-
-**Map.** An’s alpha shows where events are. Maps were failing to load when it was shared. Guillaume liked the map. It is not in the requirements table.
-
-**Organisation import shape.** Guillaume’s file is flat: Name, Cell, Duty, plus Password and Permission for account setup. An asked for a nested source, Region → Department → Team → Cell, as JSON in and JSON out, so a later restructure has one place to change. Guillaume accepted Excel or JSON as the import, and did not adopt a live lookup.
-
-**Stack.** Two sketches were shared. Neither was chosen. See section 9.
-
-**Cells as a concept.** A comment on the discovery introduction said a named invite list is enough for now and that cells add operations that are not needed yet. The rest of both documents is built around cells. The chat treats cells as in scope.
+| Topic | What was open | Call the build follows |
+| --- | --- | --- |
+| Who can see who is going | Rebecca: a count, no names. The requirements text: name and cell by default, with a switch to a count. A comment: count and initials. Guillaume on 16 October: add “Count and Name + Cell”. | Three admin choices. Default is count only. Initials, or name and cell number, are admin switches. The switch is the deployment choice. Members never see more than the switch allows. Leaders’ exports ignore it (section 7.5). |
+| Passwords | Discovery log: plain text an admin can read. A comment and the architecture sketches: a hash. | bcrypt hash only. An admin sets or replaces a password and tells the cell leader. The admin cannot read it back. |
+| Login identifier | “Cell number” might mean a phone, a member number, or the cell group. A cell id cannot be the login, because many people share one cell. | `cellNumber` is the personal login id (letters and digits). Several people may share one. The password picks the person, and must be unique among people who share that number. The group is `cellId`. |
+| Problem 1 and problem 2 | Rebecca’s question was not answered in the thread. | This build is section 3 only. There is no second problem to invent. |
+| Other outputs | Only CSV or Excel was named. | Attendee files and Insights files: CSV, TXT, JSON, XLSX. Reports also export event details for a date range (CSV or Excel). Insights share text is totals plus a link, with no names. |
+| Review workload | Any cell leader may review. No speed and no named rota were agreed. | No rota and no deadline. Whitelist publishes on the scrape. Blacklist discards. Standard waits on `/pending` until a person publishes or discards it. |
+| Daily run time | 05:00 was a comment. The requirements table said daily plus manual. | Daily at 05:00 Europe/London on the host cron, plus an admin Run now. |
+| Event-type filters | Examples were requested. | Christian, Networking, Professional, Student, Meetup. More than one type may be on. Online or in person is a separate filter. |
+| Starred events | In the alpha, not in Guillaume’s table. Reply [q] said stars are not the Attend requirement. | Stars are a bookmark, separate from Attend. They drop after the event has ended. |
+| Map | Liked, and not in the requirements table. | The map stays on the calendar, including when it has no pins. It sits on Birmingham. |
+| Organisation import shape | Flat file, or nested Region → Department → Team → Cell. | The file people are given is flat: Name, Cell number, Cell, Password, Permission. A nested JSON body is still read if it contains `users` or `rows`. Nesting is not required. |
+| Stack | Two sketches. Neither was chosen. | Next.js. SQLite file for local and for the Ubuntu target. Railway remains the live demo until the Ubuntu gate in `docs/deploy-ubuntu.md` is green. |
+| Cells | A comment said a named invite list is enough. | Cells stay. Comment [a] was not adopted. |
 
 ## 6. Roles
 
@@ -137,7 +114,7 @@ Accounts exist only because an admin created them. A person has one cell. Permis
 
 | Role | Does | Sees |
 | --- | --- | --- |
-| Admin | Users, cell assignment, passwords, scraper settings, organisation lists, event-type colours, location parameter. Can add and edit events. | All data. The discovery document includes plain-text passwords. See section 11. |
+| Admin | Users, cell assignment, passwords, scraper settings, organisation lists, event-type colours, location parameter. Can add and edit events. | All data. Passwords are hashes and cannot be read back. Section 20. |
 | Cell leader | Reviews and edits pending events, publishes or discards them, adds and edits calendar events, registers any member of their own cell, marks attendance for those members, exports reports. | Events, and member data for their own cell. |
 | User (member) | Signs in, views the calendar, books with one click, confirms attendance on the event page or when prompted at the next sign-in. | The calendar, their own bookings, and whatever attendee visibility the admin has set. |
 
@@ -216,7 +193,7 @@ An admin or a cell leader selects an event and sees the attendee list (admin: ev
 
 An admin adds a person by hand or by file. The file creates the account, assigns the cell, sets the password, and sets permission. There is no reset flow in the requirements. People sign in with the identifier and password they were given.
 
-The process sketch describes sign-in as cell number plus password. See the open question in section 5 before treating that as the username.
+Sign-in is the personal cell number plus password, as closed in section 20. The cell group is not the username.
 
 ## 8. Process
 
@@ -245,7 +222,7 @@ An earlier, coarser sketch sends every scraped event to a cell leader and only t
 
 ## 9. Architecture sketches
 
-Both drawings were offered as examples that could work. They are not a chosen design. Build against the behaviour in sections 6–8, and treat the platform names as options.
+Both drawings were offered as examples that could work. The stack the build uses is in section 20 (Next.js and a SQLite file). The names on the sketches (Cloudflare, Supabase, Vercel, Fleet) were not adopted. Build the behaviour in sections 6–8 and the rules in section 20.
 
 ### Sketch A — 15 October, “an example of an architecture that could work”
 
@@ -304,9 +281,9 @@ The thread is explicit about a few constraints. Record them as trade-offs, not a
 
 **Department systems stay disconnected.** User and cell structure is imported. The app does not read or write the wider Birmingham department system. That was a security decision, not a temporary technical limit to route around.
 
-**Passwords.** The discovery decision log accepts plain-text passwords because the data is basic, the admin is the help desk, and accounts must match an existing structure. A comment on the same document rejects that, and the architecture sketches assume hashing. Plain-text storage means anyone who can read the database, a backup, or an admin screen can use every account. Hashing still allows an admin to set or reset a password and to bulk-create accounts. It removes the ability to look a password up and read it back. Do not implement plain text unless that decision is confirmed again in light of the later sketch.
+**Passwords.** The discovery decision log accepted plain text so an admin could set passwords and match an existing structure. That need is met by setting the password at create time and telling the cell leader. The build stores bcrypt hashes only. Plain text is not implemented. Anyone who can read the database or a backup still cannot sign in as a member without breaking the hash.
 
-**Attendance data.** Name, cell, and whether someone plans to attend or attended is personal data about members. The visibility default is unresolved (section 5). With “count and name + cell” switched on, every signed-in member can read the name and cell number of everyone booked on an event. That is a deliberate admin choice, and the person switching it on should know members can see each other’s numbers. Exports are separate from the member toggle: admin exports everyone, a cell leader exports their own cell. Cell leaders are limited to their own cell in the requirements.
+**Attendance data.** Name, cell, and whether someone plans to attend or attended is personal data about members. The default is count only (section 20). With “count and name + cell” switched on, every signed-in member can read the name and cell number of everyone booked on an event. That is a deliberate admin choice, and the person switching it on should know members can see each other’s numbers. Exports are separate from the member toggle: admin exports everyone, a cell leader exports their own cell. Cell leaders are limited to their own cell in the requirements.
 
 **Scraper.** Demo events run unless `SCRAPE_FIXTURES=0`. Live fetch is admin Priority URLs only, https ICS or JSON-LD on a host allowlist (no `.ics` wildcard). Body and event caps apply. A later Save freezes scrape updates; Publish does not. Unclassified live events stay pending. It does not collect member data from those sites. Organisation whitelist / blacklist / pending still decide what members see.
 
@@ -340,7 +317,7 @@ The shorter requirements document (the one Guillaume described as easier to read
 | https://luma.com/calendar/cal-S60usgWCdXX9MLP | Prior calendar Guillaume had tried. Similarity target, plus scrape-and-choose. |
 | https://consensusdeep.com/ | Suggested during the chat as an AI requirements tool. No decision to adopt it. |
 | Architecture and process images in the chat, 14 October 15:33–16:45 and 15 October 13:02 | Member UI, flowchart, and the two system sketches summarised above. |
-| Mobile UI redesign boards (logo, login, home, menu, search, list, details, bookings, calendar), shared 16 October 2026 | Captured in section 16; images under `docs/design-mockups/`. Phone canonical; browser inspired by the same. |
+| Mobile UI redesign boards (logo, login, home, menu, search, list, details, bookings, calendar), shared 16 October 2026 | Captured in section 16; images under `docs/design-mockups/`. Flow reference. Shipped colour and tabs are section 20. |
 | Project group chat, 16 October 2026 22:30–22:34 | Guillaume’s demo feedback with annotated screenshots of the event form and the attendee-visibility setting. Captured in section 17. |
 | https://docs.google.com/document/d/1Zgv9Tr-KZCnxm58otiJZxUqo5aCNcOQM2-uxiJzd5Ys/edit | Demo feedback document. Guillaume proposed it on 16 October as the place for comments instead of the chat. |
 
@@ -348,10 +325,10 @@ Working notes from the chat: comments on the Google docs should be made from a n
 
 ## 14. Assumptions and limitations
 
-- Through 15 October 2026 this file stopped at the chat and the two documents. Section 16 (16 October 2026) adds the mobile redesign boards. Section 17 adds Guillaume’s 16 October chat feedback. Comments added later to the demo feedback document are not folded in until someone copies them here. An’s longer standalone spec, if any, is still outside unless folded in later.
+- Through 15 October 2026 this file stopped at the chat and the two documents. Later sections add the boards, Guillaume’s demo notes, tester notes, Insights, and the closed build record in section 20. A comment left only in the Google demo doc is not a change until it is copied into section 20 or `DECISIONS.md`. An’s longer standalone spec, if any, is still outside unless folded in later.
 - “Finalised” on the discovery document means the draft was written up. It does not mean the comment threads were closed.
 - GYJN, HYJN, and IWN are left as written. They are roles or forms of address in the community. They are not redefined here.
-- Keyword lists, source URLs, organisation names, colour values, and the exact Excel or JSON schema were not supplied. F02’s “keywords” were not listed.
+- The discovery papers did not list keyword strings, source URLs, or organisation names. The five type names, the import columns, and the shipped colours are in section 20. F02’s scraper “keywords” were never a separate list: the five categories are the filter.
 - The scraper will depend on third-party sites that can change or block access. Which sites are allowed is an admin decision (targeted URLs, whitelist, blacklist), and it is not a licence to ignore those sites’ terms.
 - Capacity, double booking, and external-ticket events can disagree with the host’s real remaining places. This app’s capacity is its own limit, for regional visibility. It does not reserve a seat on the host site.
 - A multi-city Midlands product is out of scope. A location parameter exists so a second deployment can point at another city and keep a separate calendar.
@@ -370,11 +347,11 @@ From the 15 October 2026 export of [Requirements](https://docs.google.com/docume
 | [j] [k] | Birmingham geographic constraint | We can add the other areas in the region too. | We can have it as a filter but this tool will only be for Birmingham region. If it works well we can look to duplicate for other regions but it will only be for Birmingham for now. If we were to deploy it to other regions, they would have their own system, admin, calendar, etc. | Birmingham only. Later regions are separate deployments. |
 | [l] [m] | Manual Run Now | That could take a while frankly — there needs to be a daily refresh at 5am so that it is prepped for later updates. | Yes that’s good. It’s good to be able to run it manually as well if we want to change some settings on the scraper. | Daily at 05:00, plus a manual run. |
 | [n] [o] | Filter primarily by event type | Give examples please, and I think others can be used for it too. | Christian, Networking, Professional, Student, Meetup | Those five types. No further filter dimensions in the reply. |
-| [p] [q] | One-click booking | This is good and ok, but we can do better by adding starred events for the members. | Once they find an event they want to attend they click Attend. Later on they need to confirm they actually attended. That’s what this requirement is about (not about starred events). | Attend records intent. Confirmation is later. Stars are not this requirement. |
+| [p] [q] | One-click booking | This is good and ok, but we can do better by adding starred events for the members. | Once they find an event they want to attend they click Attend. Later on they need to confirm they actually attended. That’s what this requirement is about (not about starred events). | Attend records intent. Confirmation is later. Stars are a separate bookmark (section 20), not part of this requirement. |
 
-## 16. Mobile-first UI design direction (phone canonical; browser inspired)
+## 16. Mobile boards (16 October) — flow reference
 
-Added from the Gather redesign mockups (logo through calendar). **Phone layouts are the source of truth.** Browser / desktop should reuse the same brand, flow, and hierarchy — with more width (side-by-side calendar + list, fuller filters) — not a separate product look.
+Added from the Gather redesign mockups (logo through calendar). These boards are a flow reference. Section 20 is the shipped colour, navigation, and copy. Do not restyle the app to the teal AFTER frames.
 
 Mockup boards (repo copies):
 
@@ -388,10 +365,10 @@ Mockup boards (repo copies):
 
 ### How to use these for implementation
 
-- **Phone:** Match structure and density of the “AFTER” frames where shown.
-- **Browser:** Keep logo, teal/orange accents, catchphrase, category colours, list cards, calendar-as-day-filter pattern; expand layout (e.g. calendar left / event list right; desktop nav instead of or alongside hamburger).
-- **Before frames** in the boards are the current Gather parish / cream UI for contrast, not the target.
-- Product rules in sections 3–7 and `DECISIONS.md` still win over mockup labels when they conflict (e.g. Attend vs “Login” wording, cell leader language, no public password reset unless decided later).
+- **Phone:** Follow the flow in section 20 (welcome, kinds on Home, list, details, bookings, calendar). Do not copy teal buttons, Forgot password, or Notify Me off the boards.
+- **Browser:** Keep the logo, the catchphrase, category colours, list cards, and the calendar-as-day-filter pattern. Expand the layout (calendar and list can sit side by side; desktop nav alongside the phone tabs). Colour is the blush / berry lock in section 20. The teal buttons on the boards were not adopted.
+- **Before frames** are an older cream parish look, kept on the boards for contrast. They are not the shipped UI.
+- Product rules in sections 3–7 and section 20, and `DECISIONS.md`, win over mockup labels (Attend rather than a public Login product, cell leader rather than GSN, no member password reset).
 
 ### Brand and visual system (from boards)
 
@@ -400,7 +377,7 @@ Mockup boards (repo copies):
 - **Logo meaning (as written on the board):**
   1. Map icon — emphasise event locations.
   2. People in the middle — gathering / evangelism (“gathering the fruits”).
-- **Palette direction:** Clean white / light grey surfaces; teal (primary CTA and active nav); orange (brand / Professional / saved); supporting category colours (e.g. Christian red, Student blue, Meetup purple); green for booked/check.
+- **Palette on the boards:** Clean white / light grey surfaces; teal (primary CTA and active nav); orange (brand / Professional / saved). That palette is the sketch. The shipped palette is section 20 (blush paper, warm ink, berry).
 - **Typography:** Modern sans-serif for UI (mockups move away from serif display on these screens).
 - **Catchphrase:** “Find, Book, Gather.” / “Find. Book. Gather. The heart of Birmingham’s events, in your pocket.”
 
@@ -412,22 +389,22 @@ Mockup boards (repo copies):
 
 ### 2. Login page
 
-**Target (AFTER):**
+**Board AFTER frame (colour is not shipped):**
 
 - White background; centred logo + `GATHER`.
 - Greeting: “Welcome back!”
 - Catchphrase: “Find, Book, Gather.”
-- Short help: sign in with cell number and password from your GSN / cell leader (mockup says GSN; existing product copy uses cell leader — keep product language unless GSN is adopted).
+- Short help on the board says GSN. Shipped copy says cell leader (section 20).
 - Fields: Cell number (phone icon), Password (lock icon); rounded inputs.
-- Mockup shows “Forgot?” — **not in current product scope** (admin sets passwords; no member reset). Treat as aspirational unless `DECISIONS.md` changes.
-- Primary CTA: teal pill **Login** / Sign in.
+- Mockup shows “Forgot?”. That control is out of this phase. An admin sets passwords.
+- Primary CTA on the board: a teal pill. The shipped button is berry.
 - Callouts on board: identifiable logo, catchphrase, modern design.
 
-**BEFORE** on the board: cream card, serif Gather, terracotta button (current shipped parish style).
+**BEFORE** on the board: cream card, serif Gather, terracotta button. That frame is historical. It is not the shipped UI.
 
 ### 3. Home screen
 
-**Target (AFTER):** Landing-style home, not the calendar as the first screen.
+**Board AFTER frame (colour is not shipped):** Landing-style home, not the calendar as the first screen.
 
 - Hamburger (or later bottom tabs) top right.
 - Centred logo + `GATHER`.
@@ -442,22 +419,21 @@ Mockup boards (repo copies):
 
 ### 4. Hamburger menu
 
-**Target:**
+**Board frame:**
 
 - Semi-transparent dark overlay over home.
 - Links: Event Search, Event Calendar, My Bookings, Saved Events (active item teal pill).
 - Sign out at bottom with exit icon.
 
-**Open design questions on the board:**
+**Questions the board asked, and the call:**
 
-- Teal “hover” highlight — mobile has no hover; use clear **selected / pressed** state instead.
-- Menu panel fully opaque vs semi-transparent?
-- **Alternative:** bottom icon bar instead of hamburger (see below).
+- Teal “hover” highlight — a phone has no hover. Shipped UI uses a selected state and a pressed state (section 20).
+- Menu panel fully opaque vs semi-transparent — the shipped Menu is the leader and admin list. It does not use a translucent dark overlay as the main nav.
+- Bottom bar vs hamburger — phone tabs are Home, Calendar, Bookings. Menu holds leader and admin tools. The five-icon bar (Home, Search, Calendar, Bookings, Saved) was not adopted.
 
-### Bottom tab bar (alternative navigation)
+### Bottom tab bar (on the board)
 
-Five icons: Home, Search, Calendar, Bookings, Saved.  
-Board asks: prefer bottom bar over hamburger? Unresolved — pick one primary pattern for phone; browser can use a top nav mirroring the same five destinations.
+Five icons: Home, Search, Calendar, Bookings, Saved. The shipped phone tabs dropped Search as its own tab (kinds live on Home) and dropped Saved as its own tab (stars stay on the event and the calendar).
 
 ### 5. Event search
 
@@ -465,7 +441,7 @@ Header: logo + hamburger. Title: “What kind of event are you looking for?”
 
 **Option 1:** Vertical pill list of categories (Christian, Networking, Professional, Student, Meetup) with icons; select highlights; teal **Continue**.
 
-**Option 2:** Search field (“Search events, locations, or keywords…”) + circular colour-coded category icons; tap category goes straight to list (no Continue). Board asks whether search bar should be included.
+**Option 2:** Search field (“Search events, locations, or keywords…”) + circular colour-coded category icons; tap category goes straight to list (no Continue). The shipped Home uses kind chips and an online / in person filter. There is no separate keyword step.
 
 Categories match product types in section 3.
 
@@ -477,7 +453,7 @@ Categories match product types in section 3.
 - Cards: date block (e.g. OCT 16 FRI), title, time, place, attendee avatars (privacy: what members see follows the admin toggle in section 5 — count, initials, or name + cell).
 - Star = saved; check = booked.
 - Tap card → event details.
-- Optional bottom tab bar (same open question).
+- Phone tabs are Home, Calendar, Bookings (section 20). The five-icon bar on the board, including a separate Saved tab, was not adopted. Stars stay on the event and on the calendar.
 
 ### 7. Event details and map
 
@@ -493,7 +469,7 @@ Categories match product types in section 3.
 - Logo + title “My Bookings” (or Saved Events equivalent).
 - **One list view, separated by date headers** (annotation).
 - Rows: date box, title, time, place, category dots, star + booked check.
-- Board asks: if several events share a day, remove duplicate date boxes?
+- The board asked whether a shared day should show one date. Shipped bookings use Upcoming and Past.
 - Same bottom nav pattern.
 
 ### 9. Calendar — monthly
@@ -509,28 +485,28 @@ Categories match product types in section 3.
 - Same chrome and Day / Week / Month control.
 - Week range label (e.g. Oct 12–18, 2026); one row of days with dots.
 - Selected day → list below (“Friday, Oct 16 TODAY”).
-- Board asks: do we need a Day view? Should “Today” be repositioned?
+- The board asked whether Day view is needed. Day stays. Week is the default. Previous / Today / Next sit on the calendar chrome.
 
 **Browser inspire for 9–10:** Calendar and day list side by side, or wider month grid with optional titles in cells without losing the day-list pattern on narrow widths.
 
 ### Open UX questions (carry into build / decisions)
 
-| Topic | Options / note |
+| Topic | Call |
 | --- | --- |
-| Primary mobile nav | Hamburger overlay vs bottom five-icon bar |
-| Event search | Option 1 (pills + Continue) vs Option 2 (search + icon grid) |
-| Search bar on category step | Include or not |
-| Day calendar view | Keep, simplify, or drop |
-| “Today” control placement | On weekly (and monthly) chrome |
-| Duplicate date boxes in bookings list | Keep per row vs once per day group |
-| Map tap | Deep-link to Apple/Google Maps |
-| Forgot password / Notify Me | Shown in mockups; **out of current product scope** unless newly decided |
-| Member attendee avatars on cards | Follow the three-way toggle (count / initials / name + cell). Avatars with faces or names only when name + cell is on. |
-| GSN vs cell leader copy | Mockup vs existing Gather language |
+| Primary mobile nav | Phone tabs: Home, Calendar, Bookings. Menu holds leader and admin tools. Section 20. |
+| Event search | Signed-in Home is the kind chooser plus the upcoming list. `/search` redirects there. |
+| Search bar on category step | Kind chips and an online / in person filter. No separate keyword step. |
+| Day calendar view | Kept. Week is the default. Month stays a grid. Day and week are a time grid. |
+| “Today” control placement | Previous / Today / Next, on the calendar chrome. |
+| Duplicate date boxes in bookings list | Upcoming and Past groups. A date shows with its events. |
+| Map tap | The map stays on the calendar. A separate “open in Apple or Google Maps” control is not required. |
+| Forgot password / Notify Me | Out of this phase. Admin sets passwords. No SMS and no email from Gather. |
+| Member attendee avatars on cards | Follow the three-way toggle. Faces or names only when name + cell is on. |
+| GSN vs cell leader copy | Product language is cell leader. |
 
-### Relationship to the shipped parish-noticeboard UI
+### Relationship to the shipped UI
 
-The live demo (cream paper, Fraunces, terracotta) remains what testers use until this direction is implemented. Section 16 is the **target visual and IA** for the next UI pass: phone-first from these boards; browser follows the same language.
+Section 16 records the boards. The shipped look is section 20: blush paper, warm ink, berry buttons, phone tabs Home / Calendar / Bookings. The boards still explain the flow (welcome, kinds, list, details, bookings, calendar). They do not set the colour, and they do not add Forgot password or Notify Me.
 
 ## 17. Demo feedback — Guillaume, 16 October 2026
 
@@ -539,12 +515,12 @@ From the project chat, 16 October 2026 22:30–22:34, after trying the Railway d
 | # | What he said | Where it lands | Built |
 | --- | --- | --- | --- |
 | G1 | Under “Count only” and “Count and initials”: “Count and Name + Cell — could we add this option please?” | Section 5 (visibility), section 11 (attendance data), `DECISIONS.md` member attendee view | Third admin choice. Members see each booker’s name and cell number when it is on. Default stays count only. |
-| G2 | “The latitude longitude is quite good when pulling event from the scrapper. I am wondering if we could add an option to enter the address or select it on the map for when we add an event manually?” Latitude and longitude were crossed out on the annotated form. | Section 7.1 | Manual add/edit: place as text plus click-to-pick on a map. Scraper coordinates unchanged. Address lookup not built (needs a geocoding service). |
+| G2 | “The latitude longitude is quite good when pulling event from the scrapper. I am wondering if we could add an option to enter the address or select it on the map for when we add an event manually?” Latitude and longitude were crossed out on the annotated form. | Section 7.1 | Manual add/edit: place as text, Find on map (Nominatim, Birmingham), or click a pin. Scraper coordinates unchanged. Nominatim is best-effort. There is no paid geocoder. |
 | G3 | Annotated form: rename “Host URL”. | Section 7.1, 7.3 | Labelled **Event Link** on the form and event page. |
 | G4 | “When publishing events from the Pending review screen, it would be good to be able to go back to the pending review.” | Section 7.1, section 8 step 5 | Publish and discard from a pending event both return to the pending review. |
 | G5 | “I am thinking we can use this document to make comments instead of posting here.” | Section 13 | Demo feedback document added as a source. |
 
-Not raised in this feedback, and still open: everything in section 5 except the toggle’s choices, and the section 16 design questions.
+The open points from this evening are closed in section 5 and section 20, including the section 16 board questions.
 
 ## 18. Tester feedback — calendar, 17 October 2026
 
@@ -567,3 +543,124 @@ Export drop-down: Summary, Weekly trend, By event type, By cell, Per-event atten
 Share drop-down: WhatsApp, Email, Microsoft Teams, Telegram, Copy, or the device’s own share menu. The message is totals plus a link back to Insights. It never includes names or cell numbers. The person’s own app sends it. Gather does not hold messaging accounts, so D02 (no SMS or notification channel in this phase) still holds.
 
 Cells with fewer than three people are shown as “fewer than 3” on charts so no one can be singled out.
+
+## 20. Closed build record (28 October 2026)
+
+This section is the operational spec. It records what the code and `DECISIONS.md` already do. It is a community calendar for a demo, not an NHS clinical system. Attendance is personal data about members. It is not a patient record.
+
+Where this section and an earlier section disagree, follow this section.
+
+### 20.1 What one pass includes
+
+Ship and maintain this, in this order. Do not start a later item by dropping an earlier one.
+
+1. Accounts, hashed passwords, three roles, flat import.
+2. Calendar (week default, month, day), five types, online / in person, map that stays up.
+3. Attend, capacity, cancel, delegate booking, attendance confirmation, stars.
+4. Pending review, organisation rules, manual events, weekly series.
+5. Exports and Insights for admin and cell leader.
+6. Host cron at 05:00 Europe/London, plus admin Run now.
+
+Explicitly out of this pass: public sign-up, member password reset, email or SMS sent by Gather, a link to the wider Birmingham department system, overlap warnings, a second city in this database, HTML scraping of ordinary web pages, the teal palette on the section 16 boards, Forgot password, Notify Me.
+
+### 20.2 Data
+
+Times are stored as instants and shown in Europe/London. Week starts Monday.
+
+| Entity | Fields that matter |
+| --- | --- |
+| User | `name`, `cellNumber` (login id, not unique), `passwordHash`, `role` (`admin`, `cell leader`, `member`), `cellId`, `active`, `sessionVersion`. |
+| Cell | `name`. One person has one cell. |
+| Event | `title`, `organisationName`, `category`, `startsAt`, `endsAt`, `online`, `placeName`, `lat`, `lng`, `externalUrl`, `notes`, `capacity`, `status` (`PENDING`, `PUBLISHED`, `DISCARDED`), `recurrence` (`NONE` or `WEEKLY`), `seriesId`, `sourceKey`, `humanEditedAt`. |
+| Booking | `eventId`, `userId`, `bookedById`, `bookedAt`, `attendance` (`UNCONFIRMED`, then `ATTENDED` or `ABSENT`). One row per person per event. |
+| Organisation | `name`, `nameKey`, `status` (`WHITELIST`, `BLACKLIST`, `STANDARD`). |
+| Star | `userId`, `eventId`. Removed after the event end. |
+| Audit log | `at`, `actorId`, `action`, `entityType`, `entityId`, `summary`. Append-only. |
+
+`capacity` empty means no limit. `capacity` 0 means full. A save cannot set capacity below the number of bookings already on that event.
+
+`sourceKey` is unique. Live ICS and JSON-LD use `live:<host>:<uid>`. Demo rows use a `fixture-` key. A later scrape updates that row in place. It does not create a second copy. A discarded row stays discarded. A row with `humanEditedAt` set (a later Save, not Publish alone) is skipped. The same key in one run: the fixture wins over the live row.
+
+A weekly series creates 24 occurrences, seven UTC days apart, sharing one `seriesId`. Each occurrence has its own bookings. Delete can remove this occurrence, or this one and every later one in the series. Display is Europe/London, so the clock time on the noticeboard can shift by one hour across the spring or autumn clock change. That shift is accepted. The series does not grow past those 24 rows by itself.
+
+### 20.3 Booking rules
+
+- Attend stores intent. A second Attend by the same person on the same event does not add a second row.
+- The last place is taken inside one database write, so two people cannot both take it.
+- A full event refuses the booking. Leaders booking for their cell hit the same check.
+- Cancel: a member may cancel their own place. A cell leader may cancel a place in their own cell. An admin may cancel any place. The row is removed. The audit log keeps the fact that it was cancelled.
+- Overlapping events are both kept. The app does not warn.
+- A cell leader does not book or cancel someone in another cell. An admin may book anyone.
+
+### 20.4 Scraper and the 05:00 job
+
+The Next.js process does not schedule itself. The host runs cron at 05:00 Europe/London:
+
+```cron
+0 5 * * * /path/to/app/scripts/scrape-cron.sh
+```
+
+That script calls the scrape with `Authorization: Bearer <CRON_SECRET>`, compared in constant time. Admin Run now uses an admin session and is marked manual. One scrape runs at a time (`ScrapeLock`). A failed feed is recorded and does not stop the other feeds.
+
+Demo fixtures run unless `SCRAPE_FIXTURES=0`. Live fetch is admin Priority URLs only: https ICS or JSON-LD, host allowlist, no `.ics` wildcard. Caps: 512 KiB body, 200 events per URL, 500 per run. Private addresses are blocked. `SCRAPE_LIVE=0` or an empty URL list skips the network. The scraper does not collect member data from those sites.
+
+### 20.5 Security and privacy
+
+- Session cookie is httpOnly, SameSite lax, signed, and lasts 12 hours. Logout, password replacement, and deactivation bump `sessionVersion`, so older cookies die on every device. Trade-off: one logout signs out every device.
+- Mutations check `APP_ORIGIN`. Login `next=` accepts only a path on this app.
+- Five failed logins on the same cell number inside 15 minutes lock that number for 15 minutes. The error text does not say whether the number exists.
+- An import file is read for that request. Only the hash is stored. If any row fails, nobody from that file is created. Cap: 2 MB and 2,000 rows.
+- Spreadsheet cells that look like formulas are prefixed.
+- Event Link is `http://` or `https://` only. A Zoom link counts when it is one of those. Category colours are `#rrggbb` only.
+- Audit log: admin only, newest 200 rows on the page. There is no edit and no delete of a log row in the app. Deleting a member clears the actor on their old rows; the rows stay.
+- Member view default `COUNT`. `COUNT_AND_NAME_CELL` shows every signed-in member the name and cell number of everyone booked. That is a deliberate admin choice. Exports ignore the switch: admin sees everyone, cell leader sees their own cell, members get 403.
+- Insights share text has totals and a link. It has no names and no cell numbers. Cells with fewer than three people show as “fewer than 3”.
+- No public registration. No write to any wider Birmingham department system.
+
+### 20.6 Look and access
+
+Shipped colour, in `src/app/globals.css`: blush paper `#FDF2F0`, warm ink `#3D2A2C`, berry `#A8434D` (button gradient `#C45C66` → `#A8434D`). Warm ink on blush paper is about 12:1. White on solid berry is about 5:1. White on the lighter gradient end `#C45C66` is about 4:1, so small white text does not sit on that colour alone. Buttons use the gradient at a heavy weight and at least 48px tall. The focus ring is a 3px berry outline, 2px outside the control, on links, buttons, and fields. On a coarse pointer (a finger), nav, chips, and day cells are at least 44px tall. Hover styles apply to a fine pointer (a mouse). A press uses `:active`. If the person has asked the device to reduce motion, the press does not scale. The current page and the selected chip expose `aria-current` or `aria-pressed`. A category is a word as well as a colour. The week grid shows event titles in the blocks. The month grid uses the day list so titles are not only coloured dots.
+
+Phone tabs for a member: Home, Calendar, Bookings. Leader and admin tools live in Menu. Signed-out `/` is the welcome door, then sign-in. A sign-in with no `next=` returns to `/`. Copy says cell leader, not GSN.
+
+### 20.7 Run it locally
+
+From the repo root, with Node 20 or later:
+
+```bash
+npm install
+mkdir -p prisma/data
+npx prisma db push
+npm run db:seed
+npm run dev
+```
+
+`DATABASE_URL` is `file:./data/gather.db` (the file lands under `prisma/data/`). Copy `.env.example` to `.env`. Set `SESSION_SECRET`, `CRON_SECRET`, and `APP_ORIGIN=http://localhost:3000`. Open http://localhost:3000. The seed prints cell numbers and starting passwords once in the terminal. The app does not show them again. Re-running seed does nothing if the admin already exists. `npm run db:reset` wipes the local file and seeds again.
+
+Do not point this SQLite build at a Postgres `DATABASE_URL`. `scripts/start.sh` refuses that. The live Railway demo stays on its last Postgres deploy until the Ubuntu gate is green.
+
+### 20.8 How to tell it works
+
+Run `npm test` and `npm run typecheck`. Then walk three people:
+
+| Who | Pass looks like |
+| --- | --- |
+| Member | Signs in from the cell-number list. Week calendar shows events. All types clears a type filter. Attend once, then Attend again, still one booking. Confirm attendance. Star an event. No Import, Scraper, Audit, or Insights in the nav. |
+| Cell leader | Pending tiles by day. Discard returns to `/pending`. Can book a member of their own cell and cannot book another cell. Export is their cell only. `/import` is a sentence, not the form. Insights is their cell only. |
+| Admin | Creates or imports Name, Cell number, Cell, Password, Permission. Replacing a password does not reveal the old one. Member view defaults to count only. Run now does not duplicate a fixture already stored. Audit shows the run. Insights can cover the region. |
+
+Browser coverage for discard copy, a CSV download, and an empty far-future month is `npm run test:e2e`. The live smoke list is `docs/REVIEW.md`. A green test run is an engineering check. It is not the signature on `docs/FUNCTIONAL.md`.
+
+### 20.9 If it breaks
+
+| Symptom | Look here |
+| --- | --- |
+| App will not start | `DATABASE_URL` must be a SQLite file. Postgres URLs are refused. |
+| Nobody can sign in | Seed output, or an admin sets a new password. Five failures lock that cell number for 15 minutes. |
+| 05:00 scrape did not run | Host cron and `CRON_SECRET`. The app does not schedule itself. One run at a time. |
+| The same event appears twice | `sourceKey` should have updated the old row. A blank `sourceKey` is a hand-made event and is not matched to a scrape. |
+| Last place taken twice | The booking write lock in `src/lib/booking.ts`. |
+| Members see names | Admin attendee view is not on count only. |
+| Disk or host loss | `docs/deploy-ubuntu.md` backup and restore, and `docs/incident-card.md`. |
+
+Operator docs: `README.md` (local), `docs/deploy-ubuntu.md` (host, cron, backups), `docs/incident-card.md` (what to do when it is down), `DECISIONS.md` (why a call was made), `docs/CHANGELOG.md` (what each build shipped). Comments added to the Google demo doc after 16 October are not a second spec. A change counts when it is in section 20 or `DECISIONS.md`.
