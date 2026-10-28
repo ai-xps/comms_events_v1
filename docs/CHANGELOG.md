@@ -21,6 +21,7 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 - The suggested priority address is `https://www.birminghamcathedral.com/whats-on/`. The old `calendar.ics` example returns 404.
 - A fresh seed stores that address. An empty list still means demo events only.
+- On Oracle that address is saved. One run created 15 pending cathedral events.
 
 ## 2026-10-28 — Cutover gate checked; CI pinned to Ubuntu 24.04
 
