@@ -1,0 +1,20 @@
+[Unit]
+Description=Gather Birmingham community events
+After=network.target
+
+[Service]
+Type=simple
+User=gather
+Group=gather
+WorkingDirectory=/var/www/gather
+EnvironmentFile=/var/www/gather/.env
+# Do not set BOOTSTRAP=1 here — schema/seed only on deliberate first install.
+ExecStart=/usr/bin/npm start
+Restart=on-failure
+RestartSec=5
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
