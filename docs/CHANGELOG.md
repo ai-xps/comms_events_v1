@@ -6,7 +6,7 @@ A **changelog** is a dated notebook of “what we put on the noticeboard,” not
 
 | Where | What people open | Code |
 | --- | --- | --- |
-| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: `8952c03` |
+| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: `26c2525` |
 | Railway (announced demo, auto-deploy paused) | https://commseventsv1-production.up.railway.app | Last Postgres build. It does not include the 28 Oct notes. |
 
 `package.json` stays `1.0.0` until a numbered church release.
@@ -17,7 +17,7 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## 2026-10-28 — Missing pages return 404, and the bare IP goes to the named site
+## 2026-10-28 — Missing pages return 404, and the bare IP goes to the named site (`26c2525`)
 
 - A missing event, or one a member cannot see, answers 404 with “Not found”, not a success status.
 - The “Loading…” line is gone, so it cannot stay announced after the page has drawn.

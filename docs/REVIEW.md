@@ -11,10 +11,10 @@ Host checked: https://132.145.68.166.sslip.io at `8952c03`. Railway was not this
 | — | Guillaume: priority URL not saved; Run now left pending looking the same | **Fixed** `8952c03`. Run now saves the box first. A host off the allowlist is named and not fetched. A demo-only run says pending will look the same. Allowlist not widened. |
 | — | Guillaume 20 Oct: delete a member, not only deactivate | **Shipped** after 17 Oct. The member form has a delete control. Bookings and stars for that person are removed. Audit rows stay, with the actor cleared. An admin cannot delete their own account. |
 | — | CI database and browser tests | **Current:** GitHub Actions uses SQLite (`file:./data/ci.db`) and runs Playwright. The 17 Oct testing table below still says Postgres and “no browser suite”. That table is the 17 Oct snapshot. |
-| Med | Missing or hidden event returns HTTP 200 with “That page or event does not exist.” `/nope` returns 404. | **Open** |
-| Med | `http://132.145.68.166` redirects to HTTPS on the bare IP. That certificate is for the `sslip.io` name, so the browser stops. | **Open** — use the `sslip.io` name |
+| Med | Missing or hidden event returns HTTP 200 with “That page or event does not exist.” `/nope` returns 404. | **Fixed** `26c2525`. A missing event is HTTP 404. The stuck “Loading…” line was removed in the same change. |
+| Med | `http://132.145.68.166` redirects to HTTPS on the bare IP. That certificate is for the `sslip.io` name, so the browser stops. | **Fixed** `26c2525`. HTTP on the bare IP redirects to `https://132.145.68.166.sslip.io`. Typing `https://` plus the bare IP can still fail the certificate, because no public certificate is issued for a raw address. |
 | — | On this Oracle database, a member saw bookers’ names and cell numbers | **Setting** — admin switch is Count and Name + Cell. Code default remains count only. |
-| Low | “Loading…” stays in the status text after Calendar, Bookings, and the event page have drawn | **Open** |
+| Low | “Loading…” stays in the status text after Calendar, Bookings, and the event page have drawn | **Fixed** `26c2525`. That loading line is no longer rendered. |
 | — | Page walk: guest bounced to sign-in; admin, leader, and member rooms matched their roles; bad event fields were refused; port 3000 did not answer from outside | **Pass** |
 
 ## 17 October 2026
