@@ -14,6 +14,11 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-28 — Scraper Run now saves the priority list first
+
+- Run now stores the priority box, then fetches. A host that is not on the allowlist is named and not fetched.
+- A demo-only run says the pending list looks the same because existing demo events are updated in place.
+
 ## 2026-10-28 — Contrast on blush / berry
 
 - Button gradient light stop `#B14E58` and muted ink `#7A6266`, so white labels and hints clear 4.5:1.

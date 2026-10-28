@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { scrapeDecision, isUpdatedScrapedRow } from "@/lib/scraper/apply";
 import { parsePriorityUrls, scrapeUrlAllowed } from "@/lib/scraper/allowlist";
-import { droppedPriorityUrlMessage } from "@/lib/scraper/priority-copy";
+import { droppedPriorityUrlMessage, runFinishedMessage } from "@/lib/scraper/priority-copy";
 import { inferCategory, TYPE_REVIEW_NOTE } from "@/lib/scraper/categorise";
 import { fixtureEvents } from "@/lib/scraper/fixtures";
 import { RUN_EVENT_CAP, selectHarvestEvents } from "@/lib/scraper/harvest";
@@ -140,7 +140,21 @@ describe("allowlist", () => {
     expect(mixed.urls).toEqual(["https://birminghamcathedral.com/calendar.ics"]);
     expect(mixed.rejected).toHaveLength(1);
     expect(droppedPriorityUrlMessage(mixed.rejected)).toMatch(/meetup\.com/i);
+    expect(droppedPriorityUrlMessage(mixed.rejected)).toMatch(/not saved/i);
     expect(droppedPriorityUrlMessage([])).toBeNull();
+  });
+
+  it("explains a demo-only run that leaves pending looking the same", () => {
+    const text = runFinishedMessage({ createdCount: 0, updatedCount: 12, sources: [], dropped: [] });
+    expect(text).toMatch(/created 0/);
+    expect(text).toMatch(/pending list looks the same/i);
+    const dropped = runFinishedMessage({
+      createdCount: 0,
+      sources: [],
+      dropped: [{ url: "https://www.meetup.com/find/?keywords=birmingham" }]
+    });
+    expect(dropped).toMatch(/not saved/i);
+    expect(dropped).toMatch(/No live feed was fetched/);
   });
 });
 

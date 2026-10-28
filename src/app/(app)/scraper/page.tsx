@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getSettings, persistCleanPriorityUrls } from "@/lib/settings";
+import { ALLOWED_HOSTS } from "@/lib/scraper/allowlist";
 import { droppedPriorityUrlMessage } from "@/lib/scraper/priority-copy";
 import { ScraperForm } from "@/components/ScraperForm";
 import { formatDateTime } from "@/lib/time";
@@ -27,8 +28,9 @@ export default async function ScraperPage() {
       <div className="page-head">
         <h1>Scraper settings</h1>
         <p className="lede">
-          Daily run at 05:00 Europe/London via cron. Use Run now after you change these settings. Demo events run
-          unless SCRAPE_FIXTURES=0. Priority URLs are fetched only if they are https ICS or JSON-LD on the allowlist.
+          Daily run at 05:00 Europe/London via cron. Run now saves the priority list, then fetches it. Demo events
+          run unless SCRAPE_FIXTURES=0. A second run of those demo events updates them in place, so pending can look
+          unchanged. A live feed is fetched only from an allowlisted https address.
         </p>
         {cleaned.urls.length === 0 ? (
           <p className="muted" data-testid="priority-empty">
@@ -37,7 +39,12 @@ export default async function ScraperPage() {
           </p>
         ) : null}
       </div>
-      <ScraperForm settings={settings} organisations={orgs} notice={droppedNotice} />
+      <ScraperForm
+        settings={settings}
+        organisations={orgs}
+        allowedHosts={[...ALLOWED_HOSTS].sort()}
+        notice={droppedNotice}
+      />
       <section>
         <h2>Recent runs</h2>
         {runs.length === 0 ? <p className="muted">No runs yet.</p> : null}

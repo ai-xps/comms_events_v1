@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, type Category, type MemberAttendeeView } from "@/lib/constants";
-import { droppedPriorityUrlMessage } from "@/lib/scraper/priority-copy";
+import { droppedPriorityUrlMessage, runFinishedMessage } from "@/lib/scraper/priority-copy";
 import { requestJson, type JsonResult } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
 
@@ -18,13 +18,17 @@ type Settings = {
 export function ScraperForm({
   settings,
   organisations,
+  allowedHosts,
   notice
 }: {
   settings: Settings;
   organisations: { id: string; name: string; status: string }[];
+  allowedHosts: string[];
   notice?: string | null;
 }) {
   const router = useRouter();
+  const savedUrls = settings.priorityUrls.join("\n");
+  const [priorityText, setPriorityText] = useState(savedUrls);
   const [message, setMessage] = useState<string | null>(notice ?? null);
   const [kind, setKind] = useState<"info" | "error">("info");
   const [running, setRunning] = useState(false);
@@ -32,37 +36,53 @@ export function ScraperForm({
   const visibleOrgs =
     orgFilter === "ALL" ? organisations : organisations.filter((o) => o.status === orgFilter);
 
+  useEffect(() => {
+    setPriorityText(savedUrls);
+  }, [savedUrls]);
+
   function show(result: JsonResult, success: string) {
     setKind(result.ok ? "info" : "error");
     setMessage(result.ok ? success : result.error);
     if (result.ok) router.refresh();
   }
 
-  async function save(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
-    const result = await requestJson<{ dropped?: { url: string; reason: string }[] }>("/api/settings", {
-      method: "POST",
-      body: {
-        locationLabel: form.get("locationLabel"),
-        memberAttendeeView: form.get("memberAttendeeView"),
-        enabled: Object.fromEntries(CATEGORIES.map((c) => [c, form.get(`enabled-${c}`) === "on"])),
-        colours: Object.fromEntries(CATEGORIES.map((c) => [c, form.get(`colour-${c}`)])),
-        priorityUrls: String(form.get("priorityUrls") ?? "")
-          .split("\n")
-          .map((s) => s.trim())
-          .filter(Boolean)
-      }
-    });
-    const skipped = result.ok ? droppedPriorityUrlMessage(result.data.dropped ?? []) : null;
-    show(result, skipped ? `Settings saved. ${skipped}` : "Settings saved.");
+  function settingsBody(form: FormData) {
+    return {
+      locationLabel: form.get("locationLabel"),
+      memberAttendeeView: form.get("memberAttendeeView"),
+      enabled: Object.fromEntries(CATEGORIES.map((c) => [c, form.get(`enabled-${c}`) === "on"])),
+      colours: Object.fromEntries(CATEGORIES.map((c) => [c, form.get(`colour-${c}`)])),
+      priorityUrls: priorityText
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    };
   }
 
-  async function runNow() {
+  async function save(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const result = await requestJson<{ dropped?: { url: string; reason: string }[] }>("/api/settings", {
+      method: "POST",
+      body: settingsBody(new FormData(e.currentTarget))
+    });
+    const skipped = result.ok ? droppedPriorityUrlMessage(result.data.dropped ?? []) : null;
+    show(result, skipped ? `Settings saved. ${skipped}` : "Settings saved. The priority list above is what will be fetched.");
+  }
+
+  async function runNow(form: HTMLFormElement) {
     if (running) return;
     setRunning(true);
     setKind("info");
-    setMessage("Scraper running… this can take up to a minute.");
+    setMessage("Saving the priority list, then running the scraper…");
+    const saved = await requestJson<{ dropped?: { url: string; reason: string }[] }>("/api/settings", {
+      method: "POST",
+      body: settingsBody(new FormData(form))
+    });
+    if (!saved.ok) {
+      setRunning(false);
+      show(saved, "");
+      return;
+    }
     const result = await requestJson<{
       createdCount?: number;
       updatedCount?: number;
@@ -70,6 +90,7 @@ export function ScraperForm({
       discardedByRule?: number;
       leftPending?: number;
       skippedHumanEdited?: number;
+      sources?: { url: string; ok: boolean; eventCount: number; error?: string }[];
     }>("/api/scraper/run", {
       method: "POST"
     });
@@ -77,7 +98,7 @@ export function ScraperForm({
     show(
       result,
       result.ok
-        ? `Run finished: created ${result.data.createdCount ?? 0}, updated ${result.data.updatedCount ?? 0}, published ${result.data.publishedCount ?? 0}, discarded ${result.data.discardedByRule ?? 0}, pending ${result.data.leftPending ?? 0}, skipped human-edited ${result.data.skippedHumanEdited ?? 0}.`
+        ? runFinishedMessage({ ...result.data, dropped: saved.data.dropped ?? [] })
         : ""
     );
   }
@@ -115,19 +136,31 @@ export function ScraperForm({
           ))}
         </fieldset>
         <label>
-          Priority URLs (https ICS or JSON-LD on the allowlist; one per line. Leave empty for the demo harvest only.)
+          Priority URLs (https ICS or JSON-LD, one per line. Leave empty for the demo harvest only.)
           <textarea
             name="priorityUrls"
-            defaultValue={settings.priorityUrls.join("\n")}
+            value={priorityText}
+            onChange={(e) => setPriorityText(e.target.value)}
             placeholder="https://birminghamcathedral.com/calendar.ics"
           />
-          <span className="muted">Meetup search pages and any host not on the allowlist are dropped, not saved.</span>
+          <span className="muted">
+            Run now saves this box first. An address is kept only when its host is one of: {allowedHosts.join(", ")}.
+            Anything else is left out, and the run will not fetch it.
+          </span>
         </label>
         <div className="row">
           <button type="submit" disabled={running}>
             Save settings
           </button>
-          <button className="secondary" type="button" onClick={runNow} disabled={running}>
+          <button
+            className="secondary"
+            type="button"
+            onClick={(e) => {
+              const form = e.currentTarget.form;
+              if (form) void runNow(form);
+            }}
+            disabled={running}
+          >
             {running ? "Running…" : "Run now"}
           </button>
         </div>
