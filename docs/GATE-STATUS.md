@@ -32,7 +32,7 @@
 - [x] DNS hostname + Caddy HTTPS — interim free name `https://132.145.68.166.sslip.io` (Let's Encrypt; `APP_ORIGIN` matches; Secure cookie on). Swap to owned domain later if wanted.  
 Gate boxes 1–15, same numbers as [`deploy-ubuntu.md`](deploy-ubuntu.md). Checked 28 Oct 2026.
 
-- [ ] 1 CI green — unit tests passed; Playwright install failed on Ubuntu 26.04. Workflow pinned to 24.04. Tick after the next run is green.
+- [x] 1 CI green — `ad69414` on Ubuntu 24.04: typecheck, unit tests, build, and 22 Playwright tests passed.
 - [x] 2 systemd `gather` + `caddy` active
 - [ ] 3 HTTPS sign-in door loads. Admin sign-in not re-checked (no password for imported admins).
 - [ ] 4 Import is in (102 people, 29 published events). **Attend not shown** (0 bookings).

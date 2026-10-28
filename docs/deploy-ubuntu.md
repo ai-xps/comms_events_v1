@@ -56,7 +56,7 @@ Oracle may reclaim Always Free A1 if CPU, network, **and** memory stay under 20%
 
 Checked 28 Oct 2026 against Oracle unless noted.
 
-1. [ ] SQLite Phase 1 on `experiment`, CI green — unit tests and the build passed on the 13:31 run. Playwright then failed: GitHub `ubuntu-latest` is 26.04, and Playwright 1.51 has no Chromium for it. The workflow is pinned to `ubuntu-24.04`. Tick this only after that run is green.
+1. [x] SQLite Phase 1 on `experiment`, CI green — `ad69414` on `ubuntu-24.04`: typecheck, unit tests, build, and 22 Playwright tests passed.
 2. [x] App running on Ubuntu via systemd — `gather` and `caddy` active. Node 22.23.4.
 3. [ ] Public **HTTPS** URL loads Gather login; admin sign-in works — `https://132.145.68.166.sslip.io/` returned 200 and the sign-in door. Admin sign-in was not repeated: the seed accounts are gone, and this check has no password for the imported admins.
 4. [ ] Seed or import loaded; member **Attend** works once — 102 people and 29 published events are loaded. Bookings are 0, so Attend on HTTPS has not been shown.
@@ -75,7 +75,7 @@ Checked 28 Oct 2026 against Oracle unless noted.
 14. [x] Incident card filled; Guillaume primary on-call, An backup — the card names both, and has the Oracle URL and the SSH line.
 15. [x] After import: stock seed admin rotated or disabled if still present — zero users with cell numbers `0700000000*`.
 
-**Blockers before Railway can stop:** 1 (CI green), 3 (admin sign-in), 4 (one Attend), 6 (tell Becca and Guillaume), 7 (off-box backup), 8 (Telegram), 9 (restore login), 13 (honest announce text).
+**Blockers before Railway can stop:** 3 (admin sign-in), 4 (one Attend), 6 (tell Becca and Guillaume), 7 (off-box backup), 8 (Telegram), 9 (restore login), 13 (honest announce text).
 
 **Then** update README / Canva / checklist to the Ubuntu URL, and **only then** stop Railway.
 
