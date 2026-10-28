@@ -4,6 +4,7 @@ One mistake → one rule. Newest first. Keep lines short.
 
 | Date | Mistake | Rule to prevent it |
 | --- | --- | --- |
+| 2026-10-28 | Shipped a fix and a live page walk, then only mentioned them in chat | Changelog row for what shipped (with the commit). REVIEW row for what broke or stayed open. Name both files in the reply. |
 | 2026-10-23 | Stakeholder Telegram drafts too long / dashy / bullet-heavy | Fossil: short caveman prose, no em dashes, few bullets, kind soft close. See `.cursor/rules/stakeholder-telegram.mdc`. |
 | 2026-10-20 | Shared-cell passwords checked with bcrypt against *every* user; Origin-only CSRF blocked some browser POSTs | Scope password uniqueness to the same `cellNumber`; allow Referer / `Sec-Fetch-Site: same-origin` when Origin is missing. |
 | 2026-10-19 | Dumping motion libraries / teal redesign while “using Emil skills” | Emil skills = on demand; keep current product tokens; ask before new UI deps (`docs/EMIL-SKILLS.md`). |

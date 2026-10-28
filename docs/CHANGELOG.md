@@ -4,9 +4,12 @@ What each Gather demo build shipped. Newest first.
 
 A **changelog** is a dated notebook of “what we put on the noticeboard,” not the full story of *why* (that stays in [`DECISIONS.md`](../DECISIONS.md)).
 
-| Branch | Live demo | `package.json` |
+| Where | What people open | Code |
 | --- | --- | --- |
-| `experiment` | https://commseventsv1-production.up.railway.app | `1.0.0` (demo label only — bump when church go-live needs numbered releases) |
+| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: `8952c03` |
+| Railway (announced demo, auto-deploy paused) | https://commseventsv1-production.up.railway.app | Last Postgres build. It does not include the 28 Oct notes. |
+
+`package.json` stays `1.0.0` until a numbered church release.
 
 Git history is the source of truth. Smoke checklists live in [`REVIEW.md`](REVIEW.md). Sign-off stays blank in [`FUNCTIONAL.md`](FUNCTIONAL.md) until An, Becca and Guillaume choose to sign.
 
@@ -14,31 +17,35 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## 2026-10-28 — Scraper Run now saves the priority list first
+## 2026-10-28 — Scraper Run now saves the priority list first (`8952c03`)
 
 - Run now stores the priority box, then fetches. A host that is not on the allowlist is named and not fetched.
 - A demo-only run says the pending list looks the same because existing demo events are updated in place.
+- Leftovers (missing-event status, bare-IP certificate, sticky “Loading…”) are in [`REVIEW.md`](REVIEW.md).
 
-## 2026-10-28 — Contrast on blush / berry
+## 2026-10-28 — Readable berry and the closed build record (`ba096bd` … `c74751f`)
 
 - Button gradient light stop `#B14E58` and muted ink `#7A6266`, so white labels and hints clear 4.5:1.
-- `context.md` section 20 is the closed build record, including the Oracle update steps.
+- `context.md` section 20 is the rule for the app. Sections 1–19 stay as the October archive.
 
-## 2026-10-28 — Bookings chips + Discard≠blacklist tests
+## 2026-10-28 — Bookings chips + Discard≠blacklist tests (`fb48a4f`)
 
 - My bookings uses the same coloured attendance chip as the event page.
 - Unit + integration cover Discard ≠ blacklist; E2E covers discard copy, CSV download, empty far-future month.
 
-## 2026-10-27 — Week timetable calendar + brand mark
+## 2026-10-27 — Week timetable calendar + brand mark (`7a7e96d` … `db65ee0`)
 
 - Calendar defaults to **Week**; week/day use a Google-style time grid (hours × days, event blocks). Month view unchanged.
 - Official Gather mark on welcome/topbar/favicon; login door is mark + Gather wordmark.
 - Responsive shell: fluid type/spacing; compact chrome through iPad portrait (≤900px); tablet/desktop week-grid proportions; Apple web-app meta.
+- Phone Menu and the top bar are opaque, so the page does not show through them.
 
-## 2026-10-26 — UX redesign (Home browse, mark, calendar stars)
+## 2026-10-26 — UX redesign (Home browse, mark, calendar stars) (`24c0ec3` … `45de4e3`)
 
-- Signed-in Home absorbs Search: kinds + upcoming list on `/?types=` / `format=`; `/search` redirects there. Phone tabs: Home, Calendar, Bookings.
-- Welcome (signed-out) is brand door then sign-in, then kinds. GatherMark refined (soft pin fill, clearer people).
+- Signed-in Home absorbs Search: kinds + upcoming list on `/?types=` / `format=`; `/search` redirects there. Phone tabs: Home, Calendar, Bookings. Sign out sits on that bar.
+- Signed-out `/` is the mark, the catchphrase, and the sign-in fields together. Sign out returns to that door on `APP_ORIGIN`.
+- `/api/health` answers without a sign-in, for an uptime check.
+- GatherMark refined (soft pin fill, clearer people).
 - Calendar: ★ on week/month rows; Saved strip; week/day list skips empty days.
 - Bookings: Upcoming / Past; spots left when capacity is set; ★ when starred.
 - Insights: Average fill explained; section headings; readable week bar labels. Reports: files vs Insights; Fill column on recent events.

@@ -1,6 +1,25 @@
-# Gather — review, 17 October 2026
+# Gather — review
 
-Read of the working tree on 17 October 2026, after Guillaume’s 16 October notes and the calendar tester notes. Scores are against a closed community demo, not an NHS production system. Dated ship notes (what each build put on the board): [`CHANGELOG.md`](CHANGELOG.md).
+Dated ship notes: [`CHANGELOG.md`](CHANGELOG.md). Scores below from 17 October are a closed community demo, not an NHS production system. The 28 October section is the later read.
+
+## 28 October 2026 — Oracle walk and Guillaume’s scraper
+
+Host checked: https://132.145.68.166.sslip.io at `8952c03`. Railway was not this build.
+
+| Sev | Item | Status |
+| --- | --- | --- |
+| — | Guillaume: priority URL not saved; Run now left pending looking the same | **Fixed** `8952c03`. Run now saves the box first. A host off the allowlist is named and not fetched. A demo-only run says pending will look the same. Allowlist not widened. |
+| — | Guillaume 20 Oct: delete a member, not only deactivate | **Shipped** after 17 Oct. The member form has a delete control. Bookings and stars for that person are removed. Audit rows stay, with the actor cleared. An admin cannot delete their own account. |
+| — | CI database and browser tests | **Current:** GitHub Actions uses SQLite (`file:./data/ci.db`) and runs Playwright. The 17 Oct testing table below still says Postgres and “no browser suite”. That table is the 17 Oct snapshot. |
+| Med | Missing or hidden event returns HTTP 200 with “That page or event does not exist.” `/nope` returns 404. | **Open** |
+| Med | `http://132.145.68.166` redirects to HTTPS on the bare IP. That certificate is for the `sslip.io` name, so the browser stops. | **Open** — use the `sslip.io` name |
+| — | On this Oracle database, a member saw bookers’ names and cell numbers | **Setting** — admin switch is Count and Name + Cell. Code default remains count only. |
+| Low | “Loading…” stays in the status text after Calendar, Bookings, and the event page have drawn | **Open** |
+| — | Page walk: guest bounced to sign-in; admin, leader, and member rooms matched their roles; bad event fields were refused; port 3000 did not answer from outside | **Pass** |
+
+## 17 October 2026
+
+Read of the working tree on 17 October 2026, after Guillaume’s 16 October notes and the calendar tester notes.
 
 ## Scorecard
 
@@ -61,7 +80,7 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | High | Silent client fetch failures | **Fixed** — `requestJson` |
 | Med | No loading / error / not-found pages | **Fixed** |
 | Med | Member cannot be deactivated | **Fixed** — form sends `on`/`off` |
-| Med | Guillaume 20 Oct: prefer **delete** members (remove) over deactivate-only | **Backlog** — hard-delete + confirm; mind bookings/audit FKs |
+| Med | Guillaume 20 Oct: prefer **delete** members (remove) over deactivate-only | **Superseded** — see 28 Oct section. The form now deletes. This row is the 17 Oct backlog. |
 | Med | Empty tables have no message | **Backlog** |
 | Low | Attend vs “booked” copy mix | **Backlog** |
 | — | §16 mobile redesign | **Backlog** (track A) |
@@ -74,7 +93,7 @@ Read of the working tree on 17 October 2026, after Guillaume’s 16 October note
 | Integration: last-place race, role matrix, session bump | **In** (runs in CI against Postgres) |
 | Coverage gate 90% lines on named libs | **In** |
 | GitHub Actions on `experiment` and `main` | **In** |
-| Browser end-to-end | **Backlog** |
+| Browser end-to-end | **Backlog** on 17 Oct. Playwright is in CI now — see 28 Oct. |
 
 ## Live smoke (run after each deploy)
 
