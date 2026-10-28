@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { requestJson } from "@/lib/fetch-json";
+import { DISCARD_EVENT_CONFIRM_BODY } from "@/lib/pending-copy";
 import { useConfirm } from "./ConfirmDialog";
 
 export function PendingTileActions({ eventId, title }: { eventId: string; title: string }) {
@@ -14,7 +15,7 @@ export function PendingTileActions({ eventId, title }: { eventId: string; title:
     if (status === "DISCARDED") {
       const ok = await confirm({
         title: `Discard ${title}?`,
-        body: "The event leaves the pending list. This does not blacklist the organisation — they can still appear in future scrapes.",
+        body: DISCARD_EVENT_CONFIRM_BODY,
         confirmLabel: "Discard",
         destructive: true
       });

@@ -53,4 +53,22 @@ test.describe("member paths", () => {
       if (await confirm.isVisible()) await confirm.click();
     }
   });
+
+  test("bookings show coloured attendance chips; empty far-future month still renders", async ({ page }) => {
+    await login(page, "member");
+    await page.goto("/bookings");
+    await dismissAttendancePrompt(page);
+    const chip = page.getByTestId("attendance-chip").first();
+    await expect(chip).toBeVisible();
+    await expect(chip).toHaveClass(/attendance-chip/);
+    await expect(chip).toHaveClass(/attendance-(attended|absent|unconfirmed)/);
+    await expect(chip).toHaveText(/Attended|Didn’t|Unconfirmed/);
+
+    await page.goto("/calendar?view=month&d=2035-06-15");
+    await dismissAttendancePrompt(page);
+    await expect(page.getByTestId("month-grid")).toBeVisible();
+    await expect(page.locator(".range-heading")).toContainText(/june 2035/i);
+    // Far future seed has no events — day count badges should be absent.
+    await expect(page.locator(".month-day-count")).toHaveCount(0);
+  });
 });

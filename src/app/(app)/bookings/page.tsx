@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CategoryThumb } from "@/components/CategoryThumb";
 import { requireUser } from "@/lib/auth";
 import { categoryAccentStyle } from "@/lib/category-art";
+import { attendanceChipClass, attendanceLabel } from "@/lib/attendance-label";
 import { prisma } from "@/lib/db";
 import { getSettings } from "@/lib/settings";
 import { formatDateTime } from "@/lib/time";
@@ -52,10 +53,13 @@ function BookingRow({
               ★
             </span>
           ) : null}
+          <span className={attendanceChipClass(booking.attendance)} data-testid="attendance-chip">
+            {attendanceLabel(booking.attendance)}
+          </span>
         </span>
         <span className="event-title">{event.title}</span>
         <span className="muted">
-          {formatDateTime(event.startsAt)} · {booking.attendance.toLowerCase()}
+          {formatDateTime(event.startsAt)}
           {spots ? ` · ${spots}` : ""}
         </span>
       </span>

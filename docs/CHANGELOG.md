@@ -14,6 +14,11 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-28 — Bookings chips + Discard≠blacklist tests
+
+- My bookings uses the same coloured attendance chip as the event page.
+- Unit + integration cover Discard ≠ blacklist; E2E covers discard copy, CSV download, empty far-future month.
+
 ## 2026-10-27 — Week timetable calendar + brand mark
 
 - Calendar defaults to **Week**; week/day use a Google-style time grid (hours × days, event blocks). Month view unchanged.

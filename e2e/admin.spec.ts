@@ -10,6 +10,11 @@ test.describe("admin paths", () => {
     if (await tile.count()) {
       await expect(tile.getByTestId("pending-approve")).toBeVisible();
       await expect(tile.getByTestId("pending-discard")).toBeVisible();
+      // Discard confirm must say it does not blacklist the organisation.
+      await tile.getByTestId("pending-discard").click();
+      await expect(page.locator("#confirm-body")).toContainText(/does not blacklist the organisation/i);
+      await page.getByRole("button", { name: /^cancel$/i }).click();
+      await expect(page.locator("#confirm-body")).toHaveCount(0);
     } else {
       await expect(page.getByText(/nothing waiting/i)).toBeVisible();
     }
@@ -31,6 +36,17 @@ test.describe("admin paths", () => {
 
     await page.goto("/reports");
     await expect(page.getByText(/export|events|date/i).first()).toBeVisible();
+  });
+
+  test("reports attendance CSV download starts", async ({ page }) => {
+    await login(page, "admin");
+    await page.goto("/reports");
+    const csv = page.locator('a[href*="/api/export/"][href*="format=csv"]').first();
+    await expect(csv).toBeVisible();
+    const downloadPromise = page.waitForEvent("download");
+    await csv.click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toMatch(/\.csv$/i);
   });
 
   test("logout clears session", async ({ page }) => {

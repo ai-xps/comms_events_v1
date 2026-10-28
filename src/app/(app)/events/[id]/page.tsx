@@ -8,13 +8,8 @@ import { categoryAccentStyle } from "@/lib/category-art";
 import { prisma } from "@/lib/db";
 import { initialsFromName } from "@/lib/initials";
 import { getSettings } from "@/lib/settings";
+import { attendanceChipClass, attendanceLabel } from "@/lib/attendance-label";
 import { formatDateTime } from "@/lib/time";
-
-function attendanceLabel(value: string): string {
-  if (value === "ATTENDED") return "Attended";
-  if (value === "ABSENT") return "Didn’t";
-  return "Unconfirmed";
-}
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -160,7 +155,7 @@ export default async function EventPage({ params }: { params: Promise<{ id: stri
                     <td data-label="Cell number">{b.user.cellNumber}</td>
                     <td data-label="Cell">{b.user.cell?.name}</td>
                     <td data-label="Attendance">
-                      <span className={`attendance-chip attendance-${b.attendance.toLowerCase()}`}>
+                      <span className={attendanceChipClass(b.attendance)}>
                         {attendanceLabel(b.attendance)}
                       </span>
                     </td>
