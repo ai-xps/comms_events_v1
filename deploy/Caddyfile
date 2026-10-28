@@ -1,7 +1,11 @@
-# Replace gather.example.org with the real DNS hostname (must match APP_ORIGIN).
-# Stock Caddy: TLS + reverse proxy. Login brute-force: fail2ban / external WAF.
-# Optional: build Caddy with github.com/mholt/caddy-ratelimit if you want edge rate limits.
-gather.example.org {
+# Hostname must match APP_ORIGIN (no trailing slash).
+# HTTP on the bare IP redirects to that hostname. Do not send people to https://<ip>:
+# the certificate is for the hostname, so the browser stops.
+http://132.145.68.166 {
+	redir https://132.145.68.166.sslip.io{uri} permanent
+}
+
+132.145.68.166.sslip.io {
 	encode gzip
 	reverse_proxy 127.0.0.1:3000
 }

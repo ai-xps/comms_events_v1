@@ -17,6 +17,12 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-28 — Missing pages return 404, and the bare IP goes to the named site
+
+- A missing event, or one a member cannot see, answers 404 with “Not found”, not a success status.
+- The “Loading…” line is gone, so it cannot stay announced after the page has drawn.
+- HTTP on the bare Oracle IP redirects to `https://132.145.68.166.sslip.io`.
+
 ## 2026-10-28 — Scraper Run now saves the priority list first (`8952c03`)
 
 - Run now stores the priority box, then fetches. A host that is not on the allowlist is named and not fetched.
