@@ -16,6 +16,7 @@ Host checked: https://132.145.68.166.sslip.io at `8952c03`. Railway was not this
 | — | On this Oracle database, a member saw bookers’ names and cell numbers | **Setting** — admin switch is Count and Name + Cell. Code default remains count only. |
 | Low | “Loading…” stays in the status text after Calendar, Bookings, and the event page have drawn | **Fixed** `26c2525`. That loading line is no longer rendered. |
 | — | Page walk: guest bounced to sign-in; admin, leader, and member rooms matched their roles; bad event fields were refused; port 3000 did not answer from outside | **Pass** |
+| — | Scraper destruction probe, 28 Oct afternoon | **Explained.** Oracle `priorityUrls` is `[]`. The last manual runs created 0 and updated 17 demo rows, so pending looks the same. Meetup, a random `.ics` host, `http://`, `javascript:`, and a private IP were refused. `https://www.birminghamcathedral.com/whats-on/` returned 21 Christian events. A Google Calendar `.ics` link was refused because that host’s `robots.txt` disallows the path. |
 
 ## 17 October 2026
 

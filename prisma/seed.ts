@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { DEFAULT_COLOURS } from "../src/lib/constants";
 import { londonDate, londonParts } from "../src/lib/time";
 import { addLondonCalendarDays } from "../src/lib/scraper/fixtures";
+import { STARTER_PRIORITY_URL } from "../src/lib/scraper/allowlist";
 
 const prisma = new PrismaClient();
 
@@ -82,7 +83,7 @@ async function main() {
       locationLabel: "Birmingham",
       memberAttendeeView: "COUNT",
       categoryColours: JSON.stringify(DEFAULT_COLOURS),
-      priorityUrls: JSON.stringify([])
+      priorityUrls: JSON.stringify([STARTER_PRIORITY_URL])
     }
   });
 

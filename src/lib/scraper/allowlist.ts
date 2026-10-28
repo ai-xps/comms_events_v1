@@ -32,6 +32,9 @@ export const ALLOWED_HOSTS = new Set([
   "churchsuite.com"
 ]);
 
+/** A page we have checked: https, on the allowlist, and it returns real events. */
+export const STARTER_PRIORITY_URL = "https://www.birminghamcathedral.com/whats-on/";
+
 export const MAX_PRIORITY_URLS = 20;
 
 function isLoopbackHost(host: string): boolean {

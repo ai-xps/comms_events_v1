@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, type Category, type MemberAttendeeView } from "@/lib/constants";
+import { STARTER_PRIORITY_URL } from "@/lib/scraper/allowlist";
 import { droppedPriorityUrlMessage, runFinishedMessage } from "@/lib/scraper/priority-copy";
 import { requestJson, type JsonResult } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
@@ -141,7 +142,7 @@ export function ScraperForm({
             name="priorityUrls"
             value={priorityText}
             onChange={(e) => setPriorityText(e.target.value)}
-            placeholder="https://birminghamcathedral.com/calendar.ics"
+            placeholder={STARTER_PRIORITY_URL}
           />
           <span className="muted">
             Run now saves this box first. An address is kept only when its host is one of: {allowedHosts.join(", ")}.

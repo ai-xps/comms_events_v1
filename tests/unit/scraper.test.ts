@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { scrapeDecision, isUpdatedScrapedRow } from "@/lib/scraper/apply";
-import { parsePriorityUrls, scrapeUrlAllowed } from "@/lib/scraper/allowlist";
+import { parsePriorityUrls, scrapeUrlAllowed, STARTER_PRIORITY_URL } from "@/lib/scraper/allowlist";
 import { droppedPriorityUrlMessage, runFinishedMessage } from "@/lib/scraper/priority-copy";
 import { inferCategory, TYPE_REVIEW_NOTE } from "@/lib/scraper/categorise";
 import { fixtureEvents } from "@/lib/scraper/fixtures";
@@ -80,6 +80,12 @@ describe("scrapeDecision", () => {
 });
 
 describe("allowlist", () => {
+  it("accepts the cathedral what's-on page we use as the starter feed", () => {
+    const parsed = parsePriorityUrls([STARTER_PRIORITY_URL]);
+    expect(parsed.urls).toEqual([STARTER_PRIORITY_URL]);
+    expect(parsed.rejected).toHaveLength(0);
+  });
+
   it("accepts cathedral https and a calendar file on an allowlisted host", () => {
     expect(scrapeUrlAllowed("https://birminghamcathedral.com/worship/").ok).toBe(true);
     expect(scrapeUrlAllowed("https://birminghamcathedral.com/calendar.ics").ok).toBe(true);

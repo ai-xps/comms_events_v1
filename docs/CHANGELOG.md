@@ -17,6 +17,11 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-10-28 — Cathedral what's-on is the starter feed
+
+- The suggested priority address is `https://www.birminghamcathedral.com/whats-on/`. The old `calendar.ics` example returns 404.
+- A fresh seed stores that address. An empty list still means demo events only.
+
 ## 2026-10-28 — Cutover gate checked; CI pinned to Ubuntu 24.04
 
 - Oracle gate: systemd, HTTPS door, `APP_ORIGIN`, closed port 3000, disk-alert test, last-place booking test, and no leftover seed cell numbers are ticked in [`deploy-ubuntu.md`](deploy-ubuntu.md) and [`GATE-STATUS.md`](GATE-STATUS.md).
