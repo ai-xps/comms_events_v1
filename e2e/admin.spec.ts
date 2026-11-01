@@ -6,37 +6,48 @@ test.describe("admin paths", () => {
     await login(page, "admin");
 
     await page.goto("/pending");
-    const tile = page.getByTestId("pending-tile").first();
-    if (await tile.count()) {
-      await expect(tile.getByTestId("pending-approve")).toBeVisible();
-      await expect(tile.getByTestId("pending-discard")).toBeVisible();
+    const tiles = page.getByTestId("pending-tile");
+    await expect(tiles.first()).toBeVisible();
+    const tileCount = await tiles.count();
+    expect(tileCount).toBeGreaterThanOrEqual(1);
+
+    for (let i = 0; i < tileCount; i += 1) {
+      const tile = tiles.nth(i);
+      const tileBox = await tile.boundingBox();
+      expect(tileBox).toBeTruthy();
       await expect(tile.locator(".pending-cat")).toBeVisible();
       await expect(tile.locator("time")).toHaveText(/–\d{2}:\d{2}/);
-      const eventLink = tile.locator(".pending-ext-url");
-      if (await eventLink.count()) {
-        await expect(eventLink).toBeVisible();
-        const box = await eventLink.boundingBox();
-        const tileBox = await tile.boundingBox();
-        expect(box && tileBox).toBeTruthy();
-        if (box && tileBox) {
-          expect(box.x + box.width).toBeLessThanOrEqual(tileBox.x + tileBox.width + 1);
-        }
-      }
+      // Category text lives in the chip, not jammed after the org host.
+      await expect(tile.locator(".pending-meta")).not.toHaveText(/·\s*(Christian|Meetup|Student)/i);
+
       const catBox = await tile.locator(".pending-cat").boundingBox();
-      const tileBox = await tile.boundingBox();
       expect(catBox && tileBox).toBeTruthy();
       if (catBox && tileBox) {
         expect(catBox.x + catBox.width).toBeLessThanOrEqual(tileBox.x + tileBox.width + 1);
         expect(catBox.y).toBeGreaterThanOrEqual(tileBox.y - 1);
+        expect(catBox.y + catBox.height).toBeLessThanOrEqual(tileBox.y + tileBox.height + 1);
       }
-      // Discard confirm must say it does not blacklist the organisation.
-      await tile.getByTestId("pending-discard").click();
-      await expect(page.locator("#confirm-body")).toContainText(/does not blacklist the organisation/i);
-      await page.getByRole("button", { name: /^cancel$/i }).click();
-      await expect(page.locator("#confirm-body")).toHaveCount(0);
-    } else {
-      await expect(page.getByText(/nothing waiting/i)).toBeVisible();
+
+      const eventLink = tile.locator(".pending-ext-url");
+      if (await eventLink.count()) {
+        await expect(eventLink).toBeVisible();
+        const box = await eventLink.boundingBox();
+        expect(box && tileBox).toBeTruthy();
+        if (box && tileBox) {
+          expect(box.x + box.width).toBeLessThanOrEqual(tileBox.x + tileBox.width + 1);
+          expect(box.width).toBeLessThanOrEqual(tileBox.width);
+        }
+      }
     }
+
+    const first = tiles.first();
+    await expect(first.getByTestId("pending-approve")).toBeVisible();
+    await expect(first.getByTestId("pending-discard")).toBeVisible();
+    // Discard confirm must say it does not blacklist the organisation.
+    await first.getByTestId("pending-discard").click();
+    await expect(page.locator("#confirm-body")).toContainText(/does not blacklist the organisation/i);
+    await page.getByRole("button", { name: /^cancel$/i }).click();
+    await expect(page.locator("#confirm-body")).toHaveCount(0);
 
     await page.goto("/scraper");
     await expect(page.getByRole("heading", { name: /scraper/i })).toBeVisible();

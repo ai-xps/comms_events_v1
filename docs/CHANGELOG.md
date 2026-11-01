@@ -17,10 +17,12 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## 2026-11-01 — Pending tiles + Meetup allowlist
+## 2026-11-01 — Pending tiles hardened + Meetup allowlist
 
-- Pending cards keep the category chip inside the tile, show start–end time, and clip long Event Links.
+- Pending cards keep the category chip inside the tile, show start–end time, and clip long Event Links (flex + overflow containment so thumbs cannot float outside).
+- Seed includes a long cathedral Event Link so e2e checks every pending tile. Playwright asserts chip, end time, and link stay inside the card on desktop and phone.
 - `meetup.com` / `www.meetup.com` are on the Priority URL allowlist. Use a Birmingham find page (not the bare homepage — that response is over Gather’s size cap and lists other cities).
+- Oracle pulled the earlier fix; refresh hard after redeploy if the old layout is cached.
 
 ## 2026-10-28 — Cathedral what's-on is the starter feed
 

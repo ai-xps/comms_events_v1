@@ -144,6 +144,28 @@ async function main() {
       placeName: "The Custard Factory, Digbeth",
       lat: 52.4747,
       lng: -1.8848,
+      // Long Event Link so pending tiles exercise ellipsis (cathedral-shaped slug).
+      externalUrl:
+        "https://www.meetup.com/birmingham-tech-meetup/events/999999999/birmingham-tech-meetup-lightning-talks-extra-long-slug-for-pending-tile/",
+      status: "PENDING",
+      createdById: admin.id
+    }
+  });
+
+  await prisma.event.create({
+    data: {
+      title: "Holy Communion in Traditional Language",
+      organisationName: "www.birminghamcathedral.com",
+      organisationId: cathedral.id,
+      sourceKey: "seed-cathedral-pending-long-link",
+      category: "Christian",
+      startsAt: at(2, 13, 10),
+      endsAt: at(2, 13, 40),
+      online: false,
+      placeName: "Birmingham Cathedral",
+      lat: 52.4814,
+      lng: -1.8985,
+      externalUrl: "https://www.birminghamcathedral.com/event/holy-communion-in-traditional-language/2026-10-28/",
       status: "PENDING",
       createdById: admin.id
     }
