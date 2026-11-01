@@ -6,7 +6,7 @@ A **changelog** is a dated notebook of “what we put on the noticeboard,” not
 
 | Where | What people open | Code |
 | --- | --- | --- |
-| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: `26c2525` |
+| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: `874c357` |
 | Railway (announced demo, auto-deploy paused) | https://commseventsv1-production.up.railway.app | Last Postgres build. It does not include the 28 Oct notes. |
 
 `package.json` stays `1.0.0` until a numbered church release.
@@ -16,6 +16,11 @@ Git history is the source of truth. Smoke checklists live in [`REVIEW.md`](REVIE
 Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+
+## 2026-11-01 — Pending tiles + Meetup allowlist
+
+- Pending cards keep the category chip inside the tile, show start–end time, and clip long Event Links.
+- `meetup.com` / `www.meetup.com` are on the Priority URL allowlist. Use a Birmingham find page (not the bare homepage — that response is over Gather’s size cap and lists other cities).
 
 ## 2026-10-28 — Cathedral what's-on is the starter feed
 

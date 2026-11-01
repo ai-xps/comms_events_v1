@@ -10,6 +10,25 @@ test.describe("admin paths", () => {
     if (await tile.count()) {
       await expect(tile.getByTestId("pending-approve")).toBeVisible();
       await expect(tile.getByTestId("pending-discard")).toBeVisible();
+      await expect(tile.locator(".pending-cat")).toBeVisible();
+      await expect(tile.locator("time")).toHaveText(/–\d{2}:\d{2}/);
+      const eventLink = tile.locator(".pending-ext-url");
+      if (await eventLink.count()) {
+        await expect(eventLink).toBeVisible();
+        const box = await eventLink.boundingBox();
+        const tileBox = await tile.boundingBox();
+        expect(box && tileBox).toBeTruthy();
+        if (box && tileBox) {
+          expect(box.x + box.width).toBeLessThanOrEqual(tileBox.x + tileBox.width + 1);
+        }
+      }
+      const catBox = await tile.locator(".pending-cat").boundingBox();
+      const tileBox = await tile.boundingBox();
+      expect(catBox && tileBox).toBeTruthy();
+      if (catBox && tileBox) {
+        expect(catBox.x + catBox.width).toBeLessThanOrEqual(tileBox.x + tileBox.width + 1);
+        expect(catBox.y).toBeGreaterThanOrEqual(tileBox.y - 1);
+      }
       // Discard confirm must say it does not blacklist the organisation.
       await tile.getByTestId("pending-discard").click();
       await expect(page.locator("#confirm-body")).toContainText(/does not blacklist the organisation/i);
@@ -25,6 +44,9 @@ test.describe("admin paths", () => {
     const empty = page.getByTestId("priority-empty");
     const urls = page.locator("textarea[name='priorityUrls']");
     await expect(empty.or(urls).first()).toBeVisible();
+    await expect(urls).toBeVisible();
+    await expect(page.getByText(/meetup\.com/i).first()).toBeVisible();
+    await expect(page.getByText(/Birmingham find/i).first()).toBeVisible();
     await expect(page.getByRole("heading", { name: /organisations/i })).toBeVisible();
 
     await page.goto("/members");

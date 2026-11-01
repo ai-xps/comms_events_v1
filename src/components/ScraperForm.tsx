@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CATEGORIES, type Category, type MemberAttendeeView } from "@/lib/constants";
-import { STARTER_PRIORITY_URL } from "@/lib/scraper/allowlist";
+import { MEETUP_BIRMINGHAM_FIND_URL, STARTER_PRIORITY_URL } from "@/lib/scraper/allowlist";
 import { droppedPriorityUrlMessage, runFinishedMessage } from "@/lib/scraper/priority-copy";
 import { requestJson, type JsonResult } from "@/lib/fetch-json";
 import { StatusBanner } from "./StatusBanner";
@@ -142,11 +142,13 @@ export function ScraperForm({
             name="priorityUrls"
             value={priorityText}
             onChange={(e) => setPriorityText(e.target.value)}
-            placeholder={STARTER_PRIORITY_URL}
+            placeholder={`${STARTER_PRIORITY_URL}\n${MEETUP_BIRMINGHAM_FIND_URL}`}
           />
           <span className="muted">
             Run now saves this box first. An address is kept only when its host is one of: {allowedHosts.join(", ")}.
-            Anything else is left out, and the run will not fetch it.
+            Anything else is left out, and the run will not fetch it. For Meetup use a Birmingham find or group page
+            (for example {MEETUP_BIRMINGHAM_FIND_URL}). The bare meetup.com homepage is too large for Gather and is
+            mostly other cities.
           </span>
         </label>
         <div className="row">

@@ -5,13 +5,10 @@ import { requireUser } from "@/lib/auth";
 import { categoryAccentStyle } from "@/lib/category-art";
 import { dayKeyOf, formatDayKey } from "@/lib/calendar";
 import { prisma } from "@/lib/db";
+import { displayEventLink, pendingWhen } from "@/lib/pending-copy";
 import { isUpdatedScrapedRow } from "@/lib/scraper/apply";
 import { getSettings } from "@/lib/settings";
-import { formatDateTime, formatDate } from "@/lib/time";
-
-function displayEventLink(url: string) {
-  return url.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
-}
+import { formatDate } from "@/lib/time";
 
 export default async function PendingPage() {
   await requireUser(["admin", "cell leader"]);
@@ -55,14 +52,17 @@ export default async function PendingPage() {
                   <Link className="pending-tile-link" href={`/events/${event.id}/edit`}>
                     <div className="pending-tile-top">
                       <p className="pending-kicker muted">{updated ? "Updated" : "New"}</p>
-                      <CategoryThumb category={event.category} size="md" />
+                      <span className="pending-cat">
+                        <CategoryThumb category={event.category} size="sm" />
+                        {event.category}
+                      </span>
                     </div>
                     <h3>{event.title}</h3>
                     <p className="pending-meta muted">
-                      <span>
-                        {event.organisationName} · {event.category}
-                      </span>
-                      <time dateTime={event.startsAt.toISOString()}>{formatDateTime(event.startsAt)}</time>
+                      <span>{event.organisationName}</span>
+                      <time dateTime={event.startsAt.toISOString()}>
+                        {pendingWhen(event.startsAt, event.endsAt)}
+                      </time>
                     </p>
                     {event.externalUrl ? (
                       <p className="pending-ext" title={event.externalUrl}>

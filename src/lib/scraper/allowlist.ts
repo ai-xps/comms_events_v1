@@ -26,6 +26,8 @@ export const ALLOWED_HOSTS = new Set([
   "www.aston.ac.uk",
   "astonsu.com",
   "www.astonsu.com",
+  "meetup.com",
+  "www.meetup.com",
   "calendar.google.com",
   "outlook.office365.com",
   "cloud.churchsuite.com",
@@ -34,6 +36,9 @@ export const ALLOWED_HOSTS = new Set([
 
 /** A page we have checked: https, on the allowlist, and it returns real events. */
 export const STARTER_PRIORITY_URL = "https://www.birminghamcathedral.com/whats-on/";
+
+/** Meetup find page with Birmingham in the location — JSON-LD events, not the bare homepage. */
+export const MEETUP_BIRMINGHAM_FIND_URL = "https://www.meetup.com/find/?location=gb--Birmingham";
 
 export const MAX_PRIORITY_URLS = 20;
 

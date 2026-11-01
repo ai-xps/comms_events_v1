@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { scrapeDecision, isUpdatedScrapedRow } from "@/lib/scraper/apply";
-import { parsePriorityUrls, scrapeUrlAllowed, STARTER_PRIORITY_URL } from "@/lib/scraper/allowlist";
+import {
+  MEETUP_BIRMINGHAM_FIND_URL,
+  parsePriorityUrls,
+  scrapeUrlAllowed,
+  STARTER_PRIORITY_URL
+} from "@/lib/scraper/allowlist";
 import { droppedPriorityUrlMessage, runFinishedMessage } from "@/lib/scraper/priority-copy";
 import { inferCategory, TYPE_REVIEW_NOTE } from "@/lib/scraper/categorise";
 import { fixtureEvents } from "@/lib/scraper/fixtures";
@@ -118,10 +123,12 @@ describe("allowlist", () => {
     expect(scrapeUrlAllowed("javascript:alert(1)").ok).toBe(false);
   });
 
-  it("refuses to save a Meetup search URL or a 21st feed", () => {
-    const meetup = parsePriorityUrls(["https://www.meetup.com/find/?keywords=birmingham"]);
-    expect(meetup.urls).toHaveLength(0);
-    expect(meetup.rejected[0]?.reason).toMatch(/allowlist/i);
+  it("accepts Meetup https and still refuses a 21st feed or unknown host", () => {
+    const meetup = parsePriorityUrls([MEETUP_BIRMINGHAM_FIND_URL, "https://www.meetup.com/"]);
+    expect(meetup.urls).toEqual([MEETUP_BIRMINGHAM_FIND_URL, "https://www.meetup.com/"]);
+    expect(meetup.rejected).toHaveLength(0);
+    expect(scrapeUrlAllowed("https://meetup.com/").ok).toBe(true);
+    expect(scrapeUrlAllowed(MEETUP_BIRMINGHAM_FIND_URL).ok).toBe(true);
     const rejected = parsePriorityUrls(["https://evil.example/cal.ics", "not-a-url"]);
     expect(rejected.urls).toHaveLength(0);
     expect(rejected.rejected.length).toBeGreaterThanOrEqual(2);
@@ -138,14 +145,14 @@ describe("allowlist", () => {
     expect(dup.rejected).toHaveLength(0);
   });
 
-  it("keeps an allowlisted feed when a leftover Meetup line sits next to it", () => {
+  it("keeps an allowlisted feed when a leftover unknown host sits next to it", () => {
     const mixed = parsePriorityUrls([
-      "https://www.meetup.com/find/?keywords=birmingham",
+      "https://evil.example/find/?keywords=birmingham",
       "https://birminghamcathedral.com/calendar.ics"
     ]);
     expect(mixed.urls).toEqual(["https://birminghamcathedral.com/calendar.ics"]);
     expect(mixed.rejected).toHaveLength(1);
-    expect(droppedPriorityUrlMessage(mixed.rejected)).toMatch(/meetup\.com/i);
+    expect(droppedPriorityUrlMessage(mixed.rejected)).toMatch(/evil\.example/i);
     expect(droppedPriorityUrlMessage(mixed.rejected)).toMatch(/not saved/i);
     expect(droppedPriorityUrlMessage([])).toBeNull();
   });
@@ -157,7 +164,7 @@ describe("allowlist", () => {
     const dropped = runFinishedMessage({
       createdCount: 0,
       sources: [],
-      dropped: [{ url: "https://www.meetup.com/find/?keywords=birmingham" }]
+      dropped: [{ url: "https://evil.example/find/?keywords=birmingham" }]
     });
     expect(dropped).toMatch(/not saved/i);
     expect(dropped).toMatch(/No live feed was fetched/);
@@ -229,6 +236,36 @@ describe("JSON-LD", () => {
     );
     expect(fallback.sourceKey.startsWith("live:jsonld:")).toBe(true);
   });
+
+  it("reads a Meetup-shaped JSON array of Events with start and end", () => {
+    // Live Meetup find pages put Events in a top-level ld+json array (not @graph).
+    const html = `<script type="application/ld+json">${JSON.stringify([
+      {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: "Canal Walk - Birmingham to Hamstead",
+        startDate: "2026-11-07T12:00:00.000Z",
+        endDate: "2026-11-07T15:00:00.000Z",
+        url: "https://www.meetup.com/birminghampeople/events/316895414/",
+        organizer: { name: "Birmingham People" }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: "Evening drinks - meet people in Tech!",
+        startDate: "2026-11-10T19:00:00.000Z",
+        url: "https://www.meetup.com/birmingham-tech-network/events/315465806/"
+      }
+    ])}</script>`;
+    const events = extractJsonLdScripts(html).flatMap((block) =>
+      eventsFromJsonLd(block, MEETUP_BIRMINGHAM_FIND_URL)
+    );
+    expect(events).toHaveLength(2);
+    expect(events[0].title).toMatch(/Canal Walk/i);
+    expect(events[0].endsAt.getTime() - events[0].startsAt.getTime()).toBe(3 * 60 * 60 * 1000);
+    expect(events[0].externalUrl).toContain("meetup.com/birminghampeople");
+    expect(events[1].endsAt.getTime()).toBeGreaterThan(events[1].startsAt.getTime());
+  });
 });
 
 describe("ICS extras", () => {
@@ -292,6 +329,42 @@ describe("live adapter", () => {
     }, pauseMs: 0 });
     expect(harvest.events).toHaveLength(0);
     expect(harvest.sources[0]?.error).toMatch(/allowlist/i);
+  });
+
+  it("harvests Meetup JSON-LD HTML and tags the category from the host", async () => {
+    const meetupHtml = `<html><script type="application/ld+json">${JSON.stringify({
+      "@type": "Event",
+      name: "DevOps Society - The Human API Workshop",
+      startDate: "2026-11-12T18:00:00.000Z",
+      endDate: "2026-11-12T20:00:00.000Z",
+      url: "https://www.meetup.com/devops-society/events/316811039/",
+      organizer: { name: "DevOps Society" }
+    })}</script></html>`;
+    const fetchFn: FetchLike = async (input) => {
+      if (input.endsWith("/robots.txt")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "text/plain" },
+          text: async () => "User-agent: *\nAllow: /\n"
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => "text/html; charset=utf-8" },
+        text: async () => meetupHtml
+      };
+    };
+    const harvest = await fetchLiveEvents([MEETUP_BIRMINGHAM_FIND_URL], { fetchFn, pauseMs: 0 });
+    expect(harvest.sources).toEqual([
+      expect.objectContaining({ url: MEETUP_BIRMINGHAM_FIND_URL, ok: true, eventCount: 1 })
+    ]);
+    expect(harvest.events).toHaveLength(1);
+    expect(harvest.events[0].category).toBe("Meetup");
+    expect(harvest.events[0].title).toMatch(/DevOps Society/i);
+    expect(harvest.events[0].externalUrl).toContain("meetup.com/devops-society");
+    expect(harvest.events[0].needsTypeReview).toBe(false);
   });
 
   it("records Response too large and keeps zero events", async () => {

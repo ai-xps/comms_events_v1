@@ -8,7 +8,8 @@ Host checked: https://132.145.68.166.sslip.io at `8952c03`. Railway was not this
 
 | Sev | Item | Status |
 | --- | --- | --- |
-| — | Guillaume: priority URL not saved; Run now left pending looking the same | **Fixed** `8952c03`. Run now saves the box first. A host off the allowlist is named and not fetched. A demo-only run says pending will look the same. Allowlist not widened. |
+| — | Guillaume: Meetup URL saved but few/no Meetup events; pending thumbs/URL/time look broken | **Fixed** `874c357`. `meetup.com` allowlisted. Pending tiles: end time, category chip inside the card, Event Link ellipsis. Live probe: Birmingham find URL returned 9 Meetup events; bare `meetup.com/` is “Response too large.” Redeploy + save find URL + Run now still needed on Oracle. E2E admin pending/scraper passed desktop + phone. |
+| — | Guillaume: priority URL not saved; Run now left pending looking the same | **Fixed** `8952c03`. Run now saves the box first. A host off the allowlist is named and not fetched. A demo-only run says pending will look the same. Allowlist later widened for Meetup (1 Nov). |
 | — | Guillaume 20 Oct: delete a member, not only deactivate | **Shipped** after 17 Oct. The member form has a delete control. Bookings and stars for that person are removed. Audit rows stay, with the actor cleared. An admin cannot delete their own account. |
 | — | CI database and browser tests | **Current:** GitHub Actions uses SQLite (`file:./data/ci.db`) and runs Playwright. The 17 Oct testing table below still says Postgres and “no browser suite”. That table is the 17 Oct snapshot. |
 | Med | Missing or hidden event returns HTTP 200 with “That page or event does not exist.” `/nope` returns 404. | **Fixed** `26c2525`. A missing event is HTTP 404. The stuck “Loading…” line was removed in the same change. |
@@ -16,7 +17,7 @@ Host checked: https://132.145.68.166.sslip.io at `8952c03`. Railway was not this
 | — | On this Oracle database, a member saw bookers’ names and cell numbers | **Setting** — admin switch is Count and Name + Cell. Code default remains count only. |
 | Low | “Loading…” stays in the status text after Calendar, Bookings, and the event page have drawn | **Fixed** `26c2525`. That loading line is no longer rendered. |
 | — | Page walk: guest bounced to sign-in; admin, leader, and member rooms matched their roles; bad event fields were refused; port 3000 did not answer from outside | **Pass** |
-| — | Scraper destruction probe, 28 Oct afternoon | **Used.** Oracle’s priority list was empty, so runs only updated demo rows. Meetup, random `.ics`, `http://`, `javascript:`, and a private IP are refused. A Google Calendar `.ics` link is refused by that host’s robots.txt. `https://www.birminghamcathedral.com/whats-on/` returned 21 events. That address is now saved on Oracle (`a732f4a`). The run created 15 pending events (the feed had 21 rows; repeats share one key). The old placeholder `calendar.ics` is a 404. |
+| — | Scraper destruction probe, 28 Oct afternoon | **Used.** Oracle’s priority list was empty, so runs only updated demo rows. Random `.ics`, `http://`, `javascript:`, and a private IP are refused. Meetup was refused then; allowlisted 1 Nov. A Google Calendar `.ics` link is refused by that host’s robots.txt. `https://www.birminghamcathedral.com/whats-on/` returned 21 events. That address is now saved on Oracle (`a732f4a`). The run created 15 pending events (the feed had 21 rows; repeats share one key). The old placeholder `calendar.ics` is a 404. |
 
 ## 17 October 2026
 

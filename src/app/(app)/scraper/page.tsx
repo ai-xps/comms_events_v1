@@ -35,7 +35,7 @@ export default async function ScraperPage() {
         {cleaned.urls.length === 0 ? (
           <p className="muted" data-testid="priority-empty">
             No Priority URLs saved — the harvest uses the built-in demo fixtures only. Add allowlisted https ICS or
-            JSON-LD feeds above when ops are ready (ask before expanding the host allowlist).
+            JSON-LD feeds above (cathedral what&apos;s-on, Meetup Birmingham find, and other hosts on the list).
           </p>
         ) : null}
       </div>

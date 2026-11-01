@@ -950,6 +950,16 @@ textarea { min-height: 96px; }
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-2);
+  min-width: 0;
+}
+.pending-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-soft);
 }
 .chip .cat-thumb-sm { margin-right: 0.15rem; }
 
@@ -1360,6 +1370,8 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
   gap: var(--space-2);
   min-width: 0;
   min-height: 100%;
+  overflow: hidden;
+  padding: 0;
   background: linear-gradient(160deg, var(--cat-soft, #fff) 0%, #fff 48%);
   border: 1px solid var(--cat-edge, var(--line));
 }
@@ -1712,7 +1724,14 @@ table.data .num, table.data .date { text-align: right; font-variant-numeric: tab
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3) var(--space-3);
 }
-.pending-tile-link { display: block; text-decoration: none; color: inherit; padding: var(--space-3); }
+.pending-tile-link {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  padding: var(--space-3);
+}
 /* Home — Apple-like calm bands (Gather blush/berry tokens) */
 .home-apple {
   max-width: 44rem;
