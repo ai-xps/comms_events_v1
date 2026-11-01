@@ -17,6 +17,10 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-11-01 — Pending Event Link labels
+
+- Pending Event Link shows a short “On Birmingham Cathedral” / “On Meetup” style label. Hover still has the full URL.
+
 ## 2026-11-01 — Pending tiles hardened + Meetup allowlist
 
 - Pending cards keep the category chip inside the tile, show start–end time, and clip long Event Links (flex + overflow containment so thumbs cannot float outside).

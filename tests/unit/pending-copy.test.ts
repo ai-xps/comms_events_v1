@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DISCARD_EVENT_CONFIRM_BODY,
   discardTouchesOrganisation,
-  displayEventLink,
+  eventLinkLabel,
   pendingWhen
 } from "@/lib/pending-copy";
 
@@ -19,22 +19,16 @@ describe("Discard ≠ blacklist", () => {
 });
 
 describe("pending tile display", () => {
-  it("strips scheme and leading www from Event Links", () => {
-    expect(displayEventLink("https://www.birminghamcathedral.com/event/evening-prayer-16/2026-10-28/")).toBe(
-      "birminghamcathedral.com/event/evening-prayer-16/2026-10-28/"
+  it("names known Event Link hosts in a short On … label", () => {
+    expect(eventLinkLabel("https://www.birminghamcathedral.com/event/evening-prayer-16/2026-10-28/")).toBe(
+      "On Birmingham Cathedral"
     );
-    expect(displayEventLink("http://meetup.com/find/?location=gb--Birmingham")).toBe(
-      "meetup.com/find/?location=gb--Birmingham"
-    );
+    expect(eventLinkLabel("https://www.meetup.com/birmingham-tech/events/123/")).toBe("On Meetup");
   });
 
-  it("keeps a long cathedral slug readable after stripping (ellipsis is CSS)", () => {
-    const long =
-      "https://www.birminghamcathedral.com/event/holy-communion-in-traditional-language-with-extra-path-segments/2026-10-28/";
-    const shown = displayEventLink(long);
-    expect(shown.startsWith("birminghamcathedral.com/")).toBe(true);
-    expect(shown).not.toMatch(/^https?:\/\//i);
-    expect(shown.length).toBeLessThan(long.length);
+  it("falls back to the hostname for unknown sites, without the long path", () => {
+    expect(eventLinkLabel("https://www.example.org/very/long/event/path/slug-here")).toBe("On example.org");
+    expect(eventLinkLabel("not-a-url")).toBe("On source page");
   });
 
   it("shows start–end as date-time then clock when endsAt is set", () => {

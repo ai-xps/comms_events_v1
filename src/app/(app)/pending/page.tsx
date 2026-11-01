@@ -5,7 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { categoryAccentStyle } from "@/lib/category-art";
 import { dayKeyOf, formatDayKey } from "@/lib/calendar";
 import { prisma } from "@/lib/db";
-import { displayEventLink, pendingWhen } from "@/lib/pending-copy";
+import { eventLinkLabel, pendingWhen } from "@/lib/pending-copy";
 import { isUpdatedScrapedRow } from "@/lib/scraper/apply";
 import { getSettings } from "@/lib/settings";
 import { formatDate } from "@/lib/time";
@@ -67,7 +67,7 @@ export default async function PendingPage() {
                     {event.externalUrl ? (
                       <p className="pending-ext" title={event.externalUrl}>
                         <span className="pending-ext-label">Event Link</span>
-                        <span className="pending-ext-url">{displayEventLink(event.externalUrl)}</span>
+                        <span className="pending-ext-url">{eventLinkLabel(event.externalUrl)}</span>
                       </p>
                     ) : (
                       <p className="pending-ext pending-ext-empty" aria-hidden="true" />

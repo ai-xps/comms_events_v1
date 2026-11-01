@@ -31,6 +31,8 @@ test.describe("admin paths", () => {
       const eventLink = tile.locator(".pending-ext-url");
       if (await eventLink.count()) {
         await expect(eventLink).toBeVisible();
+        await expect(eventLink).toHaveText(/^On /);
+        await expect(eventLink).not.toHaveText(/birminghamcathedral\.com\/event/i);
         const box = await eventLink.boundingBox();
         expect(box && tileBox).toBeTruthy();
         if (box && tileBox) {
