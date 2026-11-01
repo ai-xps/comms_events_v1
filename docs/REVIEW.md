@@ -8,7 +8,7 @@ Host checked: https://132.145.68.166.sslip.io at `8952c03`. Railway was not this
 
 | Sev | Item | Status |
 | --- | --- | --- |
-| — | Guillaume: Meetup URL saved but few/no Meetup events; pending thumbs/URL/time look broken | **Fixed** `874c357`. `meetup.com` allowlisted. Pending tiles: end time, category chip inside the card, Event Link ellipsis. Live probe: Birmingham find URL returned 9 Meetup events; bare `meetup.com/` is “Response too large.” Redeploy + save find URL + Run now still needed on Oracle. E2E admin pending/scraper passed desktop + phone. |
+| — | Guillaume: Meetup URL saved but few/no Meetup events; pending thumbs/URL/time look broken | **Fixed** `9018849`. `meetup.com` allowlisted. Pending tiles: end time, category chip inside the card, Event Link ellipsis. Live probe: Birmingham find URL returned 9 Meetup events; bare `meetup.com/` is “Response too large.” Redeploy + save find URL + Run now still needed on Oracle. E2E admin pending/scraper passed desktop + phone. |
 | — | Guillaume: priority URL not saved; Run now left pending looking the same | **Fixed** `8952c03`. Run now saves the box first. A host off the allowlist is named and not fetched. A demo-only run says pending will look the same. Allowlist later widened for Meetup (1 Nov). |
 | — | Guillaume 20 Oct: delete a member, not only deactivate | **Shipped** after 17 Oct. The member form has a delete control. Bookings and stars for that person are removed. Audit rows stay, with the actor cleared. An admin cannot delete their own account. |
 | — | CI database and browser tests | **Current:** GitHub Actions uses SQLite (`file:./data/ci.db`) and runs Playwright. The 17 Oct testing table below still says Postgres and “no browser suite”. That table is the 17 Oct snapshot. |
