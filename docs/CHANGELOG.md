@@ -17,6 +17,14 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-11-03 — Intro GitHub and maintenance prompt
+
+- New door: [`docs/tutorials/maintenance/intro-prompt.md`](tutorials/maintenance/intro-prompt.md) — copy-paste Cursor prompts (first day, daily, **Oracle**) plus numbered action lists in plain words.
+
+## 2026-11-01 — Maintain-from-scratch tutorials
+
+- New shelf: [`docs/tutorials/maintenance/`](tutorials/maintenance/) — project card (own GitHub login + central `ORG` repo; `ai-xps` sample only), from-scratch, Git in pictures, comment/review on the central pull-request page, FAQ. Video later; recipe first.
+
 ## 2026-11-01 — Pending Event Link labels
 
 - Pending Event Link shows a short “On Birmingham Cathedral” / “On Meetup” style label. Hover still has the full URL.

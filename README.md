@@ -43,6 +43,8 @@ Copy `.env.example` to `.env`.
 
 ## Setup
 
+New to the repo? Start here: [`docs/tutorials/maintenance/`](docs/tutorials/maintenance/).
+
 ```bash
 npm install
 mkdir -p prisma/data
