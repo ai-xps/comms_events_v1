@@ -7,6 +7,7 @@ import { passwordInUse } from "@/lib/password-unique";
 import { normaliseCellNumber, isValidCellNumber } from "@/lib/cell-number";
 import { parseRole } from "@/lib/constants";
 import { writeAudit } from "@/lib/audit";
+import { purgeUserInTx } from "@/lib/delete-users";
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   if (!originAllowed(request)) return rejectOrigin();
@@ -108,12 +109,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
   if (!existing) return NextResponse.json({ error: "Person not found." }, { status: 404 });
 
   await prisma.$transaction(async (tx) => {
-    await tx.booking.deleteMany({ where: { OR: [{ userId: id }, { bookedById: id }] } });
-    await tx.star.deleteMany({ where: { userId: id } });
-    await tx.event.updateMany({ where: { createdById: id }, data: { createdById: null } });
-    await tx.event.updateMany({ where: { reviewedById: id }, data: { reviewedById: null } });
-    await tx.auditLog.updateMany({ where: { actorId: id }, data: { actorId: null } });
-    await tx.user.delete({ where: { id } });
+    await purgeUserInTx(tx, id);
   });
 
   try {

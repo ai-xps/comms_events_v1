@@ -6,7 +6,7 @@ A **changelog** is a dated notebook of “what we put on the noticeboard,” not
 
 | Where | What people open | Code |
 | --- | --- | --- |
-| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: `5d92fb6` |
+| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: *(batch delete — update after ship)* |
 | Railway (announced demo, auto-deploy paused) | https://commseventsv1-production.up.railway.app | Last Postgres build. It does not include the 28 Oct notes. |
 
 `package.json` stays `1.0.0` until a numbered church release.
@@ -16,6 +16,10 @@ Git history is the source of truth. Smoke checklists live in [`REVIEW.md`](REVIE
 Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+
+## 2026-11-07 — Members: Delete selected (batch)
+
+- Admin Members: checkboxes, Select all on this page, **Delete selected**. Type `DELETE`, confirm count. Skips your own account. Same cascade as single delete (bookings/stars). One audit line. Cap 500 per request.
 
 ## 2026-11-07 — After-the-video plain run-through
 

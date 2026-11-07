@@ -2,6 +2,12 @@
 
 Dated ship notes: [`CHANGELOG.md`](CHANGELOG.md). Scores below from 17 October are a closed community demo, not an NHS production system. The 28 October section is the later read.
 
+## 7 November 2026 — Batch member delete
+
+| Sev | Item | Status |
+| --- | --- | --- |
+| — | Need to clear many people before a new Import structure | **Shipped** — admin Members: checkboxes + Delete selected; typed DELETE + count confirm; cannot delete self; cascade matches single delete. |
+
 ## 28 October 2026 — Oracle walk and Guillaume’s scraper
 
 Host checked: https://132.145.68.166.sslip.io at `8952c03`. Railway was not this build.

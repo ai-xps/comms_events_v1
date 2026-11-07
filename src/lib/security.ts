@@ -56,6 +56,7 @@ export function eventInputProblem(input: {
 export const LIMITS = {
   importBytes: 2 * 1024 * 1024,
   importRows: 2000,
+  batchDeleteUsers: 500,
   titleLength: 200,
   placeLength: 200,
   textLength: 5000,

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { MembersAdminTable } from "@/components/MembersAdminTable";
 
 export default async function MembersPage() {
   const user = await requireUser(["admin", "cell leader"]);
@@ -9,20 +9,33 @@ export default async function MembersPage() {
     include: { cell: true },
     orderBy: { name: "asc" }
   });
+
+  if (user.role === "admin") {
+    return (
+      <main>
+        <div className="page-head">
+          <h1>Members</h1>
+          <p className="lede">Everyone in Gather. Tick people, then Delete selected, before a fresh Import.</p>
+        </div>
+        <MembersAdminTable
+          selfId={user.id}
+          members={members.map((m) => ({
+            id: m.id,
+            name: m.name,
+            cellNumber: m.cellNumber,
+            cellName: m.cell?.name ?? "—",
+            role: m.role
+          }))}
+        />
+      </main>
+    );
+  }
+
   return (
     <main>
       <div className="page-head">
         <h1>Members</h1>
-        <p className="lede">
-          {user.role === "admin" ? "Everyone in Gather." : "People in your cell only."}
-        </p>
-        {user.role === "admin" ? (
-          <p>
-            <Link className="button" href="/members/new">
-              Add person
-            </Link>
-          </p>
-        ) : null}
+        <p className="lede">People in your cell only.</p>
       </div>
       <div className="table-wrap">
         <table className="data stack-sm">
@@ -32,7 +45,6 @@ export default async function MembersPage() {
               <th>Cell number</th>
               <th>Cell</th>
               <th>Permission</th>
-              {user.role === "admin" ? <th></th> : null}
             </tr>
           </thead>
           <tbody>
@@ -42,11 +54,6 @@ export default async function MembersPage() {
                 <td data-label="Cell number">{m.cellNumber}</td>
                 <td data-label="Cell">{m.cell?.name ?? "—"}</td>
                 <td data-label="Permission">{m.role}</td>
-                {user.role === "admin" ? (
-                  <td data-label="Actions">
-                    <Link href={`/members/${m.id}/edit`}>Edit</Link>
-                  </td>
-                ) : null}
               </tr>
             ))}
           </tbody>
