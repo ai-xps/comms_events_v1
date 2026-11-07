@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [experiment, main]
+  pull_request:
+    branches: [experiment, main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # ubuntu-latest moved to 26.04; Playwright 1.51 cannot install Chromium there.
+    runs-on: ubuntu-24.04
+    env:
+      DATABASE_URL: file:./data/ci.db
+      TEST_DATABASE_URL: file:./data/ci.db
+      SESSION_SECRET: ci-only-session-secret-not-used-anywhere-else-0123456789
+      CRON_SECRET: ci-only-cron-secret
+      APP_ORIGIN: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: mkdir -p prisma/data
+      - run: npx prisma generate
+      - run: npx prisma db push --skip-generate
+      - run: npm run typecheck
+      - run: npm run test:coverage
+      - run: npx next build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          CI: "true"
+          E2E_PORT: "3100"
+          E2E_DATABASE_URL: file:./data/e2e.db

@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gather — keeping the shared notebook</title>
+  <style>
+    :root {
+      --paper: #fdf2f0;
+      --paper-2: #f3e0e2;
+      --ink: #3d2a2c;
+      --ink-soft: #7a6266;
+      --line: #efd6d9;
+      --accent: #a8434d;
+      --accent-from: #b14e58;
+      --accent-to: #a8434d;
+      --sage: #8fa889;
+      --gold: #c4a574;
+      --white: #ffffff;
+      --shadow: 0 12px 32px rgba(90, 40, 48, 0.08);
+      --radius: 20px;
+      --sans: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--ink);
+      line-height: 1.55;
+      background-color: var(--paper);
+      background-image:
+        radial-gradient(ellipse 75% 55% at 50% -12%, rgba(253, 214, 218, 0.9) 0%, transparent 58%),
+        radial-gradient(ellipse 45% 40% at 100% 8%, rgba(196, 165, 116, 0.14) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 35% at 0% 90%, rgba(143, 168, 137, 0.12) 0%, transparent 45%);
+      min-height: 100vh;
+    }
+    a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: #8f3842; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+    .topnav {
+      display: flex; flex-wrap: wrap; gap: 0.65rem 1rem;
+      font-size: 0.92rem; margin: 0 0 2rem; padding-bottom: 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+    .topnav a { color: var(--ink-soft); text-decoration: none; font-weight: 600; }
+    .topnav a:hover { color: var(--accent); }
+    .brand {
+      font-weight: 800; letter-spacing: -0.03em; font-size: clamp(2rem, 5vw, 2.75rem);
+      color: var(--accent); margin: 0 0 0.35rem; line-height: 1.05;
+    }
+    .hero h1 {
+      font-size: clamp(1.35rem, 3.5vw, 1.75rem); letter-spacing: -0.02em;
+      margin: 0 0 0.75rem; font-weight: 700; line-height: 1.2;
+    }
+    .lede { color: var(--ink-soft); font-size: 1.08rem; margin: 0 0 1.5rem; max-width: 36em; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 2rem; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      background: var(--white); border: 1px solid var(--line);
+      border-radius: 999px; padding: 0.35rem 0.85rem;
+      font-size: 0.85rem; font-weight: 600; color: var(--ink-soft);
+      box-shadow: var(--shadow);
+    }
+    .pill strong { color: var(--accent); font-weight: 700; }
+    section { margin: 2.75rem 0; }
+    h2 {
+      font-size: 1.35rem; letter-spacing: -0.02em; margin: 0 0 0.75rem;
+      padding-bottom: 0.5rem; border-bottom: 2px solid var(--line);
+    }
+    h3 { font-size: 1.05rem; margin: 1.5rem 0 0.5rem; }
+    p { margin: 0 0 0.85rem; }
+    .note {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--gold);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin: 1rem 0 1.25rem;
+      color: var(--ink-soft);
+      font-size: 0.95rem;
+    }
+    .note strong { color: var(--ink); }
+    .grid-3 {
+      display: grid; gap: 0.85rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px) {
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+    }
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.15rem;
+      box-shadow: var(--shadow);
+    }
+    .card h3 { margin: 0 0 0.4rem; font-size: 1rem; color: var(--accent); }
+    .card p { margin: 0; font-size: 0.92rem; color: var(--ink-soft); }
+    .card .pic { font-size: 0.85rem; margin-top: 0.55rem; color: var(--sage); font-weight: 600; }
+    ol.steps {
+      list-style: none; margin: 0; padding: 0; counter-reset: step;
+    }
+    ol.steps > li {
+      position: relative;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.15rem 1.1rem 3.6rem;
+      margin: 0 0 0.75rem;
+      box-shadow: var(--shadow);
+    }
+    ol.steps > li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute; left: 0.9rem; top: 1.05rem;
+      width: 2rem; height: 2rem; border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent-from), var(--accent-to));
+      color: var(--white);
+      font-weight: 800; font-size: 0.95rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    ol.steps .what { font-weight: 700; margin: 0 0 0.25rem; }
+    ol.steps .how { margin: 0; color: var(--ink-soft); font-size: 0.95rem; }
+    ol.steps .done {
+      margin: 0.55rem 0 0; font-size: 0.88rem; color: var(--sage); font-weight: 600;
+    }
+    .window-table {
+      width: 100%; border-collapse: collapse; font-size: 0.92rem;
+      background: var(--white); border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow); border: 1px solid var(--line);
+    }
+    .window-table th, .window-table td {
+      text-align: left; padding: 0.7rem 0.85rem; border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    .window-table th {
+      background: var(--paper-2); font-size: 0.8rem; text-transform: uppercase;
+      letter-spacing: 0.04em; color: var(--ink-soft);
+    }
+    .window-table tr:last-child td { border-bottom: 0; }
+    .tag {
+      display: inline-block; font-size: 0.75rem; font-weight: 700;
+      padding: 0.15rem 0.5rem; border-radius: 999px;
+      background: var(--paper-2); color: var(--accent); margin-right: 0.25rem;
+    }
+    .shot-grid {
+      display: grid; gap: 0.75rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 560px) {
+      .shot-grid { grid-template-columns: 1fr 1fr; }
+    }
+    .shot {
+      border: 1px dashed var(--line);
+      border-radius: 16px;
+      padding: 1rem;
+      background: rgba(255,255,255,0.55);
+      min-height: 7.5rem;
+    }
+    .shot .num {
+      font-weight: 800; color: var(--accent); font-size: 0.8rem;
+      letter-spacing: 0.04em; text-transform: uppercase; margin: 0 0 0.35rem;
+    }
+    .shot p { margin: 0; font-size: 0.9rem; color: var(--ink-soft); }
+    details.q {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      margin: 0 0 0.55rem;
+      box-shadow: 0 4px 14px rgba(90, 40, 48, 0.04);
+    }
+    details.q summary {
+      cursor: pointer; font-weight: 650; padding: 0.85rem 1rem;
+      list-style: none; display: flex; gap: 0.65rem; align-items: flex-start;
+    }
+    details.q summary::-webkit-details-marker { display: none; }
+    details.q summary::before {
+      content: "+"; flex: 0 0 auto; width: 1.35rem; height: 1.35rem;
+      border-radius: 999px; background: var(--paper-2); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; line-height: 1; margin-top: 0.05rem;
+    }
+    details.q[open] summary::before { content: "–"; }
+    details.q .ans {
+      padding: 0 1rem 1rem 3rem; color: var(--ink-soft); font-size: 0.95rem;
+    }
+    details.q .ans p:last-child { margin-bottom: 0; }
+    .group-label {
+      margin: 1.75rem 0 0.65rem; font-size: 0.8rem; font-weight: 800;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold);
+    }
+    footer {
+      margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--line);
+      color: var(--ink-soft); font-size: 0.9rem;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.88em; background: var(--paper-2); padding: 0.1em 0.35em;
+      border-radius: 6px;
+    }
+    @media print {
+      body { background: #fff; }
+      .topnav { display: none; }
+      details.q { break-inside: avoid; }
+      details.q[open] .ans, details.q .ans { display: block; }
+      details.q:not([open]) .ans { display: block; }
+      details.q summary::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="topnav" aria-label="On this page">
+      <a href="#picture">Picture</a>
+      <a href="#open">What to open</a>
+      <a href="#first-day">First day</a>
+      <a href="#daily">Every work day</a>
+      <a href="#live">Live shop</a>
+      <a href="#stills">Clear stills</a>
+      <a href="#stuck">When something feels stuck</a>
+    </nav>
+
+    <header class="hero">
+      <p class="brand">Gather</p>
+      <h1>Keeping the shared notebook</h1>
+      <p class="lede">
+        A calm path for someone new to GitHub who needs to look after this Birmingham community calendar —
+        on their laptop, on the team shelf, and (for owners) on the live shop window.
+      </p>
+      <div class="pill-row">
+        <span class="pill"><strong>1</strong> First day</span>
+        <span class="pill"><strong>2</strong> Daily care</span>
+        <span class="pill"><strong>3</strong> Live shop</span>
+        <span class="pill"><strong>4</strong> Clear stills</span>
+      </div>
+    </header>
+
+    <section id="picture">
+      <h2>One picture for the whole path</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>GitHub</h3>
+          <p>The website that holds the shared notebook for the team.</p>
+          <p class="pic">Post-office shelf</p>
+        </div>
+        <div class="card">
+          <h3>Your laptop</h3>
+          <p>Your own copy of the notebook. You write here first.</p>
+          <p class="pic">Notebook on your desk</p>
+        </div>
+        <div class="card">
+          <h3>Cursor</h3>
+          <p>The editor with a chat helper. You decide what leaves the kitchen.</p>
+          <p class="pic">Sous-chef — you stay head chef</p>
+        </div>
+      </div>
+      <p class="note" style="margin-top:1.25rem">
+        <strong>Three words you say out loud.</strong>
+        <strong>Save</strong> writes today’s page on your laptop.
+        <strong>Share</strong> posts that page to the shelf.
+        <strong>Ask for a check</strong> leaves a review letter on GitHub.
+        The helper must not do those alone.
+      </p>
+    </section>
+
+    <section id="open">
+      <h2>What to have open</h2>
+      <p>Set these once. Hide what you do not need for the step in front of you.</p>
+      <table class="window-table">
+        <thead>
+          <tr><th>Slot</th><th>Window</th><th>Open this</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="tag">A</span></td>
+            <td>Browser</td>
+            <td>The team project on GitHub (the address on the project card)</td>
+          </tr>
+          <tr>
+            <td><span class="tag">B</span></td>
+            <td>Cursor</td>
+            <td>The Gather folder, on the daily line <code>experiment</code></td>
+          </tr>
+          <tr>
+            <td><span class="tag">C</span></td>
+            <td>Terminal</td>
+            <td>Cursor’s terminal is enough — large font</td>
+          </tr>
+          <tr>
+            <td><span class="tag">D</span></td>
+            <td>Browser</td>
+            <td>Local shop: <code>http://localhost:3000</code> after the first run</td>
+          </tr>
+          <tr>
+            <td><span class="tag">E</span></td>
+            <td>Browser</td>
+            <td>Live shop (owners): the Oracle HTTPS address</td>
+          </tr>
+          <tr>
+            <td><span class="tag">F</span></td>
+            <td>This page</td>
+            <td>Keep it beside you while you work or film</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note">
+        <strong>Calm screen.</strong> Turn on Focus / Do Not Disturb. Zoom the browser to about 125%.
+        Never leave passwords, a filled <code>.env</code> file, or real member names on screen when sharing or filming.
+      </p>
+    </section>
+
+    <section id="first-day">
+      <h2>First day — in order</h2>
+      <p>Do these once on a laptop that does not have Gather yet.</p>
+      <ol class="steps">
+        <li>
+          <p class="what">Fill the address card</p>
+          <p class="how">Open the team project card. Confirm the web address and the daily line (usually <code>experiment</code>). If names still say placeholders, ask the owner to fill them.</p>
+          <p class="done">Done when you can open the project page — or you know you still need an invite.</p>
+        </li>
+        <li>
+          <p class="what">Your own GitHub login</p>
+          <p class="how">Use your account. Ask the owner to invite your username to the central home. Accept as yourself. Never share passwords.</p>
+          <p class="done">Done when the project opens while you are signed in as you.</p>
+        </li>
+        <li>
+          <p class="what">Tools on the counter</p>
+          <p class="how">Install Cursor, Git, and Node 20 or later. In Cursor, sign in to GitHub as you. Check versions in the terminal.</p>
+          <p class="done">Done when <code>git --version</code> and <code>node --version</code> both print a number.</p>
+        </li>
+        <li>
+          <p class="what">Copy the notebook onto your desk</p>
+          <p class="how">Clone the daily line into a <code>gather</code> folder. In Cursor: File → Open Folder → that folder.</p>
+          <p class="done">Done when <code>git status</code> says you are on <code>experiment</code>.</p>
+        </li>
+        <li>
+          <p class="what">Private settings (drawer keys)</p>
+          <p class="how">Copy <code>.env.example</code> to <code>.env</code>. Put long random text in the secret fields. Keep the local web address as localhost for now. Never commit this file.</p>
+          <p class="done">Done when <code>.env</code> exists privately and is not in the “files to save” list.</p>
+        </li>
+        <li>
+          <p class="what">Open the shop on this laptop</p>
+          <p class="how">Run install, prepare the data file, seed once, then start the app. Open <code>http://localhost:3000</code>. Do not read seed passwords aloud or paste them into chat.</p>
+          <p class="done">Done when the Gather sign-in page loads.</p>
+        </li>
+        <li>
+          <p class="what">You decide; the helper helps</p>
+          <p class="how">Open Chat in Agent mode. Ask for a short plan before edits. Read proposed changes before you say yes.</p>
+          <p class="done">Done when you have a plain plan and no surprise saves.</p>
+        </li>
+        <li>
+          <p class="what">Learn save, share, ask for a check</p>
+          <p class="how">Save = commit on this laptop. Share = push to the shelf. Ask for a check = open a pull request onto <code>experiment</code>. You say the words.</p>
+          <p class="done">Done when you can point at those three ideas without rushing.</p>
+        </li>
+        <li>
+          <p class="what">Leave the live shop alone today</p>
+          <p class="how">The public window is a later, owner-only job. Practice on the laptop first.</p>
+          <p class="done">Done when you have not opened the server door.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="daily">
+      <h2>Every work day — in order</h2>
+      <p>Start here once the Gather folder already opens on this laptop.</p>
+      <ol class="steps">
+        <li>
+          <p class="what">Get other people’s pages first</p>
+          <p class="how">Check out the daily line, then pull with a fast-forward only. Collect the post before you write.</p>
+          <p class="done">Done when status is clean and up to date.</p>
+        </li>
+        <li>
+          <p class="what">Name one small job</p>
+          <p class="how">Write the bug or change in everyday English. Ask for a three-step plan, then wait.</p>
+          <p class="done">Done when you have a plan before files change.</p>
+        </li>
+        <li>
+          <p class="what">Smallest change, then check</p>
+          <p class="how">After you say go: change only what the plan named. Run the tests and the type check. Add a changelog line if people will notice.</p>
+          <p class="done">Done when checks pass and the screen looks right.</p>
+        </li>
+        <li>
+          <p class="what">Save — only when you say “commit”</p>
+          <p class="how">Review the file list. Never add <code>.env</code>. Write a short reason in the save message.</p>
+          <p class="done">Done when today’s page is written on this laptop.</p>
+        </li>
+        <li>
+          <p class="what">Share, then ask for a check</p>
+          <p class="how">Push when you say push. Open a pull request onto <code>experiment</code> with a short summary and a test plan. Comment kindly on the letter.</p>
+          <p class="done">Done when the web project shows your work.</p>
+        </li>
+        <li>
+          <p class="what">Live shop only when an owner asked</p>
+          <p class="how">A normal day ends at the shelf. Updating the public window is a separate path below.</p>
+          <p class="done">Done when you either stop at GitHub, or continue on purpose as an owner.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="live">
+      <h2>Live shop (owners)</h2>
+      <p>Only An / Guillaume — or whoever holds the shop key. Code must already be on the GitHub shelf.</p>
+      <ol class="steps">
+        <li>
+          <p class="what">Confirm the shelf has the pages</p>
+          <p class="how">The short commit on GitHub must match the change you mean to publish. Save and share first if it does not.</p>
+          <p class="done">Done when the shelf shows the right pages.</p>
+        </li>
+        <li>
+          <p class="what">Confirm you have the shop key</p>
+          <p class="how">SSH is a private door key on this laptop. Do not paste it into chat or onto a slide.</p>
+          <p class="done">Done when the key file is present — or you stopped because it is missing.</p>
+        </li>
+        <li>
+          <p class="what">Open the door</p>
+          <p class="how">Connect to the rented computer, then move into the Gather app folder.</p>
+          <p class="done">Done when you are inside the app folder on the server.</p>
+        </li>
+        <li>
+          <p class="what">Fetch the new pages</p>
+          <p class="how">Pull the daily line with a fast-forward only. If it cannot, stop.</p>
+          <p class="done">Done when the pull succeeds with no clash.</p>
+        </li>
+        <li>
+          <p class="what">Rebuild and restart</p>
+          <p class="how">Install locked ingredients, generate, build, then restart the Gather service.</p>
+          <p class="done">Done when build and restart finish without a red failure.</p>
+        </li>
+        <li>
+          <p class="what">Check the short code and the window</p>
+          <p class="how">Compare the short commit on the server to GitHub. Hard-refresh the live site (or use a private window).</p>
+          <p class="done">Done when the site shows the new behaviour.</p>
+        </li>
+        <li>
+          <p class="what">Leave the older demo host alone</p>
+          <p class="how">Do not push this SQLite build to Railway while that host still expects the old database.</p>
+          <p class="done">Done when only the intended live shop was updated.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section id="stills">
+      <h2>Clear stills for guides and slides</h2>
+      <p>Same calm rules as a good film take — one idea per picture.</p>
+      <div class="shot-grid">
+        <div class="shot">
+          <p class="num">Capture</p>
+          <p>On a Mac: <code>⌘⇧4</code> and drag a tight rectangle. Prefer one window. Browser zoom about 125%.</p>
+        </div>
+        <div class="shot">
+          <p class="num">Stay sharp</p>
+          <p>Keep the full Retina size. Do not shrink a screenshot and then enlarge it later — that goes soft.</p>
+        </div>
+        <div class="shot">
+          <p class="num">Trim</p>
+          <p>Open in Preview. Crop to the title and the one action. Soft blur any secret with Markup.</p>
+        </div>
+        <div class="shot">
+          <p class="num">Name</p>
+          <p>Plain filenames in order: <code>01-github-home.png</code>, <code>06-localhost-signin.png</code>.</p>
+        </div>
+        <div class="shot">
+          <p class="num">Never in frame</p>
+          <p>Passwords, filled <code>.env</code>, seed output, real member names or cell numbers.</p>
+        </div>
+        <div class="shot">
+          <p class="num">Look</p>
+          <p>Soft plain desktop. Same browser width across a sequence. No busy wallpaper fighting the text.</p>
+        </div>
+      </div>
+      <p class="note">
+        <strong>Recording the path on this MacBook.</strong>
+        Free and built in: press <code>⌘⇧5</code>, choose Record, pick your microphone under Options.
+        QuickTime Player → File → New Screen Recording works the same way.
+        For longer films with scenes, OBS Studio is free. Trim silence later in iMovie (free).
+      </p>
+    </section>
+
+    <section id="stuck">
+      <h2>When something feels stuck</h2>
+      <p>Open a question. If the answer still fails, copy the exact message into Cursor and wait — do not invent a forceful fix.</p>
+
+      <p class="group-label">Accounts and access</p>
+      <details class="q">
+        <summary>The project page says 404 or access denied</summary>
+        <div class="ans"><p>You may not be invited yet, or the address card still has placeholders. Tell the owner your GitHub username. Do not guess a new team address.</p></div>
+      </details>
+      <details class="q">
+        <summary>Should I share one GitHub login with the team?</summary>
+        <div class="ans"><p>No. Everyone uses their own login — like their own house key. The shared notebook lives under the central team home; you get invited there.</p></div>
+      </details>
+      <details class="q">
+        <summary>I accepted an invite but clone still fails</summary>
+        <div class="ans"><p>Sign out and back into GitHub in the browser and in Cursor as the same person. Confirm you open the central project URL, not a private copy you invented.</p></div>
+      </details>
+      <details class="q">
+        <summary>What is the difference between me and the central home?</summary>
+        <div class="ans"><p>You are the person signing in. The central home owns the shared repo. Comments and reviews show your name; the files still live on that one shelf.</p></div>
+      </details>
+
+      <p class="group-label">Tools and first setup</p>
+      <details class="q">
+        <summary>The terminal says command not found for git or node</summary>
+        <div class="ans"><p>Install that tool, quit the terminal fully, open a new one, try again. Cursor’s terminal and the Mac Terminal both need a fresh start after installs.</p></div>
+      </details>
+      <details class="q">
+        <summary>Which editor should I use?</summary>
+        <div class="ans"><p>Cursor — it is the place the team expects, with the chat helper. Open the same Gather folder you cloned.</p></div>
+      </details>
+      <details class="q">
+        <summary>Do I need Postgres on my laptop?</summary>
+        <div class="ans"><p>No for local Gather. This path uses a SQLite file on disk. Follow the example settings file.</p></div>
+      </details>
+      <details class="q">
+        <summary>Port 3000 is already in use</summary>
+        <div class="ans"><p>Another <code>npm run dev</code> may still be running. Stop it, or ask the helper which process holds the port. Then start again.</p></div>
+      </details>
+      <details class="q">
+        <summary>Where do the first passwords appear?</summary>
+        <div class="ans"><p>Once in the terminal when you seed. They are not shown in the app. Do not put them in chat, a pull request, a comment, or a film.</p></div>
+      </details>
+      <details class="q">
+        <summary>Can I commit the .env file so others have it?</summary>
+        <div class="ans"><p>No. That file is drawer keys for one machine. Share the example file only. Each person makes their own private copy.</p></div>
+      </details>
+
+      <p class="group-label">Daily line and GitHub words</p>
+      <details class="q">
+        <summary>Why experiment and not main?</summary>
+        <div class="ans"><p>Daily work lives on the daily line (usually <code>experiment</code>). <code>main</code> stays quiet until a human owner asks. Base review letters on the daily line.</p></div>
+      </details>
+      <details class="q">
+        <summary>What does save / share / ask for a check mean?</summary>
+        <div class="ans"><p>Save = commit on your laptop. Share = push to the shelf. Ask for a check = open a pull request. You must say those words; the helper waits.</p></div>
+      </details>
+      <details class="q">
+        <summary>git status says I am on main</summary>
+        <div class="ans"><p>Switch to the daily line without deleting work. Ask the helper to move you safely. Do not start daily fixes on main.</p></div>
+      </details>
+      <details class="q">
+        <summary>Pull says it cannot fast-forward</summary>
+        <div class="ans"><p>Stop. Paste the full message into Cursor. Do not invent a rebase. Do not force-push.</p></div>
+      </details>
+      <details class="q">
+        <summary>Git says we both wrote on the same line</summary>
+        <div class="ans"><p>Two cooks on one recipe card. Copy the red text, paste it into Cursor, ask for plain options, and wait. No force-push to main.</p></div>
+      </details>
+      <details class="q">
+        <summary>I typed in the wrong file and have not saved yet</summary>
+        <div class="ans"><p>Restore that one file if you are sure. If you already committed, do not invent scissors — ask with <code>git log</code> and status on screen.</p></div>
+      </details>
+      <details class="q">
+        <summary>Push was rejected</summary>
+        <div class="ans"><p>Get other people’s pages first (fast-forward pull), then push again. Never force-push main.</p></div>
+      </details>
+      <details class="q">
+        <summary>Nothing to commit</summary>
+        <div class="ans"><p>Nothing was staged, or nothing changed. Review the file list with the helper before you try again.</p></div>
+      </details>
+
+      <p class="group-label">Checks, reviews, and kindness</p>
+      <details class="q">
+        <summary>Tests or typecheck failed</summary>
+        <div class="ans"><p>Paste the red lines into Cursor. Do not skip the checks to “save time.” A failing check is the soup tasting off before service.</p></div>
+      </details>
+      <details class="q">
+        <summary>How do I leave a comment on someone’s change?</summary>
+        <div class="ans"><p>Open the pull request on the central project. Use Files changed. Point at a line. Be specific and kind. Your name shows on the note.</p></div>
+      </details>
+      <details class="q">
+        <summary>Should I approve if I only skimmed?</summary>
+        <div class="ans"><p>No. Read Files changed first. If you are unsure, leave comments only. Owners still decide merges.</p></div>
+      </details>
+      <details class="q">
+        <summary>Someone asked for changes on my letter</summary>
+        <div class="ans"><p>Fix on your laptop, save, share, reply on each thread what you did, then ask for another look.</p></div>
+      </details>
+      <details class="q">
+        <summary>Can the chat helper commit alone?</summary>
+        <div class="ans"><p>No. You say commit, push, and pull request. That keeps the official book honest.</p></div>
+      </details>
+
+      <p class="group-label">Live shop and demos</p>
+      <details class="q">
+        <summary>The live site looks old after an update</summary>
+        <div class="ans"><p>Hard-refresh or open a private window. On the server, check the short commit matches GitHub. If it does not, the pull did not land.</p></div>
+      </details>
+      <details class="q">
+        <summary>SSH says permission denied</summary>
+        <div class="ans"><p>Wrong key or missing invite to the key. Stop. Do not guess passwords. Ask the owner who holds the shop key.</p></div>
+      </details>
+      <details class="q">
+        <summary>Should I update Railway with this build?</summary>
+        <div class="ans"><p>Not while Railway still expects the older database. Oracle is the SQLite shop window for this path. Ask an owner before touching Railway.</p></div>
+      </details>
+      <details class="q">
+        <summary>Is the live shop part of day one?</summary>
+        <div class="ans"><p>No. Day one ends when the laptop shop opens and you understand save, share, and check.</p></div>
+      </details>
+      <details class="q">
+        <summary>Meetup events look empty</summary>
+        <div class="ans"><p>Use a Birmingham find page in the priority list, then Run now — not only the bare homepage. Ask an admin if you cannot see scraper settings.</p></div>
+      </details>
+
+      <p class="group-label">Safety and calm</p>
+      <details class="q">
+        <summary>What must never go into a commit or comment?</summary>
+        <div class="ans"><p>Passwords, <code>.env</code>, seed secrets, and real member data. If you see them in a diff, request changes and stop.</p></div>
+      </details>
+      <details class="q">
+        <summary>Someone suggests force-push to main</summary>
+        <div class="ans"><p>Say no. Tell the project owner. Force-pushing main rewrites the official book.</p></div>
+      </details>
+      <details class="q">
+        <summary>I feel out of my depth</summary>
+        <div class="ans"><p>Run <code>git status</code>. Copy the exact message. Paste into Cursor. Ask for plain options and wait. One step is enough for today.</p></div>
+      </details>
+      <details class="q">
+        <summary>Where is the fuller recipe if I want to read?</summary>
+        <div class="ans"><p>In the repo under <code>docs/tutorials/maintenance/</code> — start at the README door, then the from-scratch lesson, Git in pictures, and comment guide.</p></div>
+      </details>
+      <details class="q">
+        <summary>Can I print this page?</summary>
+        <div class="ans"><p>Yes. Use the browser print dialog. Answers stay readable on paper.</p></div>
+      </details>
+      <details class="q">
+        <summary>How do I share this guide with someone?</summary>
+        <div class="ans"><p>Send this HTML file, or open it from the repo path <code>docs/tutorials/maintenance/keep-gather.html</code>. It works offline in a normal browser.</p></div>
+      </details>
+    </section>
+
+    <footer>
+      <p><strong>Gather</strong> — Birmingham community events. Keep the shelf tidy. One step at a time.</p>
+      <p>Daily line: <code>experiment</code>. You say save, share, and ask for a check.</p>
+    </footer>
+  </div>
+</body>
+</html>
