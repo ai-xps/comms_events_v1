@@ -4,8 +4,8 @@ import { PendingTileActions } from "@/components/PendingTileActions";
 import { requireUser } from "@/lib/auth";
 import { categoryAccentStyle } from "@/lib/category-art";
 import { dayKeyOf, formatDayKey } from "@/lib/calendar";
-import { prisma } from "@/lib/db";
 import { eventLinkLabel, pendingWhen } from "@/lib/pending-copy";
+import { loadOpenPendingEvents } from "@/lib/pending-time";
 import { isUpdatedScrapedRow } from "@/lib/scraper/apply";
 import { getSettings } from "@/lib/settings";
 import { formatDate } from "@/lib/time";
@@ -13,10 +13,7 @@ import { formatDate } from "@/lib/time";
 export default async function PendingPage() {
   await requireUser(["admin", "cell leader"]);
   const settings = await getSettings();
-  const events = await prisma.event.findMany({
-    where: { status: "PENDING" },
-    orderBy: { startsAt: "asc" }
-  });
+  const events = await loadOpenPendingEvents();
   const groups: { key: string; label: string; events: typeof events }[] = [];
   for (const event of events) {
     const key = formatDayKey(dayKeyOf(event.startsAt));
@@ -31,7 +28,10 @@ export default async function PendingPage() {
     <main>
       <div className="page-head">
         <h1>Pending review</h1>
-        <p className="lede">Scraped events waiting for a cell leader or admin, grouped by day.</p>
+        <p className="lede">
+          Scraped events still ahead (or on now), waiting for a cell leader or admin, grouped by day. Past ones leave
+          this list automatically.
+        </p>
       </div>
       {events.length === 0 ? (
         <p className="muted">Nothing waiting. Run now on scraper settings if you are admin.</p>

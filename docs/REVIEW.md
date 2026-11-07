@@ -2,11 +2,12 @@
 
 Dated ship notes: [`CHANGELOG.md`](CHANGELOG.md). Scores below from 17 October are a closed community demo, not an NHS production system. The 28 October section is the later read.
 
-## 7 November 2026 — Batch member delete
+## 7 November 2026 — Batch member delete + past pending
 
 | Sev | Item | Status |
 | --- | --- | --- |
 | — | Need to clear many people before a new Import structure | **Shipped** — admin Members: checkboxes + Delete selected; typed DELETE + count confirm; cannot delete self; cascade matches single delete. |
+| — | Past events still listed under Pending | **Shipped** — Pending only shows open/future events; past PENDING auto-discarded on open. |
 
 ## 28 October 2026 — Oracle walk and Guillaume’s scraper
 
