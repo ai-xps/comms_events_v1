@@ -17,12 +17,13 @@ Picture: this folder is a **recipe shelf**. Fill the address card first. Then co
 ## Open these in order
 
 1. **[project.md](project.md)** — address book for the team  
-2. **[intro-prompt.md](intro-prompt.md)** — paste into Cursor; first-day, daily, and **Oracle** (live shop) actions, no jargon  
-3. **[keep-gather.html](keep-gather.html)** — shareable visual guide (open in a browser; send the file)  
-4. **[film-guide.md](film-guide.md)** — for the person filming: windows, take order, voice readout, free record tools  
-5. **[from-scratch.md](from-scratch.md)** — tools → copy → run → fix → save → share → Oracle chapter H → FAQ  
-6. **[review-and-comment.md](review-and-comment.md)** — read a change, leave comments, approve or ask for fixes  
-7. **[git-in-pictures.md](git-in-pictures.md)** — Git for everyday situations  
+2. **[after-the-video.html](after-the-video.html)** — plain run-through after the training film (Mac or Windows) · also [after-the-video.md](after-the-video.md)  
+3. **[intro-prompt.md](intro-prompt.md)** — paste into Cursor; first-day, daily, and **Oracle** (live shop) actions, no jargon  
+4. **[keep-gather.html](keep-gather.html)** — shareable visual guide (open in a browser; send the file)  
+5. **[film-guide.md](film-guide.md)** — for the person filming: windows, take order, voice readout, free record tools  
+6. **[from-scratch.md](from-scratch.md)** — tools → copy → run → fix → save → share → Oracle chapter H → FAQ  
+7. **[review-and-comment.md](review-and-comment.md)** — read a change, leave comments, approve or ask for fixes  
+8. **[git-in-pictures.md](git-in-pictures.md)** — Git for everyday situations  
 
 ## Jump to a Git situation
 

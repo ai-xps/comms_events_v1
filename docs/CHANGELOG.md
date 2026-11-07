@@ -17,6 +17,10 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-11-07 — After-the-video plain run-through
+
+- [`docs/tutorials/maintenance/after-the-video.html`](tutorials/maintenance/after-the-video.html) (+ `.md`) — eight short steps for non-tech viewers (Mac or Windows) after the training film.
+
 ## 2026-11-04 — Project card: target central home `heaventech1984`
 
 - [`docs/tutorials/maintenance/project.md`](tutorials/maintenance/project.md) notes the demo move from `ai-xps` → `heaventech1984`, with a human transfer checklist. No passwords in the repo.
