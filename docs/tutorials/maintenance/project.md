@@ -16,7 +16,8 @@ Two different things — do not mix them up:
 1. Everyone uses **their own** GitHub account (never share passwords).  
 2. An owner **invites** each person to the central home (`ORG` / `REPO`) so they can copy, push, and open pull requests there.  
 3. All day-to-day changes go through that **one** central repo (`PROJECT_URL`). Do not invent a second “main” copy for the team.  
-4. Cursor signs in as **you**. The remote address still points at the **central** `CLONE_URL`.
+4. Cursor signs in as **you**. The remote address still points at the **central** `CLONE_URL`.  
+5. **Never** put the central account password, recovery codes, or private keys into git, a pull request, a comment, a film, Cursor chat, or tutorial docs. Owners sign in themselves in a private browser.
 
 If you were not invited yet: ask the owner. Clone and push will fail until they add you.
 
@@ -27,29 +28,71 @@ If you were not invited yet: ask the owner. Clone and push will fail until they 
 | Name | What it means | Your value |
 | --- | --- | --- |
 | `HOST` | Web home for Git | `github.com` |
-| `ORG` | **Central** team / org that owns the repo | `YOUR_ORG` |
-| `REPO` | Project name under that central home | `YOUR_REPO` |
+| `ORG` | **Central** team / org that owns the repo | `heaventech1984` *(target central home for the demo move)* |
+| `REPO` | Project name under that central home | `comms_events_v1` |
 | `WORK_LINE` | Daily notebook line | `experiment` |
-| `PROJECT_URL` | Full web address of the shared repo | `https://HOST/ORG/REPO` |
-| `CLONE_URL` | Address used to copy the shared repo | `https://HOST/ORG/REPO.git` |
+| `PROJECT_URL` | Full web address of the shared repo | `https://github.com/heaventech1984/comms_events_v1` *(after transfer)* |
+| `CLONE_URL` | Address used to copy the shared repo | `https://github.com/heaventech1984/comms_events_v1.git` *(after transfer)* |
 
 ```text
-PROJECT_URL = https://HOST/ORG/REPO
-CLONE_URL   = https://HOST/ORG/REPO.git
+PROJECT_URL = https://github.com/heaventech1984/comms_events_v1
+CLONE_URL   = https://github.com/heaventech1984/comms_events_v1.git
 ```
 
-## Example only (this Gather copy — sample fill)
+Until the move finishes, clones and the live remote may still point at the **old** shelf below. Update laptop remotes after GitHub shows the new home.
 
-`ai-xps` here is a **placeholder sample** for this demo. Replace `ORG` when your central account has another name.
+---
 
-| Name | Sample |
+## Current shelf vs target shelf
+
+| | Old (still live until move) | Target (Guillaume’s central home) |
+| --- | --- | --- |
+| `ORG` | `ai-xps` | `heaventech1984` |
+| `REPO` | `comms_events_v1` | `comms_events_v1` (same name, new owner) |
+| `PROJECT_URL` | `https://github.com/ai-xps/comms_events_v1` | `https://github.com/heaventech1984/comms_events_v1` |
+
+**Owner contact for the central home:** Guillaume — GitHub user `heaventech1984` (Gmail used to create that account stays with Guillaume; do not paste passwords here).
+
+---
+
+## Move checklist (demo: `ai-xps` → `heaventech1984`)
+
+Do this as humans on GitHub. Agents do **not** log into the central account for you.
+
+1. Guillaume signs into GitHub as **`heaventech1984`** in a **private** browser window (password only on his machine — change it if it was ever sent on Telegram or chat).  
+2. Confirm https://github.com/heaventech1984 opens while signed in.  
+3. On the **current** owner account for `ai-xps/comms_events_v1`: **Settings → General → Danger Zone → Transfer ownership** → transfer to `heaventech1984` (or create a fresh mirror under that user if transfer is blocked — owner chooses).  
+4. After GitHub shows `heaventech1984/comms_events_v1`, invite each person’s **own** GitHub username (Collaborators / People).  
+5. On each laptop:
+
+```bash
+git remote -v
+git remote set-url origin https://github.com/heaventech1984/comms_events_v1.git
+git fetch origin
+git status
+```
+
+6. Update any docs that still hard-code `ai-xps` (deploy notes, stakeholder checklist) once the move is confirmed.  
+7. Oracle / CI remotes: only after the shelf URL is stable — owner pulls from the new `origin`.
+
+**Done when.** Browser opens `PROJECT_URL` under `heaventech1984`, collaborators can push to `experiment`, and no password appears in this repo.
+
+---
+
+## Example only (old Gather copy — historical sample)
+
+`ai-xps` was the **previous** demo shelf. Prefer the filled table above after the move.
+
+| Name | Old sample |
 | --- | --- |
 | `HOST` | `github.com` |
-| `ORG` | `ai-xps` *(central home — placeholder for this demo)* |
+| `ORG` | `ai-xps` |
 | `REPO` | `comms_events_v1` |
 | `WORK_LINE` | `experiment` |
 | `PROJECT_URL` | `https://github.com/ai-xps/comms_events_v1` |
 | `CLONE_URL` | `https://github.com/ai-xps/comms_events_v1.git` |
+
+---
 
 ## Owner checklist (invite people)
 

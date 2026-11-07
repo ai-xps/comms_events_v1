@@ -278,6 +278,9 @@ Write the exact SSH commands to update Oracle to origin/experiment and restart g
 | Meetup still empty? | Use the Birmingham find URL, then Run now — not only the bare homepage. |
 | Broke my laptop copy? | Do not force-push. Paste the exact git error into Cursor. |
 
-## Film later
+## Film
+
+Shot list, voice readout, windows to open, and free Mac record tools: **[film-guide.md](film-guide.md)**.  
+Shareable page for viewers: **[keep-gather.html](keep-gather.html)**.
 
 One chapter = one take. Pause on each **Paste this into Cursor** box. Blur passwords and `.env`.

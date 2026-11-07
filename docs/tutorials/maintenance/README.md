@@ -11,15 +11,18 @@ Picture: this folder is a **recipe shelf**. Fill the address card first. Then co
 - **You** = your own GitHub login  
 - **`ORG`** = the **central** GitHub home that owns the shared repo  
 - Everyone is invited there; all changes go through that one repo  
-- `ai-xps` in the sample table is only a **placeholder** for this Gather copy
+- Target central home: **`heaventech1984`** (see [project.md](project.md)); old demo shelf was `ai-xps` until the move finishes  
+- Never put the central account password in git or tutorials
 
 ## Open these in order
 
 1. **[project.md](project.md)** — address book for the team  
 2. **[intro-prompt.md](intro-prompt.md)** — paste into Cursor; first-day, daily, and **Oracle** (live shop) actions, no jargon  
-3. **[from-scratch.md](from-scratch.md)** — tools → copy → run → fix → save → share → Oracle chapter H → FAQ  
-4. **[review-and-comment.md](review-and-comment.md)** — read a change, leave comments, approve or ask for fixes  
-5. **[git-in-pictures.md](git-in-pictures.md)** — Git for everyday situations  
+3. **[keep-gather.html](keep-gather.html)** — shareable visual guide (open in a browser; send the file)  
+4. **[film-guide.md](film-guide.md)** — for the person filming: windows, take order, voice readout, free record tools  
+5. **[from-scratch.md](from-scratch.md)** — tools → copy → run → fix → save → share → Oracle chapter H → FAQ  
+6. **[review-and-comment.md](review-and-comment.md)** — read a change, leave comments, approve or ask for fixes  
+7. **[git-in-pictures.md](git-in-pictures.md)** — Git for everyday situations  
 
 ## Jump to a Git situation
 
@@ -50,7 +53,12 @@ Owners only. Skip on day one.
 - Chapter **H** in [from-scratch.md](from-scratch.md#h-live-server-oracle--skip-on-day-one)  
 - Incident card: [`docs/incident-card.md`](../../incident-card.md)
 
+## Film and share
+
+- **[film-guide.md](film-guide.md)** — windows to open, take order, full voice script, crisp stills, free Mac record tools (`⌘⇧5`, QuickTime, OBS)  
+- **[keep-gather.html](keep-gather.html)** — polished page for the team (numbered paths + long “when something feels stuck”)
+
 ## Later
 
-- Video: not recorded yet. Use **from-scratch.md** as the shot list.  
-- Live server (Oracle): **Prompt C** / Oracle actions — skip on day one.  
+- Video file: record with **film-guide.md**; do not commit large video binaries unless an owner asks.  
+- Live server (Oracle): **Prompt C** / Oracle actions — skip on day one. 

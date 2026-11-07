@@ -17,6 +17,15 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
+## 2026-11-04 — Project card: target central home `heaventech1984`
+
+- [`docs/tutorials/maintenance/project.md`](tutorials/maintenance/project.md) notes the demo move from `ai-xps` → `heaventech1984`, with a human transfer checklist. No passwords in the repo.
+
+## 2026-11-04 — Film guide + shareable keep-Gather page
+
+- Filming: [`docs/tutorials/maintenance/film-guide.md`](tutorials/maintenance/film-guide.md) — windows to open, take order, voice readout, crisp stills, free Mac record tools.
+- Shareable HTML: [`docs/tutorials/maintenance/keep-gather.html`](tutorials/maintenance/keep-gather.html) — visual numbered paths + long “when something feels stuck” section.
+
 ## 2026-11-03 — Intro GitHub and maintenance prompt
 
 - New door: [`docs/tutorials/maintenance/intro-prompt.md`](tutorials/maintenance/intro-prompt.md) — copy-paste Cursor prompts (first day, daily, **Oracle**) plus numbered action lists in plain words.
