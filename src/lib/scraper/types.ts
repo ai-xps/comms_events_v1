@@ -13,5 +13,7 @@ export type ScrapedEvent = {
   lng?: number | null;
   externalUrl?: string | null;
   notes?: string | null;
+  /** Priority URL this event was parsed from (live feeds only). */
+  fetchedFrom?: string | null;
   needsTypeReview: boolean;
 };

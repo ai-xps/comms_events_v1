@@ -9,12 +9,15 @@ import {
 import { droppedPriorityUrlMessage, runFinishedMessage } from "@/lib/scraper/priority-copy";
 import { inferCategory, TYPE_REVIEW_NOTE } from "@/lib/scraper/categorise";
 import { fixtureEvents } from "@/lib/scraper/fixtures";
+import { buildCoverageReport, formatCoverageReport } from "@/lib/scraper/coverage-report";
 import { RUN_EVENT_CAP, selectHarvestEvents } from "@/lib/scraper/harvest";
 import { parseIcsDate, parseIcsEvents } from "@/lib/scraper/ics";
 import { eventsFromJsonLd, extractJsonLdScripts } from "@/lib/scraper/jsonld";
 import { scrapeLockAcquired, scrapeLockUntil } from "@/lib/scraper/lock";
 import { fetchLiveEvents, type FetchLike } from "@/lib/scraper/live-adapter";
-import { londonParts } from "@/lib/time";
+import { discoverCalendarLinks, eventsFromMicrodata } from "@/lib/scraper/microdata";
+import { stripHtml } from "@/lib/scraper/text";
+import { londonDate, londonParts } from "@/lib/time";
 import type { ScrapedEvent } from "@/lib/scraper/types";
 import type { Category } from "@/lib/constants";
 
@@ -123,7 +126,7 @@ describe("allowlist", () => {
     expect(scrapeUrlAllowed("javascript:alert(1)").ok).toBe(false);
   });
 
-  it("accepts Meetup https and still refuses a 21st feed or unknown host", () => {
+  it("accepts Meetup https and still refuses a 61st feed or unknown host", () => {
     const meetup = parsePriorityUrls([MEETUP_BIRMINGHAM_FIND_URL, "https://www.meetup.com/"]);
     expect(meetup.urls).toEqual([MEETUP_BIRMINGHAM_FIND_URL, "https://www.meetup.com/"]);
     expect(meetup.rejected).toHaveLength(0);
@@ -133,9 +136,9 @@ describe("allowlist", () => {
     expect(rejected.urls).toHaveLength(0);
     expect(rejected.rejected.length).toBeGreaterThanOrEqual(2);
     const many = parsePriorityUrls(
-      Array.from({ length: 21 }, (_, i) => `https://birminghamcathedral.com/cal-${i}.ics`)
+      Array.from({ length: 61 }, (_, i) => `https://birminghamcathedral.com/cal-${i}.ics`)
     );
-    expect(many.urls).toHaveLength(20);
+    expect(many.urls).toHaveLength(60);
     expect(many.rejected).toHaveLength(1);
     const dup = parsePriorityUrls([
       "https://birminghamcathedral.com/calendar.ics",
@@ -181,6 +184,25 @@ describe("inferCategory", () => {
     expect(unknown.inferred).toBe(false);
     expect(TYPE_REVIEW_NOTE.length).toBeGreaterThan(10);
     expect(inferCategory({ title: "University careers fair", organisationName: "UoB" }).category).toBe("Student");
+  });
+
+  it("uses Eventbrite / Meetup Priority URL slices for the five types", () => {
+    expect(
+      inferCategory({
+        host: "www.eventbrite.co.uk",
+        title: "Generic listing",
+        organisationName: "Org",
+        pageUrl: "https://www.eventbrite.co.uk/d/united-kingdom--birmingham/professional--events/"
+      }).category
+    ).toBe("Professional");
+    expect(
+      inferCategory({
+        host: "www.meetup.com",
+        title: "Generic listing",
+        organisationName: "Org",
+        pageUrl: "https://www.meetup.com/find/?keywords=christian&location=gb--Birmingham"
+      }).category
+    ).toBe("Christian");
   });
 });
 
@@ -377,7 +399,7 @@ describe("live adapter", () => {
           ok: true,
           status: 200,
           headers: { get: () => "text/calendar" },
-          text: async () => "X".repeat(512 * 1024 + 1)
+          text: async () => "X".repeat(1024 * 1024 + 1)
         };
       },
       pauseMs: 0
@@ -386,8 +408,8 @@ describe("live adapter", () => {
     expect(harvest.sources[0]?.error).toBe("Response too large.");
   });
 
-  it("keeps 200 events from a 250-event ICS", async () => {
-    const vevents = Array.from({ length: 250 }, (_, i) => {
+  it("keeps 300 events from a 350-event ICS", async () => {
+    const vevents = Array.from({ length: 350 }, (_, i) => {
       const n = String(i).padStart(3, "0");
       return `BEGIN:VEVENT
 UID:bulk-${n}
@@ -406,8 +428,8 @@ END:VEVENT`;
       },
       pauseMs: 0
     });
-    expect(harvest.events).toHaveLength(200);
-    expect(harvest.sources[0]?.eventCount).toBe(200);
+    expect(harvest.events).toHaveLength(300);
+    expect(harvest.sources[0]?.eventCount).toBe(300);
   });
 });
 
@@ -433,7 +455,8 @@ describe("harvest select", () => {
     });
     const droppedMeetup = sampleEvent({ sourceKey: "live:meetup.com:known", category: "Meetup" });
     const kept = selectHarvestEvents([unclassified, droppedMeetup], [], enabled);
-    expect(kept.map((e) => e.sourceKey)).toEqual(["live:calendar.google.com:anon"]);
+    expect(kept.events.map((e) => e.sourceKey)).toEqual(["live:calendar.google.com:anon"]);
+    expect(kept.droppedDisabledCategory).toBe(1);
   });
 
   it("slices combined live and fixture events to the run cap", () => {
@@ -441,7 +464,7 @@ describe("harvest select", () => {
     const live = Array.from({ length: RUN_EVENT_CAP + 10 }, (_, i) =>
       sampleEvent({ sourceKey: `live:n:${i}`, category: "Meetup" })
     );
-    expect(selectHarvestEvents(live, [], enabled)).toHaveLength(RUN_EVENT_CAP);
+    expect(selectHarvestEvents(live, [], enabled).events).toHaveLength(RUN_EVENT_CAP);
   });
 });
 
@@ -463,5 +486,271 @@ describe("scrape lock helper", () => {
     expect(scrapeLockAcquired([])).toBe(false);
     expect(scrapeLockAcquired([{ id: "scrape" }])).toBe(true);
     expect(scrapeLockUntil(0).getTime()).toBe(5 * 60 * 1000);
+  });
+});
+
+describe("destruction / robust capture", () => {
+  it("strips HTML descriptions and keeps readable notes", () => {
+    expect(stripHtml("<p>Hello<br/>world</p><script>x()</script>")).toMatch(/Hello/);
+    expect(stripHtml("<p>Hello<br/>world</p><script>x()</script>")).not.toMatch(/script/i);
+  });
+
+  it("keeps GEO, organiser CN, categories, and skips cancelled ICS rows", () => {
+    const raw = `BEGIN:VCALENDAR
+BEGIN:VEVENT
+UID:geo-1
+SUMMARY:Lunch club
+DESCRIPTION:<p>Soup &amp; bread</p>
+DTSTART:20261110T120000Z
+DTEND:20261110T130000Z
+LOCATION:Carrs Lane
+GEO:52.479;-1.895
+ORGANIZER;CN=Carrs Lane Church:MAILTO:hello@carrslane.co.uk
+CATEGORIES:Community,Food
+END:VEVENT
+BEGIN:VEVENT
+UID:cancel-1
+SUMMARY:Cancelled talk
+STATUS:CANCELLED
+DTSTART:20261111T120000Z
+END:VEVENT
+END:VCALENDAR`;
+    const events = parseIcsEvents(raw, "https://carrslane.co.uk/calendar.ics");
+    expect(events).toHaveLength(1);
+    expect(events[0].lat).toBeCloseTo(52.479);
+    expect(events[0].lng).toBeCloseTo(-1.895);
+    expect(events[0].organisationName).toBe("Carrs Lane Church");
+    expect(events[0].notes).toMatch(/Soup/);
+    expect(events[0].notes).toMatch(/Categories:/);
+    expect(events[0].fetchedFrom).toContain("carrslane.co.uk");
+  });
+
+  it("walks ItemList → ListItem → item Event nodes (Eventbrite-style)", () => {
+    const payload = {
+      "@type": "ItemList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          item: {
+            "@type": "Event",
+            name: "Mind Body Spirit Festival",
+            startDate: "2026-11-20T10:00:00Z",
+            endDate: "2026-11-20T18:00:00Z",
+            url: "https://www.eventbrite.co.uk/e/example"
+          }
+        }
+      ]
+    };
+    const events = eventsFromJsonLd(payload, "https://www.eventbrite.co.uk/d/united-kingdom--birmingham/all-events/");
+    expect(events).toHaveLength(1);
+    expect(events[0]?.title).toBe("Mind Body Spirit Festival");
+  });
+
+  it("reads PostalAddress, offers, VirtualLocation, and trailing-comma JSON-LD", () => {
+    const html = `<script type="application/ld+json">{
+  "@type": "Event",
+  "name": "Founders breakfast",
+  "startDate": "2026-11-12T08:00:00Z",
+  "endDate": "2026-11-12T09:30:00Z",
+  "description": "<p>Coffee &amp; chat</p>",
+  "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+  "location": {
+    "@type": "VirtualLocation",
+    "name": "Zoom",
+    "url": "https://zoom.example/x"
+  },
+  "organizer": { "name": "Impact Hub Birmingham" },
+  "offers": { "price": "0", "priceCurrency": "GBP", "availability": "https://schema.org/InStock" },
+}</script>
+<script type="application/ld+json">{"@type":"Event","name":"Street food","startDate":"2026-11-13T17:00:00Z","location":{"@type":"Place","name":"Digbeth","address":{"@type":"PostalAddress","streetAddress":"Floodgate St","addressLocality":"Birmingham","postalCode":"B5 5SA"},"geo":{"@type":"GeoCoordinates","latitude":52.475,"longitude":-1.886}}}</script>`;
+    const events = extractJsonLdScripts(html).flatMap((block) =>
+      eventsFromJsonLd(block, "https://birmingham.impacthub.net/events")
+    );
+    expect(events).toHaveLength(2);
+    expect(events[0].online).toBe(true);
+    expect(events[0].notes).toMatch(/Coffee/);
+    expect(events[0].notes).toMatch(/Price: 0 GBP/);
+    expect(events[1].placeName).toMatch(/Digbeth/);
+    expect(events[1].placeName).toMatch(/B5 5SA/);
+    expect(events[1].lat).toBeCloseTo(52.475);
+    expect(events[1].lng).toBeCloseTo(-1.886);
+  });
+
+  it("walks itemListElement nests and survives one broken script beside a good one", () => {
+    const html = `<script type="application/ld+json">NOPE</script>
+<script type="application/ld+json">${JSON.stringify({
+      "@type": "ItemList",
+      itemListElement: [
+        {
+          "@type": "Event",
+          name: "Nested panel",
+          startDate: "2026-11-14T18:00:00Z",
+          organizer: { name: "Aston SU" }
+        }
+      ]
+    })}</script>`;
+    const events = extractJsonLdScripts(html).flatMap((b) => eventsFromJsonLd(b, "https://www.astonsu.com/events/"));
+    expect(events).toHaveLength(1);
+    expect(events[0].title).toBe("Nested panel");
+  });
+
+  it("survives a mixed live harvest where robots block, timeout, empty, and good feeds all appear", async () => {
+    const fetchFn: FetchLike = async (input) => {
+      if (input.endsWith("/robots.txt")) {
+        if (input.includes("meetup.com")) {
+          return {
+            ok: true,
+            status: 200,
+            headers: { get: () => "text/plain" },
+            text: async () => "User-agent: *\nDisallow: /find\n"
+          };
+        }
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "text/plain" },
+          text: async () => "User-agent: *\nAllow: /\n"
+        };
+      }
+      if (input.includes("calendar.ics")) {
+        return { ok: true, status: 200, headers: { get: () => "text/calendar" }, text: async () => ICS };
+      }
+      if (input.includes("empty")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "text/html" },
+          text: async () => "<html><body>no events</body></html>"
+        };
+      }
+      const err = new Error("Aborted");
+      err.name = "AbortError";
+      throw err;
+    };
+    const harvest = await fetchLiveEvents(
+      [
+        "https://birminghamcathedral.com/calendar.ics",
+        "https://www.meetup.com/find/?location=gb--Birmingham",
+        "https://birminghamcathedral.com/empty",
+        "https://www.birmingham.ac.uk/events"
+      ],
+      { fetchFn, pauseMs: 0 }
+    );
+    expect(harvest.events.some((e) => e.title === "Sung Eucharist")).toBe(true);
+    expect(harvest.events.every((e) => e.notes?.includes("Source feed:"))).toBe(true);
+    expect(harvest.sources).toHaveLength(4);
+    expect(harvest.sources.filter((s) => s.ok && s.eventCount > 0)).toHaveLength(1);
+    expect(harvest.sources.some((s) => s.error?.match(/robots/i))).toBe(true);
+    expect(harvest.sources.some((s) => s.error?.match(/Timed out/i))).toBe(true);
+    expect(harvest.sources.some((s) => s.error?.match(/No calendar events/i))).toBe(true);
+  });
+
+  it("parses Event microdata and discovers same-host ICS links", () => {
+    const html = `
+      <div itemscope itemtype="https://schema.org/Event">
+        <span itemprop="name">Evening prayer</span>
+        <meta itemprop="startDate" content="2026-11-15T18:00:00Z" />
+        <meta itemprop="endDate" content="2026-11-15T18:45:00Z" />
+        <span itemprop="location">Cathedral</span>
+      </div>
+      <a href="/feeds/whats-on.ics" type="text/calendar">ICS</a>
+      <a href="https://evil.example/x.ics">skip</a>
+    `;
+    const events = eventsFromMicrodata(html, "https://birminghamcathedral.com/whats-on/");
+    expect(events).toHaveLength(1);
+    expect(events[0]?.title).toBe("Evening prayer");
+    const links = discoverCalendarLinks(html, "https://birminghamcathedral.com/whats-on/");
+    expect(links).toEqual(["https://birminghamcathedral.com/feeds/whats-on.ics"]);
+  });
+
+  it("follows linked ICS when HTML has no JSON-LD events", async () => {
+    const fetchFn: FetchLike = async (input) => {
+      if (input.endsWith("/robots.txt")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "text/plain" },
+          text: async () => "User-agent: *\nAllow: /\n"
+        };
+      }
+      if (input.includes("whats-on.ics")) {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => "text/calendar" },
+          text: async () => `BEGIN:VCALENDAR
+BEGIN:VEVENT
+UID:linked-1
+SUMMARY:Linked ICS service
+DTSTART:20261120T110000Z
+DTEND:20261120T120000Z
+END:VEVENT
+END:VCALENDAR`
+        };
+      }
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => "text/html" },
+        text: async () =>
+          `<html><body><a href="/feeds/whats-on.ics" type="text/calendar">cal</a></body></html>`
+      };
+    };
+    const harvest = await fetchLiveEvents(["https://birminghamcathedral.com/whats-on/"], {
+      fetchFn,
+      pauseMs: 0
+    });
+    expect(harvest.events.some((e) => e.title === "Linked ICS service")).toBe(true);
+    expect(harvest.sources[0]?.eventCount).toBeGreaterThan(0);
+  });
+
+  it("builds a day × source coverage report for last week and next week", () => {
+    const now = londonDate(2026, 11, 8, 12, 0);
+    const events: ScrapedEvent[] = [
+      sampleEvent({
+        sourceKey: "live:birminghamcathedral.com:a",
+        category: "Christian",
+        title: "Past service",
+        startsAt: londonDate(2026, 11, 5, 11, 0),
+        endsAt: londonDate(2026, 11, 5, 12, 0),
+        fetchedFrom: "https://birminghamcathedral.com/calendar.ics"
+      }),
+      sampleEvent({
+        sourceKey: "live:meetup.com:b",
+        category: "Meetup",
+        title: "Tomorrow walk",
+        startsAt: londonDate(2026, 11, 9, 12, 0),
+        endsAt: londonDate(2026, 11, 9, 15, 0),
+        fetchedFrom: MEETUP_BIRMINGHAM_FIND_URL
+      }),
+      sampleEvent({
+        sourceKey: "fixture-x",
+        category: "Meetup",
+        title: "Demo tonight",
+        startsAt: londonDate(2026, 11, 8, 19, 0),
+        endsAt: londonDate(2026, 11, 8, 21, 0)
+      })
+    ];
+    const report = buildCoverageReport(events, now);
+    expect(report.lastWeek.total).toBe(1);
+    expect(report.nextWeek.total).toBe(2);
+    expect(report.nextWeek.days[0]?.total).toBe(1); // today
+    expect(report.nextWeek.days[1]?.bySource[0]?.source).toBe("meetup.com");
+    // 2026-11-08 is a Sunday → this week Mon 2 Nov – Sun 8 Nov
+    expect(report.thisWeek.from).toBe("2026-11-02");
+    expect(report.thisWeek.to).toBe("2026-11-08");
+    expect(report.thisWeek.total).toBe(2); // past service + demo tonight
+    expect(report.thisWeek.byCategory.Christian).toBe(1);
+    expect(report.thisMonth.days).toHaveLength(30); // November
+    expect(report.thisMonth.days[7]?.total).toBe(1); // day 8
+    const text = formatCoverageReport(report);
+    expect(text).toMatch(/THIS WEEK/);
+    expect(text).toMatch(/THIS MONTH/);
+    expect(text).toMatch(/LAST 7 DAYS/);
+    expect(text).toMatch(/NEXT 7 DAYS/);
+    expect(text).toMatch(/birminghamcathedral\.com/);
+    expect(text).toMatch(/meetup\.com/);
+    expect(text).toMatch(/demo fixtures/);
   });
 });

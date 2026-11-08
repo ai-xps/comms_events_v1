@@ -17,6 +17,7 @@ export function runFinishedMessage(input: {
   discardedByRule?: number;
   leftPending?: number;
   skippedHumanEdited?: number;
+  droppedDisabledCategory?: number;
   sources?: RunSource[];
   dropped?: { url: string }[];
 }): string {
@@ -28,6 +29,12 @@ export function runFinishedMessage(input: {
   parts.push(
     `Run finished: created ${created}, updated ${updated}, published ${input.publishedCount ?? 0}, discarded ${input.discardedByRule ?? 0}, pending ${input.leftPending ?? 0}, skipped human-edited ${input.skippedHumanEdited ?? 0}.`
   );
+  const typeDrops = input.droppedDisabledCategory ?? 0;
+  if (typeDrops > 0) {
+    parts.push(
+      `${typeDrops} harvested event(s) were dropped because their type toggle is off (turn Meetup on to keep Meetup feeds).`
+    );
+  }
   const sources = input.sources ?? [];
   if (sources.length === 0) {
     parts.push(
@@ -36,7 +43,15 @@ export function runFinishedMessage(input: {
         : "No Priority URL was fetched. New rows came from the demo harvest."
     );
   } else {
-    const problems = sources.filter((source) => !source.ok || source.eventCount === 0).slice(0, 3);
+    const ok = sources.filter((source) => source.ok && source.eventCount > 0);
+    if (ok.length) {
+      parts.push(
+        `Sources with events: ${ok
+          .map((source) => `${source.url} (${source.eventCount})`)
+          .join("; ")}.`
+      );
+    }
+    const problems = sources.filter((source) => !source.ok || source.eventCount === 0);
     if (problems.length) {
       parts.push(
         problems.map((source) => `${source.url}: ${source.error ?? "No events found."}`).join(" ")

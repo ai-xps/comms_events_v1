@@ -139,16 +139,19 @@ export function ScraperForm({
         <label>
           Priority URLs (https ICS or JSON-LD, one per line. Leave empty for the demo harvest only.)
           <textarea
+            className="scraper-priority-urls"
             name="priorityUrls"
+            rows={14}
             value={priorityText}
             onChange={(e) => setPriorityText(e.target.value)}
             placeholder={`${STARTER_PRIORITY_URL}\n${MEETUP_BIRMINGHAM_FIND_URL}`}
           />
           <span className="muted">
-            Run now saves this box first. An address is kept only when its host is one of: {allowedHosts.join(", ")}.
-            Anything else is left out, and the run will not fetch it. For Meetup use a Birmingham find or group page
-            (for example {MEETUP_BIRMINGHAM_FIND_URL}). The bare meetup.com homepage is too large for Gather and is
-            mostly other cities.
+            Run now saves this box first. Up to 40 allowlisted https feeds. An address is kept only when its host is
+            one of: {allowedHosts.join(", ")}. Anything else is left out, and the run will not fetch it. For Meetup use
+            a Birmingham find or group page (for example {MEETUP_BIRMINGHAM_FIND_URL}). The bare meetup.com homepage is
+            mostly other cities. Feeds keep description, place, geo, organiser, price, and a Source feed line when the
+            calendar publishes them.
           </span>
         </label>
         <div className="row">

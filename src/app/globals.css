@@ -530,6 +530,16 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--accent);
 }
 textarea { min-height: 96px; }
+textarea.scraper-priority-urls {
+  min-height: 14rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.scrape-feed-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
 
 .filter-hint { margin: 0 0 var(--space-2); font-size: 0.92rem; }
 .view-tabs {

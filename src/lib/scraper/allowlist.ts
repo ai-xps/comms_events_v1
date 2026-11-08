@@ -28,6 +28,23 @@ export const ALLOWED_HOSTS = new Set([
   "www.astonsu.com",
   "meetup.com",
   "www.meetup.com",
+  "eventbrite.co.uk",
+  "www.eventbrite.co.uk",
+  "eventbrite.com",
+  "www.eventbrite.com",
+  "luma.com",
+  "www.luma.com",
+  "lu.ma",
+  "visitbirmingham.com",
+  "www.visitbirmingham.com",
+  "guildofstudents.com",
+  "www.guildofstudents.com",
+  "skiddle.com",
+  "www.skiddle.com",
+  "allevents.in",
+  "www.allevents.in",
+  "ticketmaster.co.uk",
+  "www.ticketmaster.co.uk",
   "calendar.google.com",
   "outlook.office365.com",
   "cloud.churchsuite.com",
@@ -40,7 +57,8 @@ export const STARTER_PRIORITY_URL = "https://www.birminghamcathedral.com/whats-o
 /** Meetup find page with Birmingham in the location — JSON-LD events, not the bare homepage. */
 export const MEETUP_BIRMINGHAM_FIND_URL = "https://www.meetup.com/find/?location=gb--Birmingham";
 
-export const MAX_PRIORITY_URLS = 20;
+/** Wider Birmingham discovery pack — still capped so a bad run cannot fan out forever. */
+export const MAX_PRIORITY_URLS = 60;
 
 function isLoopbackHost(host: string): boolean {
   return (

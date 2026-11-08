@@ -1,4 +1,4 @@
-import { isHttpUrl } from "../security";
+import { isHttpUrl, LIMITS } from "../security";
 import { prisma } from "../db";
 import { writeAudit } from "../audit";
 import { categoryEnabledKey, type Category, CATEGORIES } from "../constants";
@@ -9,6 +9,7 @@ import { fixtureEvents } from "./fixtures";
 import { selectHarvestEvents } from "./harvest";
 import { fetchLiveEvents, type SourceResult } from "./live-adapter";
 import { claimScrapeLock, releaseScrapeLock } from "./lock";
+import { clip, stripHtml } from "./text";
 
 function nameKey(name: string) {
   return name.trim().toLowerCase();
@@ -56,7 +57,9 @@ export async function runScraper(opts: {
 
     const live = await fetchLiveEvents(urls);
     sources = live.sources;
-    const events = selectHarvestEvents(live.events, fixtureEvents(), enabled);
+    const harvest = selectHarvestEvents(live.events, fixtureEvents(), enabled);
+    const events = harvest.events;
+    const droppedDisabledCategory = harvest.droppedDisabledCategory;
 
     const organisations = await prisma.organisation.findMany();
     const orgByKey = new Map(organisations.map((o) => [o.nameKey, o]));
@@ -93,7 +96,8 @@ export async function runScraper(opts: {
         lat: incoming.lat ?? null,
         lng: incoming.lng ?? null,
         externalUrl: safeExternalUrl(incoming.externalUrl),
-        notes: incoming.notes ?? null
+        // Strip any leftover markup so member-facing notes stay readable.
+        notes: incoming.notes ? clip(stripHtml(incoming.notes), LIMITS.textLength) : null
       };
       if (decision.action === "skip-discarded") continue;
       if (decision.action === "skip-human-edited") {
@@ -137,7 +141,7 @@ export async function runScraper(opts: {
       entityId: runId,
       summary: `${opts.trigger} scraper created ${counts.createdCount}, updated ${counts.updatedCount}, skipped ${counts.skippedHumanEdited} human-edited`
     });
-    return { id: runId, ...counts, sources, status: "OK" as const };
+    return { id: runId, ...counts, sources, droppedDisabledCategory, status: "OK" as const };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Scraper failed";
     if (runId) {

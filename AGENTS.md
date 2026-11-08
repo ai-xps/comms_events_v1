@@ -17,7 +17,7 @@ npm run dev           # local; needs SQLite DATABASE_URL=file:./data/gather.db
 
 Live demo (until Ubuntu gate): https://commseventsv1-production.up.railway.app  
 Ubuntu / Oracle cutover: [`docs/deploy-ubuntu.md`](docs/deploy-ubuntu.md). **Do not push SQLite to Railway while it still has a Postgres URL** (pause redeploy first). `scripts/start.sh` refuses Postgres URLs.  
-Branch for work: `experiment`. Ship notes: [`docs/CHANGELOG.md`](docs/CHANGELOG.md). Smoke checklist: [`docs/REVIEW.md`](docs/REVIEW.md). Product calls: [`DECISIONS.md`](DECISIONS.md). What it does / sign-off: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md).
+Branch for work: `experiment`. Ship notes: [`docs/CHANGELOG.md`](docs/CHANGELOG.md). Smoke checklist: [`docs/REVIEW.md`](docs/REVIEW.md). Product calls: [`DECISIONS.md`](DECISIONS.md). What it does / sign-off: [`docs/FUNCTIONAL.md`](docs/FUNCTIONAL.md). Frozen scraper method: [`docs/scraper-discovery.md`](docs/scraper-discovery.md) (do not casually replace with open crawl).
 
 ## Always
 

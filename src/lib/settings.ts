@@ -2,6 +2,7 @@ import { prisma } from "./db";
 import { writeAudit } from "./audit";
 import { CATEGORIES, DEFAULT_COLOURS, parseMemberAttendeeView, type Category } from "./constants";
 import { parsePriorityUrls } from "./scraper/allowlist";
+import { frozenDiscoveryUrls } from "./scraper/discovery-pack";
 
 function readPriorityUrlList(raw: string | null | undefined): unknown[] {
   try {
@@ -10,6 +11,40 @@ function readPriorityUrlList(raw: string | null | undefined): unknown[] {
   } catch {
     return [];
   }
+}
+
+/**
+ * If Priority URLs are empty (or FORCE_DISCOVERY_PACK=1), install the frozen discovery pack
+ * and enable all five types. Keeps Oracle / fresh boxes on the same method without a manual paste.
+ */
+export async function ensureFrozenDiscoveryPack(actorId?: string | null) {
+  const row = await prisma.settings.findUnique({ where: { id: "default" } });
+  if (!row) return { urls: [] as string[], applied: false };
+  const current = parsePriorityUrls(readPriorityUrlList(row.priorityUrls)).urls;
+  const force = process.env.FORCE_DISCOVERY_PACK === "1";
+  if (current.length > 0 && !force) {
+    return { urls: current, applied: false };
+  }
+  const urls = frozenDiscoveryUrls();
+  await prisma.settings.update({
+    where: { id: "default" },
+    data: {
+      priorityUrls: JSON.stringify(urls),
+      christianEnabled: true,
+      networkingEnabled: true,
+      professionalEnabled: true,
+      studentEnabled: true,
+      meetupEnabled: true
+    }
+  });
+  await writeAudit({
+    actorId: actorId ?? null,
+    action: "settings.discoveryPack.applied",
+    entityType: "Settings",
+    entityId: "default",
+    summary: `Installed frozen Birmingham discovery pack (${urls.length} Priority URLs).`
+  });
+  return { urls, applied: true };
 }
 
 export async function getSettings() {
@@ -37,11 +72,12 @@ export async function getSettings() {
  * so Save and Run now are not blocked by stale config. Writes an audit row when anything is removed.
  */
 export async function persistCleanPriorityUrls(actorId?: string | null) {
+  const ensured = await ensureFrozenDiscoveryPack(actorId);
   const row = await prisma.settings.findUnique({ where: { id: "default" } });
   if (!row) return { urls: [] as string[], dropped: [] as { url: string; reason: string }[] };
   const partitioned = parsePriorityUrls(readPriorityUrlList(row.priorityUrls));
   if (!partitioned.rejected.length) {
-    return { urls: partitioned.urls, dropped: partitioned.rejected };
+    return { urls: partitioned.urls.length ? partitioned.urls : ensured.urls, dropped: partitioned.rejected };
   }
   await prisma.settings.update({
     where: { id: "default" },

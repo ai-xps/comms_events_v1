@@ -6,7 +6,7 @@ A **changelog** is a dated notebook of “what we put on the noticeboard,” not
 
 | Where | What people open | Code |
 | --- | --- | --- |
-| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: *`665f1ef`* |
+| Oracle (runs `experiment`) | https://132.145.68.166.sslip.io | Newest app change in this file: *frozen discovery pack* |
 | Railway (announced demo, auto-deploy paused) | https://commseventsv1-production.up.railway.app | Last Postgres build. It does not include the 28 Oct notes. |
 
 `package.json` stays `1.0.0` until a numbered church release.
@@ -16,6 +16,12 @@ Git history is the source of truth. Smoke checklists live in [`REVIEW.md`](REVIE
 Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
+
+## 2026-11-08 — Frozen Birmingham discovery pack
+
+- Locked multi-source scrape for the five types (Eventbrite slices, Meetup keywords, Allevents West Midlands, Ticketmaster, cathedral, Luma, Visit Birmingham). Method: [`docs/scraper-discovery.md`](scraper-discovery.md).
+- Caps: 60 Priority URLs, 2500 events/run, 1500ms pause. Empty Settings installs the pack; `FORCE_DISCOVERY_PACK=1` re-applies. Admin Coverage shows this week + whole month by day/type.
+- Seed helper: `npx tsx scripts/seed-discovery-pack.ts`. Freeze harvest: ~650 live November events across all categories.
 
 ## 2026-11-07 — Pending hides past events
 
