@@ -42,7 +42,9 @@ const HOST_CATEGORY: Record<string, Category> = {
   "allevents.in": "Meetup",
   "www.allevents.in": "Meetup",
   "ticketmaster.co.uk": "Meetup",
-  "www.ticketmaster.co.uk": "Meetup"
+  "www.ticketmaster.co.uk": "Meetup",
+  "achurchnearyou.com": "Christian",
+  "www.achurchnearyou.com": "Christian"
 };
 
 /** Aggregators whose host alone is too coarse — prefer the Priority URL path/query. */
@@ -64,7 +66,10 @@ const AGGREGATOR_HOSTS = new Set([
 ]);
 
 const KEYWORDS: { pattern: RegExp; category: Category }[] = [
-  { pattern: /\b(church|cathedral|eucharist|prayer|worship|mass|gospel|christian)\b/i, category: "Christian" },
+  {
+    pattern: /\b(church|cathedral|eucharist|prayer|worship|mass|gospel|christian|jesus|catholic|baptist|bible|fellowship|alpha course)\b/i,
+    category: "Christian"
+  },
   { pattern: /\b(student|university|freshers|careers fair|su\b|guild of students)\b/i, category: "Student" },
   {
     pattern: /\b(iod|chamber|director|export|professional|career|surveyor|licensed property)\b/i,
@@ -75,7 +80,11 @@ const KEYWORDS: { pattern: RegExp; category: Category }[] = [
 ];
 
 const PAGE_HINTS: { pattern: RegExp; category: Category }[] = [
-  { pattern: /religion|spiritual|christian|church|cathedral|worship|gospel|religious/i, category: "Christian" },
+  {
+    pattern:
+      /religion|spiritual|christian|church|cathedral|worship|gospel|religious|jesus|catholic|baptist|pentecostal|evangelical|bible|praise|fellowship|alpha|anglican/i,
+    category: "Christian"
+  },
   { pattern: /network|startup|start-up|founders|coworking/i, category: "Networking" },
   { pattern: /professional|career|business|director|chamber|export|government/i, category: "Professional" },
   { pattern: /student|school|education|university|freshers|family-and-education/i, category: "Student" }

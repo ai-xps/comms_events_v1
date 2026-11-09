@@ -126,7 +126,7 @@ describe("allowlist", () => {
     expect(scrapeUrlAllowed("javascript:alert(1)").ok).toBe(false);
   });
 
-  it("accepts Meetup https and still refuses a 61st feed or unknown host", () => {
+  it("accepts Meetup https and still refuses a 101st feed or unknown host", () => {
     const meetup = parsePriorityUrls([MEETUP_BIRMINGHAM_FIND_URL, "https://www.meetup.com/"]);
     expect(meetup.urls).toEqual([MEETUP_BIRMINGHAM_FIND_URL, "https://www.meetup.com/"]);
     expect(meetup.rejected).toHaveLength(0);
@@ -136,9 +136,9 @@ describe("allowlist", () => {
     expect(rejected.urls).toHaveLength(0);
     expect(rejected.rejected.length).toBeGreaterThanOrEqual(2);
     const many = parsePriorityUrls(
-      Array.from({ length: 61 }, (_, i) => `https://birminghamcathedral.com/cal-${i}.ics`)
+      Array.from({ length: 101 }, (_, i) => `https://birminghamcathedral.com/cal-${i}.ics`)
     );
-    expect(many.urls).toHaveLength(60);
+    expect(many.urls).toHaveLength(100);
     expect(many.rejected).toHaveLength(1);
     const dup = parsePriorityUrls([
       "https://birminghamcathedral.com/calendar.ics",

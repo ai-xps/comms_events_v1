@@ -17,11 +17,11 @@ Style later: [Keep a Changelog](https://keepachangelog.com/).
 
 ---
 
-## 2026-11-08 — Frozen Birmingham discovery pack
+## 2026-11-08 — Frozen Birmingham discovery pack (stretch)
 
-- Locked multi-source scrape for the five types (Eventbrite slices, Meetup keywords, Allevents West Midlands, Ticketmaster, cathedral, Luma, Visit Birmingham). Method: [`docs/scraper-discovery.md`](scraper-discovery.md).
-- Caps: 60 Priority URLs, 2500 events/run, 1500ms pause. Empty Settings installs the pack; `FORCE_DISCOVERY_PACK=1` re-applies. Admin Coverage shows this week + whole month by day/type.
-- Seed helper: `npx tsx scripts/seed-discovery-pack.ts`. Freeze harvest: ~650 live November events across all categories.
+- Locked multi-source scrape for the five types (Eventbrite slices + nearby cities, Meetup faith/keyword finds, Allevents Brum/WM/Midlands, Ticketmaster, cathedral, Luma, Visit Birmingham). Method: [`docs/scraper-discovery.md`](scraper-discovery.md).
+- Caps: **100** Priority URLs, 2500 events/run, 1500ms pause. Christian feeds listed first. Empty Settings installs the pack; `FORCE_DISCOVERY_PACK=1` re-applies. Admin Coverage: this week + whole month by day/type.
+- Seed helper: `npx tsx scripts/seed-discovery-pack.ts`. Freeze harvest: **~1204** live November events (**~175 Christian**).
 
 ## 2026-11-07 — Pending hides past events
 

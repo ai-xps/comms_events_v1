@@ -48,7 +48,9 @@ export const ALLOWED_HOSTS = new Set([
   "calendar.google.com",
   "outlook.office365.com",
   "cloud.churchsuite.com",
-  "churchsuite.com"
+  "churchsuite.com",
+  "achurchnearyou.com",
+  "www.achurchnearyou.com"
 ]);
 
 /** A page we have checked: https, on the allowlist, and it returns real events. */
@@ -58,7 +60,7 @@ export const STARTER_PRIORITY_URL = "https://www.birminghamcathedral.com/whats-o
 export const MEETUP_BIRMINGHAM_FIND_URL = "https://www.meetup.com/find/?location=gb--Birmingham";
 
 /** Wider Birmingham discovery pack — still capped so a bad run cannot fan out forever. */
-export const MAX_PRIORITY_URLS = 60;
+export const MAX_PRIORITY_URLS = 100;
 
 function isLoopbackHost(host: string): boolean {
   return (

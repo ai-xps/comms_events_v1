@@ -9,9 +9,9 @@ Dated ship notes: [`CHANGELOG.md`](CHANGELOG.md). Scores below from 17 October a
 | — | Need to clear many people before a new Import structure | **Shipped** — admin Members: checkboxes + Delete selected; typed DELETE + count confirm; cannot delete self; cascade matches single delete. |
 | — | Past events still listed under Pending | **Shipped** — Pending only shows open/future events; past PENDING auto-discarded on open. |
 
-## 8 November 2026 — Discovery pack freeze
+## 8 November 2026 — Discovery pack freeze (1000 / 150 Christian)
 
-| — | Want ~500 Birmingham November events across five types; not open-web crawl | **Frozen** allowlisted discovery pack + Allevents WM + Meetup/Eventbrite slices. Local harvest ~650 Nov live. Docs: `docs/scraper-discovery.md`. Empty Priority URLs auto-install pack. Oracle/heaventech/ai-xps to pull `experiment`. Skiddle currently WAF-challenges new fetches. |
+| — | Stretch to ~1000 Nov live events with ≥150 Christian | **Hit** ~1204 Nov / ~175 Christian. Pack capped at 100 Priority URLs; Christian slices first. Docs: `docs/scraper-discovery.md`. Pushed `experiment` to ai-xps + heaventech; Oracle seeded. Skiddle still WAF-challenges new fetches; Eventbrite may 405 from some IPs. |
 
 ## 28 October 2026 — Oracle walk and Guillaume’s scraper
 
