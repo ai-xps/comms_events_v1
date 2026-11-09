@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gather — after the video</title>
+  <style>
+    :root {
+      --paper: #fdf2f0;
+      --ink: #3d2a2c;
+      --soft: #7a6266;
+      --line: #efd6d9;
+      --accent: #a8434d;
+      --white: #fff;
+      --sans: "Avenir Next", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--ink);
+      line-height: 1.5;
+      background: var(--paper);
+      background-image: radial-gradient(ellipse 70% 50% at 50% -10%, rgba(253,214,218,.85), transparent 55%);
+    }
+    .wrap { max-width: 40rem; margin: 0 auto; padding: 2rem 1.25rem 3.5rem; }
+    h1 { font-size: 1.6rem; letter-spacing: -0.02em; margin: 0 0 0.4rem; }
+    .brand { color: var(--accent); font-weight: 800; font-size: 1.1rem; margin: 0 0 0.25rem; }
+    .lede { color: var(--soft); margin: 0 0 1.5rem; }
+    .box {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 1rem 1.1rem;
+      margin: 0 0 0.85rem;
+      box-shadow: 0 6px 18px rgba(90,40,48,.06);
+    }
+    .box h2 {
+      margin: 0 0 0.45rem;
+      font-size: 1.05rem;
+      display: flex;
+      gap: 0.55rem;
+      align-items: center;
+    }
+    .n {
+      flex: 0 0 auto;
+      width: 1.7rem; height: 1.7rem;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    p, li { margin: 0 0 0.45rem; }
+    ul { margin: 0.2rem 0 0; padding-left: 1.2rem; }
+    a { color: var(--accent); }
+    code {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 0.88em;
+      background: #f3e0e2;
+      padding: 0.1em 0.35em;
+      border-radius: 5px;
+      word-break: break-all;
+    }
+    .tip {
+      border-left: 4px solid #c4a574;
+      padding: 0.75rem 0.9rem;
+      background: rgba(255,255,255,.7);
+      border-radius: 0 12px 12px 0;
+      color: var(--soft);
+      margin: 1.25rem 0;
+      font-size: 0.95rem;
+    }
+    .words { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0 0; }
+    .words span {
+      background: #f3e0e2;
+      border-radius: 999px;
+      padding: 0.25rem 0.7rem;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    footer { margin-top: 1.75rem; color: var(--soft); font-size: 0.9rem; }
+    @media print {
+      body { background: #fff; }
+      .box { box-shadow: none; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="brand">Gather</p>
+    <h1>After the video — do this</h1>
+    <p class="lede">
+      Watch the video once. Then do these steps in order.
+      Works on a Mac or a Windows laptop. Tick each box when done.
+    </p>
+
+    <div class="box">
+      <h2><span class="n">1</span> Get a GitHub account</h2>
+      <p>Open <a href="https://github.com/login">https://github.com/login</a></p>
+      <ul>
+        <li>Sign in with <strong>your own</strong> account.</li>
+        <li>Do not share your password.</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">2</span> Open the team project</h2>
+      <p>Open this link (ask the teacher if it changed):</p>
+      <p><a href="https://github.com/heaventech1984/comms_events_v1">https://github.com/heaventech1984/comms_events_v1</a></p>
+      <ul>
+        <li>If you cannot see it, ask to be invited. Stop until you can open it.</li>
+        <li>At the top, the branch should say <code>experiment</code>.</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">3</span> Install three free tools</h2>
+      <ul>
+        <li><strong>Git</strong> — <a href="https://git-scm.com/downloads">https://git-scm.com/downloads</a></li>
+        <li><strong>Node</strong> — <a href="https://nodejs.org">https://nodejs.org</a> (pick the LTS button)</li>
+        <li><strong>Cursor</strong> (recommended) — <a href="https://cursor.com">https://cursor.com</a><br />
+            or free <strong>VS Code</strong> — <a href="https://code.visualstudio.com">https://code.visualstudio.com</a></li>
+      </ul>
+      <p>In Cursor / VS Code, sign in to GitHub as <strong>you</strong>.</p>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">4</span> Copy the project onto your laptop</h2>
+      <p>Open the Terminal (Mac) or Command Prompt / PowerShell (Windows).</p>
+      <p>Go to the folder where you keep projects, then paste this <strong>one line</strong>:</p>
+      <p><code>git clone -b experiment https://github.com/heaventech1984/comms_events_v1.git gather</code></p>
+      <ul>
+        <li>Wait until it finishes.</li>
+        <li>You now have a folder called <code>gather</code>.</li>
+      </ul>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">5</span> Open that folder in Cursor</h2>
+      <ul>
+        <li><strong>File → Open Folder</strong></li>
+        <li>Choose the <code>gather</code> folder</li>
+        <li>Open the bottom panel: <strong>Terminal</strong></li>
+      </ul>
+      <p>Paste this to check you are in the right place:</p>
+      <p><code>git status</code></p>
+      <p>You want to see the word <code>experiment</code>.</p>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">6</span> Use the chat helper — you do not write code</h2>
+      <ul>
+        <li>Open <strong>Chat</strong> in Cursor.</li>
+        <li>Choose <strong>Agent</strong> (the mode that can edit files).</li>
+        <li>Type plain English. Example:</li>
+      </ul>
+      <p><code>I am new. Explain where I am. Do not edit files yet.</code></p>
+      <ul>
+        <li>Read what it says.</li>
+        <li>If it goes too fast, type: <code>Stop. One step only. Wait.</code></li>
+      </ul>
+      <p class="words">
+        <span>You decide</span>
+        <span>Helper helps</span>
+      </p>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">7</span> Three words for team work</h2>
+      <p class="words">
+        <span>Save</span>
+        <span>Share</span>
+        <span>Ask for a check</span>
+      </p>
+      <ul>
+        <li><strong>Save</strong> = keep today’s work on your laptop (commit).</li>
+        <li><strong>Share</strong> = send it to GitHub (push).</li>
+        <li><strong>Ask for a check</strong> = open a Pull request on the website so someone reviews it.</li>
+      </ul>
+      <p>Only do Save / Share / Check when <strong>you</strong> say so. The helper must wait for those words.</p>
+    </div>
+
+    <div class="box">
+      <h2><span class="n">8</span> Look at Pull requests on GitHub</h2>
+      <p>On the project page, click <strong>Pull requests</strong>.</p>
+      <p>Open:
+        <a href="https://github.com/heaventech1984/comms_events_v1/pulls">https://github.com/heaventech1984/comms_events_v1/pulls</a>
+      </p>
+      <ul>
+        <li>Empty list is fine on day one.</li>
+        <li>Later, this is where you leave comments and approve work.</li>
+      </ul>
+    </div>
+
+    <div class="tip">
+      <strong>Stuck?</strong> Copy the exact error text. Paste it into Cursor Chat.
+      Type: <code>Explain in plain words. Wait.</code>
+      Do not guess. Do not force anything.
+    </div>
+
+    <div class="tip">
+      <strong>Not today:</strong> the live public website (Oracle).
+      First learn GitHub + your laptop copy. Live updates come later from an owner.
+    </div>
+
+    <footer>
+      <p>Gather — keep the shared notebook tidy. One step at a time.</p>
+      <p>Print this page if you like. Tick the numbers as you go.</p>
+    </footer>
+  </div>
+</body>
+</html>

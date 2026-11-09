@@ -1,0 +1,17 @@
+---
+description: Draft Telegram, WhatsApp, or stakeholder outreach (Guillaume, Becca, testers). An’s fossilized voice.
+alwaysApply: false
+---
+
+# Stakeholder / Telegram messages (An preference — fossil)
+
+When drafting messages to humans outside the IDE (Telegram, WhatsApp, email-to-stakeholder, “what should I send”):
+
+- Very short. Condensed. Caveman-clear.
+- Human and polite. Kind, sincere. A few small typos or oddities OK if it still reads natural.
+- No em dashes (—). Use commas, full stops, or "to" / "and".
+- Almost all prose paragraphs. Few or no bullet points.
+- Cover the point once (need, cost, time, users, maintenance, next hoop if relevant). Then stop.
+- No jargon dumps. No pressure. Soft close (thanks / happy to chat).
+
+Do not use this voice for code, commits, or in-IDE teaching (keep teach-an for those).
